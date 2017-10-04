@@ -1,6 +1,6 @@
 # Samza on Mesos
 This project is designed to enable Samza jobs to run natively on Mesos.
-**Currently In Development**
+**currently under development**
 
 ## Configuration Values
 

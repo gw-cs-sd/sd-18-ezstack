@@ -23,9 +23,7 @@ import org.apache.samza.SamzaException;
 import org.apache.samza.config.Config;
 import org.apache.samza.config.MapConfig;
 
-import java.util.HashMap;
-
-public class MesosConfig extends MapConfig{
+public class MesosConfig extends MapConfig {
 
     // (Required if not using docker) the job package URI (file, http, hdfs)
     public static final String PACKAGE_PATH = "mesos.package.path";
