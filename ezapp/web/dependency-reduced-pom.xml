@@ -21,7 +21,9 @@
             <configuration>
               <transformers>
                 <transformer />
-                <transformer />
+                <transformer>
+                  <mainClass>org.ezstack.ezapp.web.EZService</mainClass>
+                </transformer>
               </transformers>
             </configuration>
           </execution>
