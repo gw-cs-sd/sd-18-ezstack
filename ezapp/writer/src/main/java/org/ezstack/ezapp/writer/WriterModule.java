@@ -1,0 +1,45 @@
+package org.ezstack.ezapp.writer;
+
+import com.fasterxml.jackson.databind.JsonNode;
+import com.google.inject.PrivateModule;
+import com.google.inject.Provides;
+import com.google.inject.Singleton;
+import org.apache.kafka.connect.json.JsonSerializer;
+import org.ezstack.ezapp.writer.api.DataWriter;
+import org.ezstack.ezapp.writer.core.DefaultDataWriter;
+import org.apache.kafka.clients.producer.KafkaProducer;
+import org.apache.kafka.clients.producer.Producer;
+import org.apache.kafka.clients.producer.ProducerConfig;
+import org.apache.kafka.common.serialization.StringSerializer;
+
+import java.util.Properties;
+
+public class WriterModule extends PrivateModule {
+
+    protected void configure() {
+        bind(DataWriter.class).to(DefaultDataWriter.class).asEagerSingleton();
+        expose(DataWriter.class);
+    }
+
+    @Provides
+    @Singleton
+    Producer<String, JsonNode> provideProducer(WriterConfiguration configuration) {
+
+        Properties props = new Properties();
+        props.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, configuration.getBootstrapServers());
+        props.put(ProducerConfig.ACKS_CONFIG, "all");
+        props.put(ProducerConfig.RETRIES_CONFIG, 0);
+
+        // batch size will remain at 0 until it is proven that this doesn't endanger durability
+        props.put(ProducerConfig.BATCH_SIZE_CONFIG, 0);
+
+        props.put(ProducerConfig.CLIENT_ID_CONFIG, configuration.getProducerName());
+        System.out.println("KAFKA PRODUCER CALLED");
+
+        props.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, StringSerializer.class);
+        props.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, JsonSerializer.class);
+
+        // TODO: find a way to call producer.close when service terminates
+        return new KafkaProducer<String, JsonNode>(props);
+    }
+}
