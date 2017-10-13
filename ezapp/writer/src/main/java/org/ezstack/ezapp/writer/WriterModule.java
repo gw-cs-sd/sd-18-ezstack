@@ -11,6 +11,7 @@ import org.apache.kafka.clients.producer.KafkaProducer;
 import org.apache.kafka.clients.producer.Producer;
 import org.apache.kafka.clients.producer.ProducerConfig;
 import org.apache.kafka.common.serialization.StringSerializer;
+import org.ezstack.ezapp.writer.db.kafka.KafkaDataWriterDAO;
 
 import java.util.Properties;
 
@@ -18,6 +19,7 @@ public class WriterModule extends PrivateModule {
 
     protected void configure() {
         bind(DataWriter.class).to(DefaultDataWriter.class).asEagerSingleton();
+        bind(KafkaDataWriterDAO.class).asEagerSingleton();
         expose(DataWriter.class);
     }
 
@@ -34,11 +36,11 @@ public class WriterModule extends PrivateModule {
         props.put(ProducerConfig.BATCH_SIZE_CONFIG, 0);
 
         props.put(ProducerConfig.CLIENT_ID_CONFIG, configuration.getProducerName());
-        System.out.println("KAFKA PRODUCER CALLED");
 
         props.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, StringSerializer.class);
         props.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, JsonSerializer.class);
-
+        props.put(ProducerConfig.REQUEST_TIMEOUT_MS_CONFIG, 1000);
+        props.put(ProducerConfig.TRANSACTION_TIMEOUT_CONFIG, 1000);
         // TODO: find a way to call producer.close when service terminates
         return new KafkaProducer<String, JsonNode>(props);
     }

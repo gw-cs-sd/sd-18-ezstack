@@ -9,7 +9,7 @@ public class EZHealthCheck extends HealthCheck{
 
     @Override
     protected Result check() throws Exception {
-        // TODO: implement checks to ensure connections to kafka and elasticsearch
+        // TODO: implement checks to ensure connections to db and elasticsearch
         return Result.healthy();
     }
 }

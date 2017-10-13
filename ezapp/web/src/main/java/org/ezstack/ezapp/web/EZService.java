@@ -8,6 +8,7 @@ import org.ezstack.ezapp.web.resources.EZHealthCheck;
 import io.dropwizard.Application;
 import io.dropwizard.setup.Bootstrap;
 import io.dropwizard.setup.Environment;
+import org.ezstack.ezapp.writer.api.DataWriter;
 
 public class EZService extends Application<EZConfiguration> {
 
@@ -31,12 +32,13 @@ public class EZService extends Application<EZConfiguration> {
         _configuration = configuration;
         _environment = environment;
 
-        // add ping ezapp.gwu.edu.writer.edu.gwu.ezapp.writer.api route
+        // add ping route
         environment.servlets().addServlet("/ping", new PingServlet());
         environment.healthChecks().register("placeholder", new EZHealthCheck());
 
         _injector = Guice.createInjector(new EZModule(_configuration, _environment));
-        environment.jersey().register(new DataStoreResource1());
+
+        environment.jersey().register(new DataStoreResource1(_injector.getInstance(DataWriter.class)));
 
     }
 
