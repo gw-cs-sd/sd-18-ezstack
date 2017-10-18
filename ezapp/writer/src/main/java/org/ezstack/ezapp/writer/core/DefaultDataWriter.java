@@ -21,7 +21,13 @@ public class DefaultDataWriter implements DataWriter {
         _dataWriterDAO = dataWriterDAO;
     }
 
+    @Override
     public void create(String table, String key, Map<String, Object> document) {
-        _dataWriterDAO.update(new Update(table, key, null, document));
+        _dataWriterDAO.update(new Update(table, key, null, document, false));
+    }
+
+    @Override
+    public void update(String table, String key, Map<String, Object> update) {
+        _dataWriterDAO.update(new Update(table, key, null, update, true));
     }
 }
