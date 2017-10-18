@@ -1,0 +1,4 @@
+
+dataWriter:
+  bootstrapServers: "localhost:9092"
+  producerName: "server1"
