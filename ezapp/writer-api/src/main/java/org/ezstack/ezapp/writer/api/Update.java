@@ -16,10 +16,12 @@ public class Update {
     private final String _key;
     private final UUID _timestamp;
     private final Map<String, Object> _data;
+    private final boolean _isUpdate;
 
     @JsonCreator
     public Update(@JsonProperty("_table") String table, @JsonProperty("_key") String key,
-                  @JsonProperty("_timestamp") UUID timestamp, @JsonProperty("_data") Map<String, Object> data) {
+                  @JsonProperty("_timestamp") UUID timestamp, @JsonProperty("_data") Map<String, Object> data,
+                  boolean isUpdate) {
 
         checkNotNull(table, "table");
         checkNotNull(key, "key");
@@ -31,6 +33,7 @@ public class Update {
         _key = key;
         _timestamp = MoreObjects.firstNonNull(timestamp, UUIDs.timeBased());
         _data = data;
+        _isUpdate = isUpdate;
     }
 
     @JsonProperty("_table")
@@ -51,5 +54,10 @@ public class Update {
     @JsonProperty("_data")
     public Map<String, Object> getData() {
         return _data;
+    }
+
+    @JsonProperty("_isUpdate")
+    public boolean getIsUpdate() {
+        return _isUpdate;
     }
 }

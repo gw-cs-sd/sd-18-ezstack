@@ -28,4 +28,15 @@ public class DataStoreResource1 {
         return SuccessResponse.instance();
     }
 
+    @PUT
+    @Path("{table}/{key}")
+    @Timed
+    @Consumes(MediaType.APPLICATION_JSON)
+    public SuccessResponse update(@PathParam("table") String table,
+                                  @PathParam("key") String key,
+                                  Map<String, Object> json) {
+        _dataWriter.update(table, key, json);
+        return SuccessResponse.instance();
+    }
+
 }
