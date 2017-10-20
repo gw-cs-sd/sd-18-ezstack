@@ -67,6 +67,7 @@ if [[ $# -gt 0 ]]; then
                 ;;
             -c|--clean)
                 clean
+                shift 1
                 ;;
         esac
     done
