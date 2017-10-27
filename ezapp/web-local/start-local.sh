@@ -56,6 +56,8 @@ function clean {
     rm -rf ${DIR}/deploy
     ${DIR}/grid install zookeeper
     ${DIR}/grid install kafka
+    ${DIR}/grid-elastic install elasticsearch
+    ${DIR}/grid-elastic install kibana
 }
 
 
@@ -84,9 +86,13 @@ fi
 
 ${DIR}/grid start zookeeper
 ${DIR}/grid start kafka
+${DIR}/grid-elastic start elasticsearch
+${DIR}/grid-elastic start kibana
 
 info "Running EZapp"
 java -jar ${BASE_DIR}/web/target/ezapp-web-${VERSION}-SNAPSHOT.jar server ${DIR}/config-local.yaml
 
 ${DIR}/grid stop kafka
 ${DIR}/grid stop zookeeper
+${DIR}/grid-elastic stop elasticsearch
+${DIR}/grid-elastic stop kibana
