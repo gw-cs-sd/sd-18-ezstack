@@ -13,10 +13,13 @@
         <module>web-local</module>
         <module>writer</module>
         <module>writer-api</module>
+        <module>denormalizer</module>
     </modules>
     <name>EZapp</name>
 
     <properties>
+        <maven.compiler.source>1.8</maven.compiler.source>
+        <maven.compiler.target>1.8</maven.compiler.target>
         <guava.version>23.0</guava.version>
         <dropwizard.version>1.1.4</dropwizard.version>
         <guice.version>4.1.0</guice.version>
