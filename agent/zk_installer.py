@@ -12,6 +12,8 @@ sudo python zk_installer.py -config zk_config.json
 
 To Uninstall:
 sudo python zk_installer.py -u
+
+Note: uninstall does not remove the data directory in case you still need the data
 """
 
 import os
@@ -25,7 +27,11 @@ zk_config = {
     'clientPort' : 2181,
     'initLimit' : 5,
     'syncLimit' : 2,
-    'server' : [''] # remove this value if its a single instance
+    'server' : [
+        'node1:2888:3888',
+        'node2:2888:3888',
+        'node3:2888:3888'
+    ] # remove this value if its a single instance
 }
 
 zk_config_file = [] # will be used as the actual configuration file for
@@ -34,11 +40,13 @@ zk_tar = '{}.tar.gz'.format(zk_folder)
 zk_download_url = 'http://mirror.metrocast.net/apache/zookeeper/{}/{}'.format(zk_folder, zk_tar)
 ezstack_dir = '/opt/ezstack'
 
+cmd = os.system
+
 def install():
-    cmd = os.system
     cmd('mkdir -p {}'.format(ezstack_dir))
     wget.download(zk_download_url, out='{}/{}'.format(ezstack_dir, zk_tar))
     cmd('tar xvzf {}/{} -C {}/'.format(ezstack_dir, zk_tar, ezstack_dir))
+    cmd('rm {}/{}'.format(ezstack_dir, zk_tar))
 
     for key, value in zk_config.iteritems():
         if key == 'server':
@@ -61,9 +69,14 @@ def install():
         cmd('mkdir -p {}/'.format(zk_config['dataDir']))
         with open('{}/myid'.format(zk_config['dataDir']), 'w') as f:
             f.write(str(myid))
+    cmd('{}/{}/bin/zkServer.sh start'.format(ezstack_dir, zk_folder))
+    print 'Zookeeper can be started using {}/{}/bin/zkServer.sh start'.format(ezstack_dir, zk_folder)
+    print 'Installation Complete'
 
 def uninstall():
-    pass
+    cmd('{}/{}/bin/zkServer.sh stop'.format(ezstack_dir, zk_folder))
+    cmd('rm -rf {}/{}'.format(ezstack_dir, zk_folder))
+    print 'Uninstallation Complete'
 
 if __name__=='__main__':
     parser = argparse.ArgumentParser(description='Installer/Uninstaller for Zookeeper.')
