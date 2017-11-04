@@ -1,0 +1,21 @@
+{
+    "clientPort":2181,
+    "dataDir":"/var/lib/zookeeper/",
+    "initLimit":5,
+    "server":[
+        {
+            "connection":"ezstack09.parmer.seas.gwu.edu:2888:3888",
+            "id":1
+        },
+        {
+            "connection":"ezstack10.parmer.seas.gwu.edu:2888:3888",
+            "id":2
+        },
+        {
+            "connection":"ezstack11.parmer.seas.gwu.edu:2888:3888",
+            "id":3
+        }
+    ],
+    "syncLimit":2,
+    "tickTime":2000
+}

@@ -28,9 +28,9 @@ zk_config = {
     'initLimit' : 5,
     'syncLimit' : 2,
     'server' : [
-        'node1:2888:3888',
-        'node2:2888:3888',
-        'node3:2888:3888'
+        {'id' : 1, 'connection':'zoo1:2888:3888'},
+        {'id' : 2, 'connection':'zoo2:2888:3888'},
+        {'id' : 3, 'connection':'zoo3:2888:3888'}
     ] # remove this value if its a single instance
 }
 
@@ -43,6 +43,10 @@ ezstack_dir = '/opt/ezstack'
 cmd = os.system
 
 def install():
+    if os.path.exists('{}/{}'.format(ezstack_dir, zk_folder)):
+        print 'Application seems to already be installed.'
+        return
+
     cmd('mkdir -p {}'.format(ezstack_dir))
     wget.download(zk_download_url, out='{}/{}'.format(ezstack_dir, zk_tar))
     cmd('tar xvzf {}/{} -C {}/'.format(ezstack_dir, zk_tar, ezstack_dir))
@@ -50,18 +54,16 @@ def install():
 
     for key, value in zk_config.iteritems():
         if key == 'server':
-            i = 1
-            for host in key:
-                zk_config_file.append('server.{}={}'.format(i, host))
-                i += 1
+            for host in value:
+                zk_config_file.append('server.{}={}\n'.format(host['id'], host['connection']))
         else:
-            zk_config_file.append('{}={}'.format(key, value))
+            zk_config_file.append('{}={}\n'.format(key, value))
 
     with open('{}/{}/conf/zoo.cfg'.format(ezstack_dir, zk_folder), 'w') as f:
         f.writelines(zk_config_file)
 
     if 'server' in zk_config.keys():
-        myid = int(raw_input('You Indicated {} node setup.\n'
+        myid = int(raw_input('\nYou Indicated {} node setup.\n'
                              'Enter Current Node Number> '.format(len(zk_config['server']))))
         if myid > len(zk_config['server']) or myid < 1:
             print 'Invalid number please correct value in {}/myid'.format(zk_config['dataDir'])
@@ -82,20 +84,25 @@ if __name__=='__main__':
     parser = argparse.ArgumentParser(description='Installer/Uninstaller for Zookeeper.')
     parser.add_argument('-config', dest='config',
                         help='specify path to json install config file')
+    parser.add_argument('-d', '--dump', dest='dump', help='dumps default config file')
     parser.add_argument('-i', '--install', dest='install',
                         action='store_true', help='install zookeeper')
     parser.add_argument('-u', '--uninstall', dest='install',
                         action='store_false', help='uninstall zookeeper')
     parser.set_defaults(install=True)
 
-    if os.getuid() != 0:
-        print 'Installation needs sudo privileges.'
-        exit(1)
-
     args = parser.parse_args()
     if args.config is not None:
         with open(args.config, 'r') as f:
             zk_config = json.loads(''.join(f.readlines()))
+    if args.dump is not None:
+        with open(args.dump, 'w') as f:
+            f.write(json.dumps(zk_config, sort_keys=True, indent=4, separators=(',',':')))
+        exit(0)
+
+    if os.getuid() != 0:
+        print 'Installation needs sudo privileges.'
+        exit(1)
 
     if args.install is True:
         install()
