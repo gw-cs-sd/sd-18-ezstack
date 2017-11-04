@@ -1,3 +1,5 @@
+#!/usr/bin/python2.7
+
 """
 Script version: Python 2.7
 Pre Installed Applications Needed for Zookeeper: Java 8
