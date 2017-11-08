@@ -6,6 +6,8 @@ import org.apache.samza.job.StreamJob;
 
 public class MesosJob implements StreamJob {
     private MesosConfig mesosConfig;
+    private SamzaScheduler samzaScheduler;
+    private SamzaExecutor samzaExecutor;
 
     public MesosJob(Config config) {
         mesosConfig = new MesosConfig(config);

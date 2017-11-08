@@ -4,15 +4,20 @@ import org.apache.mesos.Protos;
 import org.apache.mesos.Scheduler;
 import org.apache.mesos.SchedulerDriver;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.util.List;
 
 public class SamzaScheduler implements Scheduler {
-    public void registered(SchedulerDriver schedulerDriver, Protos.FrameworkID frameworkID, Protos.MasterInfo masterInfo) {
+    private static final Logger LOG = LoggerFactory.getLogger(SamzaScheduler.class);
 
+    public void registered(SchedulerDriver schedulerDriver, Protos.FrameworkID frameworkID, Protos.MasterInfo masterInfo) {
+        LOG.info("Registered " + frameworkID);
     }
 
     public void reregistered(SchedulerDriver schedulerDriver, Protos.MasterInfo masterInfo) {
-
+        LOG.info("Reregistered");
     }
 
     public void resourceOffers(SchedulerDriver schedulerDriver, List<Protos.Offer> list) {
@@ -32,18 +37,18 @@ public class SamzaScheduler implements Scheduler {
     }
 
     public void disconnected(SchedulerDriver schedulerDriver) {
-
+        LOG.info("Framework has been disconnected.");
     }
 
     public void slaveLost(SchedulerDriver schedulerDriver, Protos.SlaveID slaveID) {
-
+        LOG.error("Slave " + slaveID.getValue() + " has been lost.");
     }
 
     public void executorLost(SchedulerDriver schedulerDriver, Protos.ExecutorID executorID, Protos.SlaveID slaveID, int i) {
-
+        LOG.error("Executor " + executorID.getValue() + " on Slave " + slaveID.getValue() + " has been lost.");
     }
 
     public void error(SchedulerDriver schedulerDriver, String s) {
-
+        LOG.error("Error Report: " + s);
     }
 }

@@ -29,6 +29,14 @@
             <artifactId>mesos</artifactId>
             <version>1.4.0</version>
         </dependency>
+
+        <!-- https://samza.apache.org/learn/documentation/0.13/jobs/logging.html -->
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-log4j12</artifactId>
+            <scope>runtime</scope>
+            <version>1.6.2</version>
+        </dependency>
     </dependencies>
 
     <licenses>
