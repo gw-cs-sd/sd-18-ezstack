@@ -17,7 +17,7 @@
  * under the License.
  */
 
-package org.ezstack.samza.config;
+package org.ezstack.samza;
 
 import org.apache.samza.SamzaException;
 import org.apache.samza.config.Config;
