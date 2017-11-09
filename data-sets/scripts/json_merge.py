@@ -1,10 +1,12 @@
-import json
+import json, os
 
-output=[]
+output = []
+filepath = './'
 
 # concat files into list
-for i in range (0, 50):
-	f=open('MOCK_DATA%s.json' % i, 'r')
+json_files = [pos_json for pos_json in os.listdir(filepath) if pos_json.endswith('.json')]
+for file in json_files:
+	f=open(file, 'r')
 	content = f.readlines()
 	data = ''.join(content)
 	data = json.loads(data)
@@ -12,14 +14,13 @@ for i in range (0, 50):
 	f.close()
 
 # change json id then write back
-i=0
+i = 0
 for item in output:
-	item['id']=i
-	i+=1
+	item['id'] = i
+	i += 1
 file=open('MOCK_DATA.json', 'w')
-file.write(json.dumps(output))
+file.write(json.dumps(output, indent = 4, separators = (',',':')))
 file.close()
-
 
 # Test section
 file=open('MOCK_DATA.json', 'r')
