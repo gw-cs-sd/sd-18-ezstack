@@ -1,4 +1,4 @@
-package org.ezstack.ezapp.writer;
+package org.ezstack.ezapp.datastore;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import org.hibernate.validator.constraints.NotEmpty;

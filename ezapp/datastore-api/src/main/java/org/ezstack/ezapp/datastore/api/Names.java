@@ -1,4 +1,4 @@
-package org.ezstack.ezapp.writer.api;
+package org.ezstack.ezapp.datastore.api;
 
 import com.google.common.base.CharMatcher;
 

@@ -1,17 +1,17 @@
-package org.ezstack.ezapp.writer;
+package org.ezstack.ezapp.datastore;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.google.inject.PrivateModule;
 import com.google.inject.Provides;
 import com.google.inject.Singleton;
 import org.apache.kafka.connect.json.JsonSerializer;
-import org.ezstack.ezapp.writer.api.DataWriter;
-import org.ezstack.ezapp.writer.core.DefaultDataWriter;
+import org.ezstack.ezapp.datastore.api.DataWriter;
+import org.ezstack.ezapp.datastore.core.DefaultDataWriter;
 import org.apache.kafka.clients.producer.KafkaProducer;
 import org.apache.kafka.clients.producer.Producer;
 import org.apache.kafka.clients.producer.ProducerConfig;
 import org.apache.kafka.common.serialization.StringSerializer;
-import org.ezstack.ezapp.writer.db.kafka.KafkaDataWriterDAO;
+import org.ezstack.ezapp.datastore.db.kafka.KafkaDataWriterDAO;
 
 import java.util.Properties;
 

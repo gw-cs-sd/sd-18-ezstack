@@ -1,7 +1,7 @@
 package org.ezstack.ezapp.web.resources;
 
 import com.codahale.metrics.annotation.Timed;
-import org.ezstack.ezapp.writer.api.DataWriter;
+import org.ezstack.ezapp.datastore.api.DataWriter;
 
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;

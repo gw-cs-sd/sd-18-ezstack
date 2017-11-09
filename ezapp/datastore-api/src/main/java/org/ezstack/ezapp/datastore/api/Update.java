@@ -1,4 +1,4 @@
-package org.ezstack.ezapp.writer.api;
+package org.ezstack.ezapp.datastore.api;
 
 import com.datastax.driver.core.utils.UUIDs;
 import com.fasterxml.jackson.annotation.JsonCreator;

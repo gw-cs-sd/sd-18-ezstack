@@ -1,14 +1,9 @@
-package org.ezstack.ezapp.writer.core;
+package org.ezstack.ezapp.datastore.core;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.inject.Inject;
-import org.apache.kafka.clients.producer.RecordMetadata;
-import org.ezstack.ezapp.writer.api.DataWriter;
-import org.apache.kafka.clients.producer.Producer;
-import org.apache.kafka.clients.producer.ProducerRecord;
-import org.ezstack.ezapp.writer.api.Update;
-import org.ezstack.ezapp.writer.db.kafka.KafkaDataWriterDAO;
+import org.ezstack.ezapp.datastore.api.DataWriter;
+import org.ezstack.ezapp.datastore.api.Update;
+import org.ezstack.ezapp.datastore.db.kafka.KafkaDataWriterDAO;
 
 import java.util.Map;
 

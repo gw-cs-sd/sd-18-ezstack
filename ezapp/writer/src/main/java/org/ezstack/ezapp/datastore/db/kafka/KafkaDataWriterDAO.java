@@ -1,4 +1,4 @@
-package org.ezstack.ezapp.writer.db.kafka;
+package org.ezstack.ezapp.datastore.db.kafka;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -6,7 +6,7 @@ import com.google.inject.Inject;
 import org.apache.kafka.clients.producer.Producer;
 import org.apache.kafka.clients.producer.ProducerRecord;
 import org.apache.kafka.clients.producer.RecordMetadata;
-import org.ezstack.ezapp.writer.api.Update;
+import org.ezstack.ezapp.datastore.api.Update;
 
 public class KafkaDataWriterDAO {
 
