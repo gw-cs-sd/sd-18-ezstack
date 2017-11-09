@@ -7,44 +7,69 @@ import org.apache.samza.job.ApplicationStatus;
 import org.apache.samza.job.StreamJob;
 
 public class MesosJob implements StreamJob {
-    private ApplicationStatus applicationStatus;
     private MesosConfig mesosConfig;
     private MesosSchedulerDriver mesosSchedulerDriver;
     private SamzaScheduler samzaScheduler;
     private SamzaExecutor samzaExecutor;
+    private static final String FRAMEWORK_NAME = "Samza Mesos Framework";
 
     public MesosJob(Config config) {
         mesosConfig = new MesosConfig(config);
         samzaScheduler = new SamzaScheduler(); // Constructor will change
         mesosSchedulerDriver = new MesosSchedulerDriver(samzaScheduler,
                 getFrameWorkInfo(), mesosConfig.getMasterConnect());
-        applicationStatus = ApplicationStatus.New;
     }
 
     public StreamJob submit() {
-        // TODO
-        applicationStatus = ApplicationStatus.Running;
+        mesosSchedulerDriver.run();
         return this;
     }
 
     public StreamJob kill() {
-        // TODO
+        mesosSchedulerDriver.stop();
         return this;
     }
 
-    public ApplicationStatus waitForFinish(long l) {
-        return null;
+    public ApplicationStatus waitForFinish(long timeOutMs) {
+        long startTime = System.currentTimeMillis();
+        while (System.currentTimeMillis() - startTime < timeOutMs) {
+            ApplicationStatus s = getStatus();
+            if (s.equals(ApplicationStatus.SuccessfulFinish) ||
+                    s.equals(ApplicationStatus.UnsuccessfulFinish)) {
+                return s;
+            }
+            try {
+                Thread.sleep(1000); // 1 ms sleep
+            } catch (Exception e) { /* do nothing */ }
+        }
+
+        return ApplicationStatus.Running;
     }
 
-    public ApplicationStatus waitForStatus(ApplicationStatus applicationStatus, long l) {
-        return null;
+    public ApplicationStatus waitForStatus(ApplicationStatus applicationStatus, long timeOutMs) {
+        long startTime = System.currentTimeMillis();
+        while (System.currentTimeMillis() - startTime < timeOutMs) {
+            ApplicationStatus s = getStatus();
+            if (s.equals(applicationStatus)) {
+                return s;
+            }
+            try {
+                Thread.sleep(1000); // 1 ms sleep
+            } catch (Exception e) { /* do nothing */ }
+        }
+
+        return getStatus();
     }
 
     public ApplicationStatus getStatus() {
-        return applicationStatus;
+        return ApplicationStatus.New; // TODO: Fix ME
     }
 
-    private static Protos.FrameworkInfo getFrameWorkInfo() {
-        return null;
+    private Protos.FrameworkInfo getFrameWorkInfo() {
+        Protos.FrameworkInfo.Builder builder = Protos.FrameworkInfo.newBuilder();
+        builder.setFailoverTimeout(mesosConfig.getSchedulerFailoverTimeout());
+        builder.setUser(mesosConfig.getSchedulerUser());
+        builder.setName(FRAMEWORK_NAME);
+        return builder.build();
     }
 }
