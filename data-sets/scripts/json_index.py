@@ -11,20 +11,20 @@ data = ''.join(content)
 data = json.loads(data)
 f.close()
 
-# i=0
-# for item in data:
-# 	doc = item
-# 	res = es.index(index='students', doc_type='student', id=doc['id'], body=doc)
-# 	i+=1
+i=0
+for item in data:
+ 	doc = item
+ 	res = es.index(index='students', doc_type='student', id=doc['id'], body=doc)
+ 	i+=1
 
-actions = [
-	{
-		'_index': 'students',
-		'_type': 'student',
-		'_id': doc['id'],
-		'_source': doc
-	}
-	for doc in data
-]
-
-helpers.bulk(es, actions)
+#actions = [
+#	{
+#		'_index': 'students',
+#		'_type': 'student',
+#		'_id': doc['id'],
+#		'_source': doc
+#	}
+#	for doc in data
+#]
+#
+#helpers.bulk(es, actions)
