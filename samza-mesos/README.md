@@ -9,16 +9,16 @@ This project is designed to enable Samza jobs to run natively on Mesos.
 |------------------------------------|-----------|---------------------------|-------------------------------------------|
 | mesos.master.connect               | yes       |                           | Mesos master URL                          |
 | mesos.package.path                 | yes*      |                           | Job package URI (file, http, hdfs)        |
-| mesos.docker.image                 | yes*      |                           | Docker image (registry/my-jobs:latest)    |
-| mesos.docker.entrypoint.arguments  |           |                           | Arguments for Docker image ENTRYPOINT     |
+| mesos.docker.image (not implemented)                 | yes*      |                           | Docker image (registry/my-jobs:latest)    |
+| mesos.docker.entrypoint.arguments (not implemented) |           |                           | Arguments for Docker image ENTRYPOINT     |
 | mesos.executor.count               |           | 1                         | Number of Samza containers to run job in  |
 | mesos.executor.memory.mb           |           | 1024                      | Mesos task memory constraint              |
 | mesos.executor.cpu.cores           |           | 1                         | Mesos task CPU cores constraint           |
 | mesos.executor.disk.mb             |           | 2048                      | Mesos task disk constraint                |
-| mesos.executor.attributes.*        |           |                           | Slave attributes reqs (regex expressions) |
+| mesos.executor.attributes.* (not implemented)       |           |                           | Slave attributes reqs (regex expressions) |
 | mesos.scheduler.user               |           |                           | System user for starting executors        |
-| mesos.scheduler.role               |           |                           | Mesos role to use for this scheduler      |
-| mesos.scheduler.jmx.enabled        |           | true                      | Mesos role to use for this scheduler      |
+| mesos.scheduler.role (not implemented)              |           |                           | Mesos role to use for this scheduler      |
+| mesos.scheduler.jmx.enabled (not implemented)       |           | true                      | Mesos role to use for this scheduler      |
 | mesos.scheduler.failover.timeout   |           | Long.MaxValue             | Framework failover timeout                |
 
 ** either `mesos.package.path` or `mesos.docker.image` is required.

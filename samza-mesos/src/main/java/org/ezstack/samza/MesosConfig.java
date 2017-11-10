@@ -28,6 +28,9 @@ public class MesosConfig extends MapConfig {
     // (Required if not using docker) the job package URI (file, http, hdfs)
     public static final String PACKAGE_PATH = "mesos.package.path";
 
+    // (Required if not using docker) the command to be executed in the package
+    public static final String PACKAGE_CMD = "mesos.package.cmd";
+
     // (Required if using docker) the docker image
     public static final String DOCKER_IMAGE = "mesos.docker.image";
 
@@ -71,6 +74,7 @@ public class MesosConfig extends MapConfig {
     public static final String SCHEDULER_FAILOVER_TIMEOUT = "mesos.scheduler.failover.timeout";
     private static final long DEFAULT_SCHEDULER_FAILOVER_TIMEOUT = Long.MAX_VALUE;
 
+    // framework name (Default: Samza Mesos Framework)
     public static final String FRAMEWORK_NAME = "mesos.framework.name";
     private static final String DEFAULT_FRAMEWORK_NAME = "Samza Mesos Framework";
 
@@ -80,6 +84,10 @@ public class MesosConfig extends MapConfig {
 
     public String getPackagePath() {
         return get(PACKAGE_PATH);
+    }
+
+    public String getPackageCmd() {
+        return get(PACKAGE_CMD);
     }
 
     public String getDockerImage() {
