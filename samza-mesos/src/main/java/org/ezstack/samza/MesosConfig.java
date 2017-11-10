@@ -95,7 +95,7 @@ public class MesosConfig extends MapConfig {
         return masterConnect;
     }
 
-    public double ExecutorMaxMemoryMb() {
+    public double getExecutorMaxMemoryMb() {
         return getDouble(EXECUTOR_MAX_MEMORY_MB, DEFAULT_EXECUTOR_MAX_MEMORY_MB);
     }
 
