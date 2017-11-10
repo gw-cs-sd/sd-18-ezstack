@@ -11,6 +11,11 @@ import java.util.List;
 
 public class SamzaScheduler implements Scheduler {
     private static final Logger LOG = LoggerFactory.getLogger(SamzaScheduler.class);
+    private MesosConfig mesosConfig;
+
+    public SamzaScheduler(MesosConfig config) {
+        mesosConfig = config;
+    }
 
     public void registered(SchedulerDriver schedulerDriver, Protos.FrameworkID frameworkID, Protos.MasterInfo masterInfo) {
         LOG.info("Registered " + frameworkID);
@@ -33,7 +38,7 @@ public class SamzaScheduler implements Scheduler {
     }
 
     public void frameworkMessage(SchedulerDriver schedulerDriver, Protos.ExecutorID executorID, Protos.SlaveID slaveID, byte[] bytes) {
-
+        LOG.info("Framework (scheduler) message: " + new String(bytes));
     }
 
     public void disconnected(SchedulerDriver schedulerDriver) {

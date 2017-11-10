@@ -10,12 +10,11 @@ public class MesosJob implements StreamJob {
     private MesosConfig mesosConfig;
     private MesosSchedulerDriver mesosSchedulerDriver;
     private SamzaScheduler samzaScheduler;
-    private SamzaExecutor samzaExecutor;
     private static final String FRAMEWORK_NAME = "Samza Mesos Framework";
 
     public MesosJob(Config config) {
         mesosConfig = new MesosConfig(config);
-        samzaScheduler = new SamzaScheduler(); // Constructor will change
+        samzaScheduler = new SamzaScheduler(mesosConfig);
         mesosSchedulerDriver = new MesosSchedulerDriver(samzaScheduler,
                 getFrameWorkInfo(), mesosConfig.getMasterConnect());
     }
