@@ -71,6 +71,9 @@ public class MesosConfig extends MapConfig {
     public static final String SCHEDULER_FAILOVER_TIMEOUT = "mesos.scheduler.failover.timeout";
     private static final long DEFAULT_SCHEDULER_FAILOVER_TIMEOUT = Long.MAX_VALUE;
 
+    public static final String FRAMEWORK_NAME = "mesos.framework.name";
+    private static final String DEFAULT_FRAMEWORK_NAME = "Samza Mesos Framework";
+
     public MesosConfig(Config config) {
         super(config);
     }
@@ -117,6 +120,10 @@ public class MesosConfig extends MapConfig {
 
     public String getSchedulerUser() {
         return get(SCHEDULER_USER, DEFAULT_SCHEDULER_USER);
+    }
+
+    public String getFrameworkName() {
+        return get(FRAMEWORK_NAME, DEFAULT_FRAMEWORK_NAME);
     }
 
     public String getSchedulerRole() {

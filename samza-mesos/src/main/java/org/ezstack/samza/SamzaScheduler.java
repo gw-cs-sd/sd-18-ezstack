@@ -46,33 +46,15 @@ public class SamzaScheduler implements Scheduler {
 
                 // TODO: Docker stuff
 
-                // Create Task To Run
+                // Create Mesos Task To Run
                 Protos.TaskInfo task = Protos.TaskInfo.newBuilder()
                         .setName("task " + taskId.getValue())
                         .setTaskId(taskId)
                         .setSlaveId(offer.getSlaveId())
-                        .addResources(Protos.Resource.newBuilder()
-                                .setName("cpus")
-                                .setType(Protos.Value.Type.SCALAR)
-                                .setScalar(Protos.Value.Scalar.newBuilder()
-                                        .setValue(mesosConfig.getExecutorMaxCpuCores())))
-                        .addResources(Protos.Resource.newBuilder()
-                                .setName("mem")
-                                .setType(Protos.Value.Type.SCALAR)
-                                .setScalar(Protos.Value.Scalar.newBuilder()
-                                        .setValue(mesosConfig.getExecutorMaxMemoryMb())))
-                        .addResources(Protos.Resource.newBuilder()
-                                .setName("disk")
-                                .setType(Protos.Value.Type.SCALAR)
-                                .setScalar(Protos.Value.Scalar.newBuilder()
-                                        .setValue(mesosConfig.getExecutorMaxDiskMb())))
-                        .setCommand(Protos.CommandInfo.newBuilder()
-                                .addUris(Protos.CommandInfo.URI.newBuilder()
-                                        .setValue(mesosConfig.getPackagePath())
-                                        .setExtract(true)
-                                        .build())
-                                .setValue(null) // TODO: fix value to the command value
-                                .build())
+                        .addResources(getResourceBuilder("cpus", mesosConfig.getExecutorMaxCpuCores()))
+                        .addResources(getResourceBuilder("mem", mesosConfig.getExecutorMaxMemoryMb()))
+                        .addResources(getResourceBuilder("disk", mesosConfig.getExecutorMaxDiskMb()))
+                        .setCommand(getCommand())
                         .build();
                 tasks.add(task);
             }
@@ -102,7 +84,6 @@ public class SamzaScheduler implements Scheduler {
                 runningInstance.remove(taskId);
                 break;
         }
-
         LOG.info("Running Instance Count: {}, Pending Instance Count: {}", runningInstance.size(), pendingInstance.size());
     }
 
@@ -125,5 +106,23 @@ public class SamzaScheduler implements Scheduler {
 
     public void error(SchedulerDriver schedulerDriver, String s) {
         LOG.error("Error Report: " + s);
+    }
+
+    private Protos.Resource.Builder getResourceBuilder(String resource, double value) {
+        return Protos.Resource.newBuilder()
+                .setName(resource)
+                .setType(Protos.Value.Type.SCALAR)
+                .setScalar(Protos.Value.Scalar.newBuilder()
+                        .setValue(value));
+    }
+
+    private Protos.CommandInfo getCommand() {
+        return Protos.CommandInfo.newBuilder()
+                .addUris(Protos.CommandInfo.URI.newBuilder()
+                        .setValue(mesosConfig.getPackagePath())
+                        .setExtract(true)
+                        .build())
+                .setValue(null) // TODO: fix value to the command value
+                .build();
     }
 }
