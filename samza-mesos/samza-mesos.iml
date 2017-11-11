@@ -26,7 +26,6 @@
     <orderEntry type="library" name="Maven: javax.servlet:javax.servlet-api:3.1.0" level="project" />
     <orderEntry type="library" name="Maven: org.eclipse.jetty:jetty-http:9.2.7.v20150116" level="project" />
     <orderEntry type="library" name="Maven: org.eclipse.jetty:jetty-io:9.2.7.v20150116" level="project" />
-    <orderEntry type="library" name="Maven: org.scala-lang:scala-library:2.12.1" level="project" />
     <orderEntry type="library" name="Maven: net.sf.jopt-simple:jopt-simple:3.2" level="project" />
     <orderEntry type="library" name="Maven: com.google.guava:guava:17.0" level="project" />
     <orderEntry type="library" name="Maven: org.codehaus.jackson:jackson-mapper-asl:1.9.13" level="project" />
@@ -35,7 +34,8 @@
     <orderEntry type="library" name="Maven: org.apache.commons:commons-lang3:3.4" level="project" />
     <orderEntry type="library" name="Maven: org.apache.mesos:mesos:1.4.0" level="project" />
     <orderEntry type="library" name="Maven: com.google.protobuf:protobuf-java:3.3.0" level="project" />
-    <orderEntry type="library" scope="RUNTIME" name="Maven: org.slf4j:slf4j-log4j12:1.6.2" level="project" />
-    <orderEntry type="library" name="Maven: log4j:log4j:1.2.16" level="project" />
+    <orderEntry type="library" scope="RUNTIME" name="Maven: org.slf4j:slf4j-log4j12:1.7.25" level="project" />
+    <orderEntry type="library" name="Maven: log4j:log4j:1.2.17" level="project" />
+    <orderEntry type="library" name="Maven: org.scala-lang:scala-library:2.12.3" level="project" />
   </component>
 </module>

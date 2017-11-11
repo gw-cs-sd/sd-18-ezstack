@@ -6,6 +6,8 @@ import org.apache.samza.config.Config;
 import org.apache.samza.job.ApplicationStatus;
 import org.apache.samza.job.StreamJob;
 
+import java.util.Calendar;
+
 public class MesosJob implements StreamJob {
     private MesosConfig mesosConfig;
     private MesosSchedulerDriver mesosSchedulerDriver;
@@ -64,10 +66,14 @@ public class MesosJob implements StreamJob {
     }
 
     private Protos.FrameworkInfo getFrameWorkInfo() {
-        Protos.FrameworkInfo.Builder builder = Protos.FrameworkInfo.newBuilder();
-        builder.setFailoverTimeout(mesosConfig.getSchedulerFailoverTimeout());
-        builder.setUser(mesosConfig.getSchedulerUser());
-        builder.setName(mesosConfig.getFrameworkName());
-        return builder.build();
+        String frameworkName = mesosConfig.getName().get();
+        return Protos.FrameworkInfo.newBuilder()
+                .setFailoverTimeout(mesosConfig.getSchedulerFailoverTimeout())
+                .setUser(mesosConfig.getSchedulerUser())
+                .setName(frameworkName)
+                .setId(Protos.FrameworkID.newBuilder()
+                        .setValue(frameworkName + "-" + Calendar.getInstance().getTimeInMillis())
+                        .build())
+                .build();
     }
 }

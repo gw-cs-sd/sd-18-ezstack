@@ -122,20 +122,11 @@ public class SamzaScheduler implements Scheduler {
                         .setValue(mesosConfig.getPackagePath())
                         .setExtract(true)
                         .build())
-                .setValue(mesosConfig.getPackageCmd())
+                .setValue(null) // TODO: fix
                 // .setEnvironment(null) // TODO: fix value for environment
                 .build();
     }
 
-//    /*
-//    TODO: possibly use samza command builder for package path
-//     */
 //    private CommandBuilder getSamzaCommandBuilder() {
-//        ShellCommandBuilder scb = new ShellCommandBuilder();
-//        CommandBuilder cb = scb;
-//        cb.setConfig(mesosConfig);
-//        cb.setId(null);
-//        cb.setUrl(null);
-//        return cb;
 //    }
 }
