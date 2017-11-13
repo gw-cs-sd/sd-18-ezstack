@@ -18,7 +18,7 @@ This project is designed to enable Samza jobs to run natively on Mesos.
 | mesos.executor.attributes.* (not implemented)       |           |                           | Slave attributes reqs (regex expressions) |
 | mesos.scheduler.user               |           |                           | System user for starting executors        |
 | mesos.scheduler.role (not implemented)              |           |                           | Mesos role to use for this scheduler      |
-| mesos.scheduler.jmx.enabled (not implemented)       |           | true                      | Mesos role to use for this scheduler      |
+| mesos.scheduler.jmx.enabled        |           | true                      | Mesos role to use for this scheduler      |
 | mesos.scheduler.failover.timeout   |           | Long.MaxValue             | Framework failover timeout                |
 
 ** either `mesos.package.path` or `mesos.docker.image` is required.
