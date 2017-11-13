@@ -55,7 +55,7 @@ public class MesosJob implements StreamJob {
             }
             try {
                 Thread.sleep(1000); // 1 ms sleep
-            } catch (Exception e) { /* do nothing */ }
+            } catch (InterruptedException e) { /* do nothing */ }
         }
 
         return getStatus();

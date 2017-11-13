@@ -23,6 +23,8 @@ import org.apache.samza.SamzaException;
 import org.apache.samza.config.Config;
 import org.apache.samza.config.JobConfig;
 
+import java.util.Map;
+
 public class MesosConfig extends JobConfig {
 
     // (Required if not using docker) the job package URI (file, http, hdfs)
@@ -107,7 +109,7 @@ public class MesosConfig extends JobConfig {
         return getDouble(EXECUTOR_MAX_DISK_MB, DEFAULT_EXECUTOR_MAX_DISK_MB);
     }
 
-    public Config getExecutorAttributes() {
+    public Map<String, String> getExecutorAttributes() {
         return subset(EXECUTOR_ATTRIBUTES, true);
     }
 

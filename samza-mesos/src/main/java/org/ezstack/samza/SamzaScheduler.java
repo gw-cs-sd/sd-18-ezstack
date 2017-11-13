@@ -4,11 +4,15 @@ import org.apache.mesos.Protos;
 import org.apache.mesos.Scheduler;
 import org.apache.mesos.SchedulerDriver;
 
+import org.apache.samza.config.TaskConfig;
+import org.apache.samza.job.CommandBuilder;
+import org.apache.samza.job.ShellCommandBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 
 public class SamzaScheduler implements Scheduler {
@@ -44,17 +48,18 @@ public class SamzaScheduler implements Scheduler {
                 // Launch Task
                 pendingInstance.add(taskId.getValue());
 
-                // TODO: Docker stuff
+                String containerId = "samza-task-" + taskId.getValue();
+                // TODO: Docker stuff Maybe
 
                 // Create Mesos Task To Run
                 Protos.TaskInfo task = Protos.TaskInfo.newBuilder()
-                        .setName("task " + taskId.getValue())
+                        .setName(containerId)
                         .setTaskId(taskId)
                         .setSlaveId(offer.getSlaveId())
                         .addResources(getResourceBuilder("cpus", mesosConfig.getExecutorMaxCpuCores()))
                         .addResources(getResourceBuilder("mem", mesosConfig.getExecutorMaxMemoryMb()))
                         .addResources(getResourceBuilder("disk", mesosConfig.getExecutorMaxDiskMb()))
-                        .setCommand(getCommand())
+                        .setCommand(getCommand(containerId))
                         .build();
                 tasks.add(task);
             }
@@ -116,17 +121,47 @@ public class SamzaScheduler implements Scheduler {
                         .setValue(value));
     }
 
-    private Protos.CommandInfo getCommand() {
+    private Protos.CommandInfo getCommand(String containerId) {
+        CommandBuilder commandBuilder = getSamzaCommandBuilder(containerId);
         return Protos.CommandInfo.newBuilder()
                 .addUris(Protos.CommandInfo.URI.newBuilder()
                         .setValue(mesosConfig.getPackagePath())
                         .setExtract(true)
                         .build())
-                .setValue(null) // TODO: fix
-                // .setEnvironment(null) // TODO: fix value for environment
+                .setValue(commandBuilder.buildCommand())
+                .setEnvironment(getBuiltMesosEnvironment(commandBuilder.buildEnvironment()))
                 .build();
     }
 
-//    private CommandBuilder getSamzaCommandBuilder() {
-//    }
+    private CommandBuilder getSamzaCommandBuilder(String containerId) {
+        CommandBuilder ret = null;
+        TaskConfig tc = new TaskConfig(mesosConfig);
+        String cmdBuilderClassName = tc.getCommandClass(ShellCommandBuilder.class.getName());
+        try {
+            ret = (CommandBuilder)Class.forName(cmdBuilderClassName).newInstance();
+            ret.setConfig(mesosConfig);
+            ret.setId(containerId);
+        } catch (ClassNotFoundException e) {
+            LOG.error(e.getMessage());
+        } catch (InstantiationException e) {
+            LOG.error(e.getMessage());
+        } catch (IllegalAccessException e) {
+            LOG.error(e.getMessage());
+        }
+
+        return ret;
+    }
+
+    private Protos.Environment getBuiltMesosEnvironment(Map<String, String> envMap) {
+        Protos.Environment.Builder envBuilder = Protos.Environment.newBuilder();
+
+        for (Map.Entry<String, String> entry: envMap.entrySet()) {
+            envBuilder.addVariables(Protos.Environment.Variable.newBuilder()
+                    .setName(entry.getKey())
+                    .setValue(entry.getValue())
+                    .build());
+        }
+
+        return envBuilder.build();
+    }
 }
