@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.google.inject.PrivateModule;
 import com.google.inject.Provides;
 import com.google.inject.Singleton;
+import com.google.inject.name.Named;
 import org.apache.kafka.connect.json.JsonSerializer;
 import org.ezstack.ezapp.datastore.api.DataWriter;
 import org.ezstack.ezapp.datastore.core.DefaultDataWriter;
@@ -43,5 +44,12 @@ public class WriterModule extends PrivateModule {
         props.put(ProducerConfig.TRANSACTION_TIMEOUT_CONFIG, 1000);
         // TODO: find a way to call producer.close when service terminates
         return new KafkaProducer<String, JsonNode>(props);
+    }
+
+    @Provides
+    @Singleton
+    @Named("documentTopic")
+    String provideDocumentTopic(WriterConfiguration configuration) {
+        return configuration.getWriterTopicName();
     }
 }

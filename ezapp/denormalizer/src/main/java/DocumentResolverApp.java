@@ -20,7 +20,9 @@ public class DocumentResolverApp implements StreamApplication {
     private static final ObjectMapper mapper = new ObjectMapper();
 
     public void init(StreamGraph streamGraph, Config config) {
-        MessageStream<Map<String, Object>> updates = streamGraph.<String, Map<String, Object>, Map<String, Object>>getInputStream("test", (k, v) -> v);
+
+        // TODO: move input stream name into properties
+        MessageStream<Map<String, Object>> updates = streamGraph.<String, Map<String, Object>, Map<String, Object>>getInputStream("documents", (k, v) -> v);
 
         OutputStream<String, Map<String, Object>, Map<String, Object>> outputStream = streamGraph
                 .getOutputStream("test_output", msg -> "placeholder_key", msg -> msg);

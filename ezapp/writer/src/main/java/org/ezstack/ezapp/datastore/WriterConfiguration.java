@@ -13,11 +13,19 @@ public class WriterConfiguration {
     @JsonProperty("producerName")
     private String _producerName;
 
+    @NotEmpty
+    @JsonProperty("writerTopicName")
+    private String _writerTopicName;
+
     public String getBootstrapServers() {
         return _bootstrapServers;
     }
 
     public String getProducerName() {
         return _producerName;
+    }
+
+    public String getWriterTopicName() {
+        return _writerTopicName;
     }
 }
