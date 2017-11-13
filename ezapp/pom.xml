@@ -12,7 +12,7 @@
         <module>web</module>
         <module>web-local</module>
         <module>writer</module>
-        <module>writer-api</module>
+        <module>datastore-api</module>
         <module>denormalizer</module>
     </modules>
     <name>EZapp</name>

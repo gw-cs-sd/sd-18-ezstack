@@ -2,8 +2,8 @@ package org.ezstack.ezapp.web;
 
 import com.google.inject.AbstractModule;
 import io.dropwizard.setup.Environment;
-import org.ezstack.ezapp.writer.WriterConfiguration;
-import org.ezstack.ezapp.writer.WriterModule;
+import org.ezstack.ezapp.datastore.WriterConfiguration;
+import org.ezstack.ezapp.datastore.WriterModule;
 
 public class EZModule extends AbstractModule {
 

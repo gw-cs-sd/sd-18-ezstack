@@ -15,7 +15,7 @@
         <!--internal dependencies-->
         <dependency>
             <groupId>org.ezstack.ezapp</groupId>
-            <artifactId>ezapp-writer-api</artifactId>
+            <artifactId>ezapp-datastore-api</artifactId>
             <version>${project.version}</version>
         </dependency>
         <!--third-party dependencies-->

@@ -13,7 +13,7 @@ public class DenormalizerLocalApplication {
 
         LocalApplicationRunner runner = new LocalApplicationRunner(config);
 
-        FanoutApp app = new FanoutApp();
+        DocumentResolverApp app = new DocumentResolverApp();
 
         runner.run(app);
         runner.waitForFinish();

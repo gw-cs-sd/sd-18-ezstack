@@ -8,7 +8,7 @@ import org.ezstack.ezapp.web.resources.EZHealthCheck;
 import io.dropwizard.Application;
 import io.dropwizard.setup.Bootstrap;
 import io.dropwizard.setup.Environment;
-import org.ezstack.ezapp.writer.api.DataWriter;
+import org.ezstack.ezapp.datastore.api.DataWriter;
 
 public class EZService extends Application<EZConfiguration> {
 

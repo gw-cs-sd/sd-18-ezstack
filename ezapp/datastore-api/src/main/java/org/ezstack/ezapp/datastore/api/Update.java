@@ -1,4 +1,4 @@
-package org.ezstack.ezapp.writer.api;
+package org.ezstack.ezapp.datastore.api;
 
 import com.datastax.driver.core.utils.UUIDs;
 import com.fasterxml.jackson.annotation.JsonCreator;
@@ -21,7 +21,7 @@ public class Update {
     @JsonCreator
     public Update(@JsonProperty("_table") String table, @JsonProperty("_key") String key,
                   @JsonProperty("_timestamp") UUID timestamp, @JsonProperty("_data") Map<String, Object> data,
-                  boolean isUpdate) {
+                  @JsonProperty("_isUpdate") boolean isUpdate) {
 
         checkNotNull(table, "table");
         checkNotNull(key, "key");
@@ -57,7 +57,7 @@ public class Update {
     }
 
     @JsonProperty("_isUpdate")
-    public boolean getIsUpdate() {
+    public boolean isUpdate() {
         return _isUpdate;
     }
 }
