@@ -71,7 +71,7 @@ public class MesosConfig extends JobConfig {
 
     // framework (distributed system) failover time (Default: Long.MAX_VALUE)
     public static final String SCHEDULER_FAILOVER_TIMEOUT = "mesos.scheduler.failover.timeout";
-    private static final long DEFAULT_SCHEDULER_FAILOVER_TIMEOUT = Long.MAX_VALUE;
+    private static final long DEFAULT_SCHEDULER_FAILOVER_TIMEOUT = Integer.MAX_VALUE;
 
     public MesosConfig(Config config) {
         super(config);

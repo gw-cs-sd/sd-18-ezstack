@@ -29,6 +29,8 @@ import org.apache.samza.job.ShellCommandBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -148,7 +150,7 @@ public class SamzaScheduler implements Scheduler {
                         .setExtract(true)
                         .build())
                 .setValue(commandBuilder.buildCommand())
-                .setEnvironment(getBuiltMesosEnvironment(commandBuilder.buildEnvironment()))
+                //.setEnvironment(getBuiltMesosEnvironment(commandBuilder.buildEnvironment()))
                 .build();
     }
 
