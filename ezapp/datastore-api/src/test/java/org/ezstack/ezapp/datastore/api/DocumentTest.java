@@ -15,7 +15,6 @@ import java.util.UUID;
 public class DocumentTest {
 
     private final String jsonDoc = "{\"_table\":\"comment\",\"_key\":\"dsfaf3\",\"_timestamp\":\"90cec5d0-c8b7-11e7-8a28-ff35eed18bcb\",\"_data\":{\"author\":{\"firstName\":\"Bob\",\"lastName\":\"Johnson\"},\"title\":\"Best Ever!\",\"likes\":50},\"_version\":2}";
-    private final String jsonUpdate = "{\"_table\":\"comment\",\"_key\":\"dsfaf3\",\"_timestamp\":\"90cec5d0-c8b7-11e7-8a28-ff35eed18bcb\",\"_data\":{\"author\":{\"firstName\":\"Bob\",\"lastName\":\"Johnson\"},\"title\":\"Best Ever!\",\"likes\":50},\"_version\":2}";
     private Document document;
     private ObjectMapper mapper;
 
