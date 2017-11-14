@@ -4,8 +4,6 @@ import com.datastax.driver.core.utils.UUIDs;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.google.common.base.MoreObjects;
-import org.ezstack.ezapp.datastore.api.Names;
-import org.ezstack.ezapp.datastore.api.Update;
 
 import java.util.Map;
 import java.util.UUID;
