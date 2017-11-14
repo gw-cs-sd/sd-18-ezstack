@@ -52,7 +52,8 @@ public class Document {
         checkArgument(_table.equals(update.getTable()) && _key.equals(update.getKey()),
                 "Update is not to same record as existing document");
 
-        // TODO: figure a way to maintain timestamp consistency, until then ignore it
+        // TODO: figure out a better way to maintain timestamp consistency, until then, simple assignment
+        _timestamp = update.getTimestamp();
 
         _version++;
 
