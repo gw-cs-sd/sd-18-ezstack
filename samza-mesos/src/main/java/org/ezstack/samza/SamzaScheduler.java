@@ -23,9 +23,12 @@ import org.apache.mesos.Protos;
 import org.apache.mesos.Scheduler;
 import org.apache.mesos.SchedulerDriver;
 
+import org.apache.samza.config.JobConfig;
+import org.apache.samza.config.ShellCommandConfig;
 import org.apache.samza.config.TaskConfig;
 import org.apache.samza.job.CommandBuilder;
 import org.apache.samza.job.ShellCommandBuilder;
+import org.apache.samza.util.Util;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -69,18 +72,21 @@ public class SamzaScheduler implements Scheduler {
                 // Launch Task
                 pendingInstance.add(taskId.getValue());
 
-                String containerId = "samza-task-" + taskId.getValue();
+                String containerId = "" + taskId.getValue();
+                String url = "http://" + offer.getUrl().getAddress().getIp() + ":" + offer.getUrl().getAddress().getPort();
+                LOG.info("Offer id: {}, Url: {}", containerId, url);
+
                 // TODO: Docker stuff Maybe
 
                 // Create Mesos Task To Run
                 Protos.TaskInfo task = Protos.TaskInfo.newBuilder()
-                        .setName(containerId)
+                        .setName("samza-task-" + containerId)
                         .setTaskId(taskId)
                         .setSlaveId(offer.getSlaveId())
                         .addResources(getResourceBuilder("cpus", mesosConfig.getExecutorMaxCpuCores()))
                         .addResources(getResourceBuilder("mem", mesosConfig.getExecutorMaxMemoryMb()))
                         .addResources(getResourceBuilder("disk", mesosConfig.getExecutorMaxDiskMb()))
-                        .setCommand(getCommand(containerId))
+                        .setCommand(getCommand(containerId, url))
                         .build();
                 tasks.add(task);
             }
@@ -142,41 +148,76 @@ public class SamzaScheduler implements Scheduler {
                         .setValue(value));
     }
 
-    private Protos.CommandInfo getCommand(String containerId) {
-        CommandBuilder commandBuilder = getSamzaCommandBuilder(containerId);
+    private Protos.CommandInfo getCommand(String containerId, String url) {
+        CommandBuilder commandBuilder = getSamzaCommandBuilder(containerId, url);
+        String cmd = commandBuilder.buildCommand();
+        LOG.info("Run Command: {}", cmd);
         return Protos.CommandInfo.newBuilder()
                 .addUris(Protos.CommandInfo.URI.newBuilder()
                         .setValue(mesosConfig.getPackagePath())
                         .setExtract(true)
                         .build())
-                .setValue(commandBuilder.buildCommand())
-                //.setEnvironment(getBuiltMesosEnvironment(commandBuilder.buildEnvironment()))
+                .setValue(cmd)
+                //.setValue(buildCmd())
+                .setEnvironment(getBuiltMesosEnvironment(commandBuilder.buildEnvironment()))
                 .build();
     }
 
-    private CommandBuilder getSamzaCommandBuilder(String containerId) {
-        CommandBuilder ret = null;
-        TaskConfig tc = new TaskConfig(mesosConfig);
-        String cmdBuilderClassName = tc.getCommandClass(ShellCommandBuilder.class.getName());
-        try {
-            ret = (CommandBuilder)Class.forName(cmdBuilderClassName).newInstance();
-            ret.setConfig(mesosConfig);
-            ret.setId(containerId);
-        } catch (ClassNotFoundException e) {
-            LOG.error(e.getMessage());
-        } catch (InstantiationException e) {
-            LOG.error(e.getMessage());
-        } catch (IllegalAccessException e) {
-            LOG.error(e.getMessage());
+    private String buildCmd() {
+        // Figure out if framework is deployed else where
+        String fwkPath = mesosConfig.get(JobConfig.SAMZA_FWK_PATH(), "");
+        String fwkVersion = mesosConfig.get(JobConfig.SAMZA_FWK_VERSION());
+        if (fwkVersion == null || fwkVersion.isEmpty()) {
+            fwkVersion = "STABLE";
         }
 
-        return ret;
+        String cmdExec = "./bin/run-jc.sh"; // default location
+        if (!fwkPath.isEmpty()) {
+            cmdExec = fwkPath + "/" + fwkVersion + "/bin/run-jc.sh";
+        }
+        LOG.info("Build cmd path: {}", cmdExec);
+        return cmdExec;
+    }
+
+    private CommandBuilder getSamzaCommandBuilder(String containerId, String url) {
+        String fwkPath = mesosConfig.get(JobConfig.SAMZA_FWK_PATH(), "");
+        String fwkVersion = mesosConfig.get(JobConfig.SAMZA_FWK_VERSION());
+        if (fwkVersion == null || fwkVersion.isEmpty()) {
+            fwkVersion = "STABLE";
+        }
+
+        String cmdPath = ".";
+        if (!fwkPath.isEmpty()) {
+            cmdPath = fwkPath + "/" + fwkVersion;
+        }
+
+        TaskConfig tc = new TaskConfig(mesosConfig);
+        CommandBuilder commandBuilder = new ShellCommandBuilder();
+        commandBuilder.setConfig(mesosConfig)
+                .setId(containerId)
+                .setCommandPath(cmdPath);
+        try {
+            //commandBuilder.setUrl(new URL(url));
+            commandBuilder.setUrl(new URL("http://ezstack12.parmer.seas.gwu.edu:2181/"));
+        } catch (MalformedURLException e) {
+            LOG.error("url error: {}", e.getMessage());
+        }
+        return commandBuilder;
     }
 
     private Protos.Environment getBuiltMesosEnvironment(Map<String, String> envMap) {
         Protos.Environment.Builder envBuilder = Protos.Environment.newBuilder();
-
+        String mem = "" + mesosConfig.getExecutorMaxMemoryMb();
+        envBuilder.addVariables(Protos.Environment.Variable.newBuilder()
+                .setName("JAVA_HEAP_OPTS")
+                .setValue("-Xms" + mem + "M -Xmx" + mem + "M")
+                .build());
+//        envBuilder.addVariables(Protos.Environment.Variable.newBuilder()
+//                .setName("JOB_LIB_DIR")
+//                .setValue("./lib")
+//                .build());
         for (Map.Entry<String, String> entry: envMap.entrySet()) {
+            LOG.info("Environemnt Variable Name: {}, Value: {}", entry.getKey(), entry.getValue());
             envBuilder.addVariables(Protos.Environment.Variable.newBuilder()
                     .setName(entry.getKey())
                     .setValue(entry.getValue())
