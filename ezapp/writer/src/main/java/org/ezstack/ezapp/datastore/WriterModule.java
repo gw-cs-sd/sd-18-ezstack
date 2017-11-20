@@ -52,4 +52,11 @@ public class WriterModule extends PrivateModule {
     String provideDocumentTopic(WriterConfiguration configuration) {
         return configuration.getWriterTopicName();
     }
+
+    @Provides
+    @Singleton
+    @Named("zookeeperHosts")
+    String provideZookeeperHosts(WriterConfiguration configuration) {
+        return configuration.getZookeeperHosts();
+    }
 }

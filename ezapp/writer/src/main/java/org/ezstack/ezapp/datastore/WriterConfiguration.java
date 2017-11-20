@@ -17,6 +17,10 @@ public class WriterConfiguration {
     @JsonProperty("writerTopicName")
     private String _writerTopicName;
 
+    @NotEmpty
+    @JsonProperty("zookeeperHosts")
+    private String _zookeeperHosts;
+
     public String getBootstrapServers() {
         return _bootstrapServers;
     }
@@ -27,5 +31,9 @@ public class WriterConfiguration {
 
     public String getWriterTopicName() {
         return _writerTopicName;
+    }
+
+    public String getZookeeperHosts() {
+        return _zookeeperHosts;
     }
 }

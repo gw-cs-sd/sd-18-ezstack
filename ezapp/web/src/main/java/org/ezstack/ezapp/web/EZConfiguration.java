@@ -9,15 +9,21 @@ import javax.validation.constraints.NotNull;
 
 public class EZConfiguration extends Configuration {
 
-    @JsonProperty("port")
-    private int _port = 8080;
-
     @Valid
     @NotNull
     @JsonProperty("dataWriter")
     private WriterConfiguration _writerConfiguration;
 
+    @Valid
+    @NotNull
+    @JsonProperty("zookeeperHosts")
+    private String _zookeeperHosts;
+
     public WriterConfiguration getWriterConfiguration() {
         return _writerConfiguration;
+    }
+
+    public String getZookeeperHosts() {
+        return _zookeeperHosts;
     }
 }

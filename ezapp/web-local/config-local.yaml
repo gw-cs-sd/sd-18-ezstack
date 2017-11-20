@@ -1,5 +1,7 @@
+zookeeperHosts: "localhost:2181"
 
 dataWriter:
   bootstrapServers: "localhost:9092"
-  producerName: "server1"
+  producerName: "EZapp"
   writerTopicName: "documents"
+  zookeeperHosts: "localhost:2181"
