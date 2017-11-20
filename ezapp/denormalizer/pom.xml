@@ -50,7 +50,7 @@
     </build>
 
     <properties>
-        <samza.version>0.13.0</samza.version>
+        <samza.version>0.13.1</samza.version>
     </properties>
 
     <dependencies>
@@ -83,6 +83,17 @@
             <groupId>org.apache.samza</groupId>
             <artifactId>samza-kafka_2.11</artifactId>
             <version>${samza.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.samza</groupId>
+            <artifactId>samza-elasticsearch</artifactId>
+            <version>${samza.version}</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>com.fasterxml.jackson.core</groupId>
+                    <artifactId>jackson-core</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
         <dependency>
             <groupId>org.slf4j</groupId>

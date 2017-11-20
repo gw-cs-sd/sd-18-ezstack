@@ -41,7 +41,7 @@ SERVICE_WAIT_TIMEOUT_SEC=120
 KIBANA_PORT=5601
 ELASTICSEARCH_PORT=9200
 
-DOWNLOAD_ELASTICSEARCH=https://artifacts.elastic.co/downloads/elasticsearch/elasticsearch-5.6.3.tar.gz
+DOWNLOAD_ELASTICSEARCH=https://download.elasticsearch.org/elasticsearch/release/org/elasticsearch/distribution/tar/elasticsearch/2.2.1/elasticsearch-2.2.1.tar.gz
 DOWNLOAD_KIBANA=
 
 if [ $KERNEL == "Linux" ]; then
@@ -61,7 +61,7 @@ install_all() {
 
 install_elasticsearch() {
   mkdir -p "$DEPLOY_ROOT_DIR"
-  install elasticsearch $DOWNLOAD_ELASTICSEARCH elasticsearch-5.6.3
+  install elasticsearch $DOWNLOAD_ELASTICSEARCH elasticsearch-2.2.1
 }
 
 install_kibana() {

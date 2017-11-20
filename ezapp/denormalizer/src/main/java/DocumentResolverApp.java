@@ -5,8 +5,13 @@ import org.apache.samza.operators.MessageStream;
 import org.apache.samza.operators.OutputStream;
 import org.apache.samza.operators.StreamGraph;
 import org.apache.samza.operators.functions.MapFunction;
+import org.apache.samza.operators.functions.SinkFunction;
 import org.apache.samza.storage.kv.KeyValueStore;
+import org.apache.samza.system.OutgoingMessageEnvelope;
+import org.apache.samza.system.SystemStream;
+import org.apache.samza.task.MessageCollector;
 import org.apache.samza.task.TaskContext;
+import org.apache.samza.task.TaskCoordinator;
 import org.ezstack.ezapp.datastore.api.Document;
 import org.ezstack.ezapp.datastore.api.Update;
 import org.slf4j.Logger;
@@ -24,12 +29,13 @@ public class DocumentResolverApp implements StreamApplication {
         // TODO: move input stream name into properties
         MessageStream<Map<String, Object>> updates = streamGraph.<String, Map<String, Object>, Map<String, Object>>getInputStream("documents", (k, v) -> v);
 
-        OutputStream<String, Map<String, Object>, Map<String, Object>> outputStream = streamGraph
-                .getOutputStream("test_output", msg -> "placeholder_key", msg -> msg);
+//        OutputStream<String, Map<String, Object>, Map<String, Object>> outputStream = streamGraph
+//                .getOutputStream("test_output", msg -> "placeholder_key", msg -> msg);
 
         updates
                 .map( msg -> mapper.convertValue(msg, Update.class))
-                .map(new ResolveFunction());
+                .map(new ResolveFunction())
+                .sink(new IndexToESFunction());
     }
 
     private class ResolveFunction implements MapFunction<Update, Map<String, Object>> {
@@ -58,6 +64,16 @@ public class DocumentResolverApp implements StreamApplication {
             store.put(storeKey, mapper.convertValue(storedDocument, Map.class));
 
             return mapper.convertValue(update, Map.class);
+        }
+    }
+
+    private class IndexToESFunction implements SinkFunction<Map<String, Object>> {
+
+        @Override
+        public void apply(Map<String, Object> objectMap, MessageCollector messageCollector, TaskCoordinator taskCoordinator) {
+            log.info("about to index");
+            messageCollector.send(new OutgoingMessageEnvelope(new SystemStream("elasticsearch", "test/document"), (String) objectMap.get("_key"), objectMap.get("_data")));
+            log.info("indexed");
         }
     }
 
