@@ -15,6 +15,7 @@ import org.I0Itec.zkclient.ZkConnection;
 import org.apache.kafka.clients.producer.Producer;
 import org.apache.kafka.clients.producer.ProducerRecord;
 import org.apache.kafka.clients.producer.RecordMetadata;
+import org.apache.kafka.common.errors.TopicExistsException;
 import org.ezstack.ezapp.datastore.api.Update;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -63,7 +64,11 @@ public class KafkaDataWriterDAO {
             Properties topicConfiguration = new Properties();
             AdminUtils.createTopic(zkUtils, _documentTopic, 1, 1, topicConfiguration, RackAwareMode.Safe$.MODULE$);
         } catch (Exception e) {
-            Throwables.throwIfUnchecked(e);
+            if (Throwables.getRootCause(e) instanceof TopicExistsException) {
+                _log.info("Topic {} already exists, proceeding without creation.", _documentTopic);
+            } else {
+                Throwables.throwIfUnchecked(e);
+            }
         } finally {
             if (zkClientWrapper != null) {
                 zkClientWrapper.close();
