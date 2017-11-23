@@ -25,6 +25,14 @@ public class DocumentTest {
     }
 
     @Test
+    public void testObjectMapper() throws  IOException {
+        String str = "{\"_table\":\"test\",\"_key\":\"231145\",\"_timestamp\":\"22bef2c0-ce59-11e7-a7d8-8d6dcb64e54f\",\"_data\":{\"author\":\"Bob\",\"title\":\"Hey Paul!\",\"rating\":17},\"_isUpdate\":false}";
+        Update update = mapper.readValue(str, Update.class);
+        System.out.println(update.getTable());
+        System.out.print(str);
+    }
+
+    @Test
     public void testJsonConstructor() throws IOException {
 
         assertEquals("comment", document.getTable());

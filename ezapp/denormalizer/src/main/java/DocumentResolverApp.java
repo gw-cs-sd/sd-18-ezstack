@@ -2,7 +2,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.samza.application.StreamApplication;
 import org.apache.samza.config.Config;
 import org.apache.samza.operators.MessageStream;
-import org.apache.samza.operators.OutputStream;
 import org.apache.samza.operators.StreamGraph;
 import org.apache.samza.operators.functions.MapFunction;
 import org.apache.samza.operators.functions.SinkFunction;
@@ -17,6 +16,7 @@ import org.ezstack.ezapp.datastore.api.Update;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.IOException;
 import java.util.Map;
 
 public class DocumentResolverApp implements StreamApplication {
@@ -24,16 +24,28 @@ public class DocumentResolverApp implements StreamApplication {
     private static final Logger log = LoggerFactory.getLogger(DocumentResolverApp.class);
     private static final ObjectMapper mapper = new ObjectMapper();
 
+    public void testObjectMapper() throws IOException {
+        String str = "{\"_table\":\"test\",\"_key\":\"231145\",\"_timestamp\":\"22bef2c0-ce59-11e7-a7d8-8d6dcb64e54f\",\"_data\":{\"author\":\"Bob\",\"title\":\"Hey Paul!\",\"rating\":17},\"_isUpdate\":false}";
+        Update update = mapper.readValue(str, Update.class);
+        log.info(update.getTable());
+        log.info(str);
+    }
+
     public void init(StreamGraph streamGraph, Config config) {
+        try {
+            testObjectMapper();
+        } catch (Exception e) {
+            log.error("TEST MAPPER FAILED :(");
+        }
 
         // TODO: move input stream name into properties
-        MessageStream<Map<String, Object>> updates = streamGraph.<String, Map<String, Object>, Map<String, Object>>getInputStream("documents", (k, v) -> v);
+        MessageStream<Update> updates = streamGraph.<Update>getInputStream("documents", new JsonSerdeV3<>(Update.class));
 
 //        OutputStream<String, Map<String, Object>, Map<String, Object>> outputStream = streamGraph
 //                .getOutputStream("test_output", msg -> "placeholder_key", msg -> msg);
 
         updates
-                .map( msg -> mapper.convertValue(msg, Update.class))
+//                .map( msg -> mapper.convertValue(msg, Update.class))
                 .map(new ResolveFunction())
                 .sink(new IndexToESFunction());
     }

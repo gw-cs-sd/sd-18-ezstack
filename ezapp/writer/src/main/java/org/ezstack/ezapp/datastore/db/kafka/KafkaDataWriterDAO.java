@@ -62,7 +62,7 @@ public class KafkaDataWriterDAO {
             zkUtils = new ZkUtils(zkClientWrapper, new ZkConnection(_zookeeperHosts), false);
 
             Properties topicConfiguration = new Properties();
-            AdminUtils.createTopic(zkUtils, _documentTopic, 1, 1, topicConfiguration, RackAwareMode.Safe$.MODULE$);
+            AdminUtils.createTopic(zkUtils, _documentTopic, 2, 1, topicConfiguration, RackAwareMode.Safe$.MODULE$);
         } catch (Exception e) {
             if (Throwables.getRootCause(e) instanceof TopicExistsException) {
                 _log.info("Topic {} already exists, proceeding without creation.", _documentTopic);

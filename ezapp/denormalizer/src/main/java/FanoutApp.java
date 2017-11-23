@@ -15,19 +15,19 @@ public class FanoutApp implements StreamApplication {
     public void init(StreamGraph streamGraph, Config config) {
 
         // TODO: move input stream name into properties
-        MessageStream<Map<String, Object>> updates = streamGraph.<String, Map<String, Object>, Map<String, Object>>getInputStream("documents", (k, v) -> v);
-
-        OutputStream<String, Map<String, Object>, Map<String, Object>> outputStream = streamGraph
-                .getOutputStream("test_output", msg -> "placeholder_key", msg -> msg);
-
-        System.out.println("APPLICATION STARTING!!!!!");
-
-        updates
-                .map( msg -> {
-                    log.info(msg.toString());
-                    return msg;
-                })
-        .sendTo(outputStream);
+//        MessageStream<Map<String, Object>> updates = streamGraph.<String, Map<String, Object>, Map<String, Object>>getInputStream("documents", (k, v) -> v);
+//
+//        OutputStream<String, Map<String, Object>, Map<String, Object>> outputStream = streamGraph
+//                .getOutputStream("test_output", msg -> "placeholder_key", msg -> msg);
+//
+//        System.out.println("APPLICATION STARTING!!!!!");
+//
+//        updates
+//                .map( msg -> {
+//                    log.info(msg.toString());
+//                    return msg;
+//                })
+//        .sendTo(outputStream);
     }
 }
 
