@@ -23,23 +23,11 @@ import org.apache.mesos.Protos;
 import org.apache.mesos.Scheduler;
 import org.apache.mesos.SchedulerDriver;
 
-import org.apache.samza.config.JobConfig;
-import org.apache.samza.config.MapConfig;
-import org.apache.samza.config.ShellCommandConfig;
-import org.apache.samza.job.CommandBuilder;
-import org.apache.samza.job.ShellCommandBuilder;
-import org.apache.samza.serializers.model.SamzaObjectMapper;
-import org.apache.samza.util.Util;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.IOException;
-import java.net.MalformedURLException;
-import java.net.URL;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 
 public class SamzaScheduler implements Scheduler {
@@ -89,7 +77,7 @@ public class SamzaScheduler implements Scheduler {
                         .addResources(getResourceBuilder("cpus", mesosConfig.getExecutorMaxCpuCores()))
                         .addResources(getResourceBuilder("mem", mesosConfig.getExecutorMaxMemoryMb()))
                         .addResources(getResourceBuilder("disk", mesosConfig.getExecutorMaxDiskMb()))
-                        .setCommand(getCommand(containerId))
+                        .setCommand(getCommand())
                         .build();
                 tasks.add(task);
             }
@@ -124,7 +112,7 @@ public class SamzaScheduler implements Scheduler {
 
     public void frameworkMessage(SchedulerDriver schedulerDriver, Protos.ExecutorID executorID,
                                  Protos.SlaveID slaveID, byte[] bytes) {
-        LOG.info("Framework (scheduler) message: " + new String(bytes));
+        LOG.info("Framework (scheduler) message: {}", new String(bytes));
     }
 
     public void disconnected(SchedulerDriver schedulerDriver) {
@@ -136,11 +124,11 @@ public class SamzaScheduler implements Scheduler {
     }
 
     public void executorLost(SchedulerDriver schedulerDriver, Protos.ExecutorID executorID, Protos.SlaveID slaveID, int i) {
-        LOG.error("Executor " + executorID.getValue() + " on Slave " + slaveID.getValue() + " has been lost.");
+        LOG.error("Executor {} on Slave {} has been lost.", executorID.getValue(), slaveID.getValue());
     }
 
     public void error(SchedulerDriver schedulerDriver, String s) {
-        LOG.error("Error Report: " + s);
+        LOG.error("Error Report: {}", s);
     }
 
     private Protos.Resource.Builder getResourceBuilder(String resource, double value) {
@@ -151,9 +139,8 @@ public class SamzaScheduler implements Scheduler {
                         .setValue(value));
     }
 
-    private Protos.CommandInfo getCommand(String containerId) {
-        CommandBuilder commandBuilder = getSamzaCommandBuilder(containerId);
-        String cmd = commandBuilder.buildCommand();
+    private Protos.CommandInfo getCommand() {
+        String cmd = getCmd();
         LOG.info("exec command: {}", cmd);
 
 
@@ -163,76 +150,21 @@ public class SamzaScheduler implements Scheduler {
                         .setExtract(true)
                         .build())
                 .setValue(cmd)
-                .setEnvironment(getBuiltMesosEnvironment(commandBuilder.buildEnvironment()))
+                .setEnvironment(getBuiltMesosEnvironment())
                 .build();
     }
 
-//    private String buildCmd() {
-//        // Figure out if framework is deployed else where
-//        String fwkPath = mesosConfig.get(JobConfig.SAMZA_FWK_PATH(), "");
-//        String fwkVersion = mesosConfig.get(JobConfig.SAMZA_FWK_VERSION());
-//        if (fwkVersion == null || fwkVersion.isEmpty()) {
-//            fwkVersion = "STABLE";
-//        }
-//
-//        String cmdExec = "./bin/run-jc.sh"; // default location
-//        if (!fwkPath.isEmpty()) {
-//            cmdExec = fwkPath + "/" + fwkVersion + "/bin/run-jc.sh";
-//        }
-//        LOG.info("Build cmd path: {}", cmdExec);
-//
-//        return cmdExec;
-//    }
-
-    private CommandBuilder getSamzaCommandBuilder(String containerId) {
-        String fwkPath = mesosConfig.get(JobConfig.SAMZA_FWK_PATH(), "");
-        String fwkVersion = mesosConfig.get(JobConfig.SAMZA_FWK_VERSION());
-        if (fwkVersion == null || fwkVersion.isEmpty()) {
-            fwkVersion = "STABLE";
-        }
-
-        String cmdPath = ".";
-        if (!fwkPath.isEmpty()) {
-            cmdPath = fwkPath + "/" + fwkVersion;
-        }
-
-        CommandBuilder commandBuilder = new ShellCommandBuilder();
-        commandBuilder.setConfig(mesosConfig)
-                .setId(containerId)
-                .setCommandPath(cmdPath);
-        try {
-            commandBuilder.setUrl(new URL("http://ezstack12.parmer.seas.gwu.edu:8080"));
-        } catch (MalformedURLException e) {
-            LOG.error("couldn't set url: {}", e.getMessage());
-        }
-
-        return commandBuilder;
+    private String getCmd() {
+        return mesosConfig.getCommand();
     }
 
-    private Protos.Environment getBuiltMesosEnvironment(Map<String, String> envMap) {
+    private Protos.Environment getBuiltMesosEnvironment() {
         Protos.Environment.Builder envBuilder = Protos.Environment.newBuilder();
         String mem = "" + mesosConfig.getExecutorMaxMemoryMb();
-
-        MapConfig cordSystemConfig = Util.buildCoordinatorStreamConfig(mesosConfig);
-        Map<String, String> map = new HashMap<>();
-        map.putAll(envMap);
-        map.put("JAVA_HEAP_OPTS", "-Xms" + mem + "M -Xmx" + mem + "M");
-//        map.put("JOB_LIB_DIR", "./lib");
-        try {
-            map.put(ShellCommandConfig.ENV_COORDINATOR_SYSTEM_CONFIG(), Util.envVarEscape(SamzaObjectMapper
-                    .getObjectMapper().writeValueAsString(cordSystemConfig)));
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-
-        for (Map.Entry<String, String> entry: map.entrySet()) {
-            LOG.info("export {} = {}", entry.getKey(), entry.getValue());
-            envBuilder.addVariables(Protos.Environment.Variable.newBuilder()
-                    .setName(entry.getKey())
-                    .setValue(entry.getValue())
-                    .build());
-        }
-
+        envBuilder.addVariables(Protos.Environment.Variable.newBuilder()
+                .setName("JAVA_HEAP_OPTS")
+                .setValue("-Xms" + mem + "M -Xmx" + mem + "M")
+                .build());
         return envBuilder.build();
     }
 }

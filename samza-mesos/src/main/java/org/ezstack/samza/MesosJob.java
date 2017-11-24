@@ -22,12 +22,9 @@ package org.ezstack.samza;
 import org.apache.mesos.MesosSchedulerDriver;
 import org.apache.mesos.Protos;
 import org.apache.samza.config.Config;
-import org.apache.samza.job.ApplicationStatus;
-import org.apache.samza.job.StreamJob;
-
 import java.util.Calendar;
 
-public class MesosJob implements StreamJob {
+public class MesosJob {
     private MesosConfig mesosConfig;
     private MesosSchedulerDriver mesosSchedulerDriver;
     private SamzaScheduler samzaScheduler;
@@ -39,49 +36,8 @@ public class MesosJob implements StreamJob {
                 getFrameWorkInfo(), mesosConfig.getMasterConnect());
     }
 
-    public StreamJob submit() {
-        mesosSchedulerDriver.run();
-        return this;
-    }
-
-    public StreamJob kill() {
-        mesosSchedulerDriver.stop();
-        return this;
-    }
-
-    public ApplicationStatus waitForFinish(long timeOutMs) {
-        long startTime = System.currentTimeMillis();
-        while (System.currentTimeMillis() - startTime < timeOutMs) {
-            ApplicationStatus s = getStatus();
-            if (s.equals(ApplicationStatus.SuccessfulFinish) ||
-                    s.equals(ApplicationStatus.UnsuccessfulFinish)) {
-                return s;
-            }
-            try {
-                Thread.sleep(1000); // 1 ms sleep
-            } catch (InterruptedException e) { /* do nothing */ }
-        }
-
-        return ApplicationStatus.Running;
-    }
-
-    public ApplicationStatus waitForStatus(ApplicationStatus applicationStatus, long timeOutMs) {
-        long startTime = System.currentTimeMillis();
-        while (System.currentTimeMillis() - startTime < timeOutMs) {
-            ApplicationStatus s = getStatus();
-            if (s.equals(applicationStatus)) {
-                return s;
-            }
-            try {
-                Thread.sleep(1000); // 1 ms sleep
-            } catch (InterruptedException e) { /* do nothing */ }
-        }
-
-        return getStatus();
-    }
-
-    public ApplicationStatus getStatus() {
-        return ApplicationStatus.New; // TODO: Fix ME
+    public MesosSchedulerDriver getMesosSchedulerDriver() {
+        return mesosSchedulerDriver;
     }
 
     private Protos.FrameworkInfo getFrameWorkInfo() {

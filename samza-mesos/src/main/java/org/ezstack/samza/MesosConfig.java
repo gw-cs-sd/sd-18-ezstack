@@ -27,17 +27,14 @@ import java.util.Map;
 
 public class MesosConfig extends JobConfig {
 
-    // (Required if not using docker) the job package URI (file, http, hdfs)
+    // (Required) the job package URI (file, http, hdfs)
     public static final String PACKAGE_PATH = "mesos.package.path";
-
-    // (Required if using docker) the docker image
-    public static final String DOCKER_IMAGE = "mesos.docker.image";
-
-    // arguments for docker image
-    public static final String DOCKER_ENTRYPOINT_ARGUMENTS = "mesos.docker.entrypoint.arguments";
 
     // (Required) Mesos Master URL
     public static final String MASTER_CONNECT = "mesos.master.connect";
+
+    // (Required) Mesos Command
+    public static final String COMMAND = "mesos.command";
 
     // Mesos task memory constraint (Default: 1024)
     public static final String EXECUTOR_MAX_MEMORY_MB = "mesos.executor.memory.mb";
@@ -62,13 +59,6 @@ public class MesosConfig extends JobConfig {
     public static final String SCHEDULER_USER = "mesos.scheduler.user";
     private static final String DEFAULT_SCHEDULER_USER = "";
 
-    // Mesos role to use for this scheduler
-    public static final String SCHEDULER_ROLE = "mesos.scheduler.role";
-
-    // Java monitoring tools (Default: true)
-    public static final String SCHEDULER_JMX_ENABLED = "mesos.scheduler.jmx.enabled";
-    private static final boolean DEFAULT_SCHEDULER_JMX_ENABLED = true;
-
     // framework (distributed system) failover time (Default: Integer.MAX_VALUE)
     public static final String SCHEDULER_FAILOVER_TIMEOUT = "mesos.scheduler.failover.timeout";
     private static final long DEFAULT_SCHEDULER_FAILOVER_TIMEOUT = Integer.MAX_VALUE;
@@ -81,20 +71,20 @@ public class MesosConfig extends JobConfig {
         return get(PACKAGE_PATH);
     }
 
-    public String getDockerImage() {
-        return get(DOCKER_IMAGE);
-    }
-
-    public String getDockerEntrypointArguments() {
-        return get(DOCKER_ENTRYPOINT_ARGUMENTS);
-    }
-
     public String getMasterConnect() {
         String masterConnect = get(MASTER_CONNECT);
         if (masterConnect == null) {
             throw new SamzaException("No Mesos Master Connect in config.");
         }
         return masterConnect;
+    }
+
+    public String getCommand() {
+        String cmd = get(COMMAND);
+        if (cmd == null || cmd.isEmpty()) {
+            throw new SamzaException("No Command in config.");
+        }
+        return cmd;
     }
 
     public double getExecutorMaxMemoryMb() {
@@ -109,24 +99,12 @@ public class MesosConfig extends JobConfig {
         return getDouble(EXECUTOR_MAX_DISK_MB, DEFAULT_EXECUTOR_MAX_DISK_MB);
     }
 
-    public Map<String, String> getExecutorAttributes() {
-        return subset(EXECUTOR_ATTRIBUTES, true);
-    }
-
     public int getExecutorTaskCount() {
         return getInt(EXECUTOR_TASK_COUNT, DEFAULT_EXECUTOR_TASK_COUNT);
     }
 
     public String getSchedulerUser() {
         return get(SCHEDULER_USER, DEFAULT_SCHEDULER_USER);
-    }
-
-    public String getSchedulerRole() {
-        return get(SCHEDULER_ROLE);
-    }
-
-    public boolean getSchedulerJmxEnabled() {
-        return getBoolean(SCHEDULER_JMX_ENABLED, DEFAULT_SCHEDULER_JMX_ENABLED);
     }
 
     public long getSchedulerFailoverTimeout() {
