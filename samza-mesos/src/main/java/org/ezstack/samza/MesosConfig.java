@@ -69,7 +69,7 @@ public class MesosConfig extends JobConfig {
     public static final String SCHEDULER_JMX_ENABLED = "mesos.scheduler.jmx.enabled";
     private static final boolean DEFAULT_SCHEDULER_JMX_ENABLED = true;
 
-    // framework (distributed system) failover time (Default: Long.MAX_VALUE)
+    // framework (distributed system) failover time (Default: Integer.MAX_VALUE)
     public static final String SCHEDULER_FAILOVER_TIMEOUT = "mesos.scheduler.failover.timeout";
     private static final long DEFAULT_SCHEDULER_FAILOVER_TIMEOUT = Integer.MAX_VALUE;
 
