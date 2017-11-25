@@ -1,3 +1,4 @@
+
 package org.ezstack.samza;
 
 import joptsimple.OptionSet;
@@ -7,7 +8,7 @@ import org.apache.samza.util.CommandLine;
 import org.apache.samza.config.Config;
 
 public class MesosMain {
-    public static void main (String[] args) throws Exception {
+    public static void main(String[] args) throws Exception {
         CommandLine cmdLine = new CommandLine();
         OptionSet options = cmdLine.parser().parse(args);
         Config config = cmdLine.loadConfig(options);

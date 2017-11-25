@@ -82,6 +82,9 @@ local.properties
 .idea/**/gradle.xml
 .idea/**/libraries
 
+# iml files
+*.iml
+
 # CMake
 cmake-build-debug/
 
