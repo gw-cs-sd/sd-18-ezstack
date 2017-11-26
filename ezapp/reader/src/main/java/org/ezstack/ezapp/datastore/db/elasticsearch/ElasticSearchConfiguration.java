@@ -12,15 +12,14 @@ public class ElasticSearchConfiguration {
     @JsonProperty("clusterName")
     private String _clusterName = "elasticsearch";
 
-    @NotNull
     @JsonProperty("transportAddresses")
-    private List<Map<String, Integer>> _transportAddresses;
+    private List<Map<String, Object>> _transportAddresses;
 
     public String getClusterName() {
         return _clusterName;
     }
 
-    public List<Map<String, Integer>> getTransportAddresses() {
+    public List<Map<String, Object>> getTransportAddresses() {
         return _transportAddresses;
     }
 }
