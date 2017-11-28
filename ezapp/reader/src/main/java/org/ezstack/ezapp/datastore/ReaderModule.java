@@ -1,6 +1,6 @@
 package org.ezstack.ezapp.datastore;
 
-import com.google.inject.AbstractModule;
+import com.google.inject.PrivateModule;
 import com.google.inject.Provides;
 import com.google.inject.Singleton;
 import org.elasticsearch.client.Client;
@@ -15,7 +15,7 @@ import java.net.InetAddress;
 import java.util.List;
 import java.util.Map;
 
-public class ReaderModule extends AbstractModule {
+public class ReaderModule extends PrivateModule {
     private final ElasticSearchConfiguration _elasticSearchConfiguration;
 
     public ReaderModule(ElasticSearchConfiguration elasticSearchConfiguration) {
@@ -31,6 +31,7 @@ public class ReaderModule extends AbstractModule {
         https://www.elastic.co/guide/en/elasticsearch/client/java-rest/master/java-rest-high-getting-started-initialization.html
          */
         bind(Client.class).to(PreBuiltTransportClient.class);
+        expose(DataReader.class);
     }
 
     @Provides

@@ -2,6 +2,7 @@ package org.ezstack.ezapp.web;
 
 import com.google.inject.AbstractModule;
 import io.dropwizard.setup.Environment;
+import org.ezstack.ezapp.datastore.ReaderModule;
 import org.ezstack.ezapp.datastore.WriterConfiguration;
 import org.ezstack.ezapp.datastore.WriterModule;
 
@@ -18,5 +19,6 @@ public class EZModule extends AbstractModule {
     protected void configure() {
         bind(WriterConfiguration.class).toInstance(_configuration.getWriterConfiguration());
         install(new WriterModule());
+        install(new ReaderModule(_configuration.getElasticSearchConfiguration()));
     }
 }
