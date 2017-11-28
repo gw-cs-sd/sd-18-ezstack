@@ -1,4 +1,4 @@
-package com.mycompany.app;
+package org.ezstack.aggregations;
 
 import java.util.ArrayList;
 import java.util.Collections;
