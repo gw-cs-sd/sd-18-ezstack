@@ -9,7 +9,7 @@ import argparse
 import json
 
 debug = False
-es = Elasticsearch([{'host':'localhost'}])
+es = Elasticsearch()
 
 def debug_print(*argv):
     """
