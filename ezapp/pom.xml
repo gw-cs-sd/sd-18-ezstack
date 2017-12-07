@@ -15,6 +15,7 @@
         <module>datastore-api</module>
         <module>denormalizer</module>
         <module>samza-elasticsearch</module>
+        <module>reader</module>
     </modules>
     <name>EZapp</name>
 
