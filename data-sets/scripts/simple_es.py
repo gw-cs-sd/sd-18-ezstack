@@ -4,7 +4,7 @@ Python Version: Python 2.7
 
 Simple Python script for reading, writing, and deleting documents from elasticsearch.
 """
-from elasticsearch import Elasticsearch
+from elasticsearch import Elasticsearch, helpers
 import argparse
 import json
 
@@ -36,6 +36,22 @@ def single_doc_write(list_docs, index='test_index', type='test_type'):
         else:
             res = es.index(index=index, doc_type=type, body=doc)
         debug_print(res)
+
+def bulk_doc_write(list_docs, index='test_index', type='test_type'):
+    new_list = []
+    es.indices.create(index=index, ignore=400)
+
+    for doc in list_docs:
+        temp_dict = dict()
+        temp_dict['_op_type'] = 'index'
+        temp_dict['_index'] = index
+        temp_dict['_type'] = type
+        if 'id' in doc:
+            temp_dict['_id'] = doc['id']
+        temp_dict['_source'] = doc
+        new_list.append(temp_dict)
+
+    helpers.bulk(es, new_list)
 
 def get_document(list_ids, index='test_index', type='test_type'):
     """
@@ -81,6 +97,8 @@ def setup_argparse(parser=None):
         parser = argparse.ArgumentParser(description='Simple Python script for reading, writing, and deleting '
                                                      'documents from elasticsearch.')
     parser.add_argument('-w', '--write', dest='write', action='store_true', default=False, help='writes documents to es')
+    parser.add_argument('-wb', '--write-bulk', dest='write_bulk', action='store_true', default=False,
+                        help='writes documents to es in bulk')
     parser.add_argument('-d', '--delete', dest='delete', action='store_true', default=False, help='deletes the index specified')
     parser.add_argument('-s', '--search', dest='search', action='store_true', default=False, help='simple search retireves document '
                                                                                      'relating to index and type')
@@ -110,6 +128,8 @@ if __name__=='__main__':
         type = args.type
     if args.write is True:
         single_doc_write(documents, index=index, type=type)
+    if args.write_bulk is True:
+        bulk_doc_write(documents, index=index, type=type)
     if args.delete is True:
         delete_index(index=index)
     if args.search is True:
