@@ -19,6 +19,11 @@
             <artifactId>ezapp-writer</artifactId>
             <version>${project.version}</version>
         </dependency>
+        <dependency>
+            <groupId>org.ezstack.ezapp</groupId>
+            <artifactId>ezapp-reader</artifactId>
+            <version>${project.version}</version>
+        </dependency>
     </dependencies>
 
     <build>
