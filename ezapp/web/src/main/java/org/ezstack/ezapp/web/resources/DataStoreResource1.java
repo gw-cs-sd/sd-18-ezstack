@@ -13,8 +13,10 @@ import javax.ws.rs.Consumes;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.core.MediaType;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.List;
+import java.util.Optional;
 
 @Path("sor/1")
 @Produces(MediaType.APPLICATION_JSON)
@@ -58,7 +60,8 @@ public class DataStoreResource1 {
     public Map<String, Object> getDocument(@PathParam("database") String database,
                                   @PathParam("table") String table,
                                   @PathParam("id") String id) {
-        return _dataReader.getDocument(database, table, id);
+        Optional<Map<String, Object>> ret = Optional.ofNullable(_dataReader.getDocument(database, table, id));
+        return ret.orElse(new HashMap<>());
     }
 
     @POST

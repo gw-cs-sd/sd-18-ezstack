@@ -5,10 +5,28 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 import java.util.List;
-import java.util.Map;
 
 
 public class ElasticSearchConfiguration {
+    public static class TransportAddressConfig {
+        @Valid
+        @NotNull
+        @JsonProperty("address")
+        private String _address;
+
+        @Valid
+        @NotNull
+        @JsonProperty("port")
+        private  int _port;
+
+        public String getAddress() {
+            return _address;
+        }
+
+        public int getPort() {
+            return _port;
+        }
+    }
 
     @Valid
     @NotNull
@@ -17,13 +35,13 @@ public class ElasticSearchConfiguration {
 
     @Valid
     @JsonProperty("transportAddresses")
-    private List<Map<String, Object>> _transportAddresses;
+    private List<TransportAddressConfig> _transportAddresses;
 
     public String getClusterName() {
         return _clusterName;
     }
 
-    public List<Map<String, Object>> getTransportAddresses() {
+    public List<TransportAddressConfig> getTransportAddresses() {
         return _transportAddresses;
     }
 }
