@@ -27,18 +27,14 @@ public class DocumentResolverApp implements StreamApplication {
     public void init(StreamGraph streamGraph, Config config) {
 
         // TODO: move input stream name into properties
-        MessageStream<Map<String, Object>> updates = streamGraph.<String, Map<String, Object>, Map<String, Object>>getInputStream("documents", (k, v) -> v);
-
-        OutputStream<String, Map<String, Object>, Map<String, Object>> outputStream = streamGraph
-                .getOutputStream("test_output", msg -> "placeholder_key", msg -> msg);
+        MessageStream<Update> updates = streamGraph.<String, Map<String, Object>, Update>getInputStream("documents", (k, v) -> mapper.convertValue(v, Update.class));
 
         updates
-                .map( msg -> mapper.convertValue(msg, Update.class))
                 .map(new ResolveFunction())
                 .sink(new IndexToESFunction());
     }
 
-    private class ResolveFunction implements MapFunction<Update, Map<String, Object>> {
+    private class ResolveFunction implements MapFunction<Update, Document> {
 
         private KeyValueStore<String, Map<String, Object>> store;
 
@@ -48,9 +44,9 @@ public class DocumentResolverApp implements StreamApplication {
         }
 
         @Override
-        public Map<String, Object> apply(Update update) {
+        public Document apply(Update update) {
             // TODO: replace this storekey with an actual hash function
-            String storeKey = update.getTable() + update.getKey();
+            String storeKey = update.getDatabase() + update.getTable() + update.getKey();
             Document storedDocument = mapper.convertValue(store.get(storeKey), Document.class);
             if (storedDocument != null) {
                 log.info("Object already existed in store. Need to merge.");
@@ -63,16 +59,17 @@ public class DocumentResolverApp implements StreamApplication {
 
             store.put(storeKey, mapper.convertValue(storedDocument, Map.class));
 
-            return mapper.convertValue(update, Map.class);
+            return storedDocument;
         }
     }
 
-    private class IndexToESFunction implements SinkFunction<Map<String, Object>> {
+    private class IndexToESFunction implements SinkFunction<Document> {
 
         @Override
-        public void apply(Map<String, Object> objectMap, MessageCollector messageCollector, TaskCoordinator taskCoordinator) {
+        public void apply(Document document, MessageCollector messageCollector, TaskCoordinator taskCoordinator) {
             log.info("about to index");
-            messageCollector.send(new OutgoingMessageEnvelope(new SystemStream("elasticsearch", "test/document"), (String) objectMap.get("_key"), objectMap.get("_data")));
+            messageCollector.send(new OutgoingMessageEnvelope(new SystemStream("elasticsearch", document.getDatabase() + "/" + document.getTable()),
+                    document.getKey(), document.getData()));
             log.info("indexed");
         }
     }
