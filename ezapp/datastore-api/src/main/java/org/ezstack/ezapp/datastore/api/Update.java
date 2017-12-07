@@ -12,6 +12,7 @@ import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 public class Update {
+    private final String _database;
     private final String _table;
     private final String _key;
     private final UUID _timestamp;
@@ -19,21 +20,28 @@ public class Update {
     private final boolean _isUpdate;
 
     @JsonCreator
-    public Update(@JsonProperty("_table") String table, @JsonProperty("_key") String key,
+    public Update(@JsonProperty("_database") String database, @JsonProperty("_table") String table, @JsonProperty("_key") String key,
                   @JsonProperty("_timestamp") UUID timestamp, @JsonProperty("_data") Map<String, Object> data,
                   @JsonProperty("_isUpdate") boolean isUpdate) {
 
+        checkNotNull(database, "database");
         checkNotNull(table, "table");
         checkNotNull(key, "key");
         checkNotNull(data, "data");
         checkArgument(Names.isLegalTableName(table), "Invalid Table Name");
         checkArgument(Names.isLegalKey("Invalid key"));
 
+        _database = database;
         _table = table;
         _key = key;
         _timestamp = MoreObjects.firstNonNull(timestamp, UUIDs.timeBased());
         _data = data;
         _isUpdate = isUpdate;
+    }
+
+    @JsonProperty("_database")
+    public String getDatabase() {
+        return _database;
     }
 
     @JsonProperty("_table")

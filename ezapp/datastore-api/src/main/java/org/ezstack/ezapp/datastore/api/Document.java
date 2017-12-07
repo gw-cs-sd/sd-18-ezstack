@@ -13,6 +13,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 public class Document {
 
+    private final String _database;
     private final String _table;
     private final String _key;
     private UUID _timestamp;
@@ -20,16 +21,18 @@ public class Document {
     private int _version;
 
     @JsonCreator
-    public Document(@JsonProperty("_table") String table, @JsonProperty("_key") String key,
-                  @JsonProperty("_timestamp") UUID timestamp, @JsonProperty("_data") Map<String, Object> data,
-                  @JsonProperty("_version") int version) {
+    public Document(@JsonProperty("_database") String database, @JsonProperty("_table") String table,
+                    @JsonProperty("_key") String key, @JsonProperty("_timestamp") UUID timestamp,
+                    @JsonProperty("_data") Map<String, Object> data, @JsonProperty("_version") int version) {
 
+        checkNotNull(database, "database");
         checkNotNull(table, "table");
         checkNotNull(key, "key");
         checkNotNull(data, "data");
         checkArgument(Names.isLegalTableName(table), "Invalid Table Name");
         checkArgument(Names.isLegalKey("Invalid key"));
 
+        _database = database;
         _table = table;
         _key = key;
         _timestamp = MoreObjects.firstNonNull(timestamp, UUIDs.timeBased());
@@ -39,6 +42,7 @@ public class Document {
 
     // This constructor should only be used if there is only one version of this document to consider
     public Document(Update update) {
+        _database = update.getDatabase();
         _table = update.getTable();
         _key = update.getKey();
         _timestamp = update.getTimestamp();
@@ -47,7 +51,8 @@ public class Document {
     }
 
     public void addUpdate(Update update) {
-        checkArgument(_table.equals(update.getTable()) && _key.equals(update.getKey()),
+        checkArgument(_database.equals(update.getDatabase()) &&
+                        _table.equals(update.getTable()) && _key.equals(update.getKey()),
                 "Update is not to same record as existing document");
 
         // TODO: figure out a better way to maintain timestamp consistency, until then, simple assignment
@@ -73,6 +78,11 @@ public class Document {
             }
         }
 
+    }
+
+    @JsonProperty("_database")
+    public String getDatabase() {
+        return _database;
     }
 
     @JsonProperty("_table")

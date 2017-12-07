@@ -14,7 +14,7 @@ import java.util.UUID;
 
 public class DocumentTest {
 
-    private final String jsonDoc = "{\"_table\":\"comment\",\"_key\":\"dsfaf3\",\"_timestamp\":\"90cec5d0-c8b7-11e7-8a28-ff35eed18bcb\",\"_data\":{\"author\":{\"firstName\":\"Bob\",\"lastName\":\"Johnson\"},\"title\":\"Best Ever!\",\"likes\":50},\"_version\":2}";
+    private final String jsonDoc = "{\"_database\":\"facebook\",\"_table\":\"comment\",\"_key\":\"dsfaf3\",\"_timestamp\":\"90cec5d0-c8b7-11e7-8a28-ff35eed18bcb\",\"_data\":{\"author\":{\"firstName\":\"Bob\",\"lastName\":\"Johnson\"},\"title\":\"Best Ever!\",\"likes\":50},\"_version\":2}";
     private Document document;
     private ObjectMapper mapper;
 
@@ -42,7 +42,7 @@ public class DocumentTest {
         data.put("likes", 25);
         data.put("author", "Bob");
 
-        Update update = new Update("posts", "abc123", timestamp, data, true);
+        Update update = new Update("facebook","posts", "abc123", timestamp, data, true);
         Document doc = new Document(update);
 
         assertEquals("posts", doc.getTable());
@@ -59,7 +59,7 @@ public class DocumentTest {
         data.put("likes", 25);
         data.put("author", "Bob");
 
-        Update update = new Update("comment", "dsfaf3", timestamp, data, false);
+        Update update = new Update("facebook","comment", "dsfaf3", timestamp, data, false);
         document.addUpdate(update);
 
         assertEquals("comment", document.getTable());
@@ -81,7 +81,7 @@ public class DocumentTest {
         author.put("age", 22);
         data.put("author", author);
 
-        Update update = new Update("comment", "dsfaf3", timestamp, data, true);
+        Update update = new Update("facebook","comment", "dsfaf3", timestamp, data, true);
         document.addUpdate(update);
 
         Map<String, Object> expectedDataAfterMerge = new HashMap<>();

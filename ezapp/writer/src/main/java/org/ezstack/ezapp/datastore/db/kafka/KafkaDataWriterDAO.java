@@ -28,6 +28,7 @@ public class KafkaDataWriterDAO {
     }
 
     public void update(Update update) {
+        // TODO: need hash function for ids that considers database and table
         try {
             RecordMetadata metadata = _producer.send(new ProducerRecord<String, JsonNode>(_documentTopic, update.getKey(),
                     _objectMapper.valueToTree(update))).get();
