@@ -8,8 +8,9 @@ import org.elasticsearch.common.settings.Settings;
 import org.elasticsearch.common.transport.TransportAddress;
 import org.elasticsearch.transport.client.PreBuiltTransportClient;
 import org.ezstack.ezapp.datastore.api.DataReader;
+import org.ezstack.ezapp.datastore.core.DefaultDataReader;
 import org.ezstack.ezapp.datastore.db.elasticsearch.ElasticSearchConfiguration;
-import org.ezstack.ezapp.datastore.db.elasticsearch.ElasticSearchDataReader;
+import org.ezstack.ezapp.datastore.db.elasticsearch.ElasticSearchDataReaderDAO;
 
 import java.net.InetAddress;
 import java.net.UnknownHostException;
@@ -24,12 +25,8 @@ public class ReaderModule extends PrivateModule {
 
     @Override
     protected void configure() {
-        bind(DataReader.class).to(ElasticSearchDataReader.class);
-
-        /*
-        If the RestHighLevelClient api comes out of beta and we have time we should use it instead.
-        https://www.elastic.co/guide/en/elasticsearch/client/java-rest/master/java-rest-high-getting-started-initialization.html
-         */
+        bind(DataReader.class).to(DefaultDataReader.class).asEagerSingleton();
+        bind(ElasticSearchDataReaderDAO.class).asEagerSingleton();
         bind(Client.class).to(PreBuiltTransportClient.class);
         expose(DataReader.class);
     }
@@ -52,7 +49,7 @@ public class ReaderModule extends PrivateModule {
             try {
                 client.addTransportAddress(new TransportAddress(InetAddress.getByName(node.getAddress()), node.getPort()));
             } catch (UnknownHostException e) {
-                // Maybe log it?
+                // maybe log it?
             }
         }
         return client;

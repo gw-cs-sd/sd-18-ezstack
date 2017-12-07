@@ -4,15 +4,16 @@ import com.google.common.base.Preconditions;
 import com.google.inject.Inject;
 import org.ezstack.ezapp.datastore.api.DataReader;
 import org.ezstack.ezapp.datastore.api.Query;
+import org.ezstack.ezapp.datastore.db.elasticsearch.ElasticSearchDataReaderDAO;
 
 import java.util.List;
 import java.util.Map;
 
 public class DefaultDataReader implements DataReader {
-    private final DataReader _dataReader;
+    private final ElasticSearchDataReaderDAO _dataReader;
 
     @Inject
-    public DefaultDataReader(DataReader dataReader) {
+    public DefaultDataReader(ElasticSearchDataReaderDAO dataReader) {
         Preconditions.checkNotNull(dataReader);
 
         _dataReader = dataReader;

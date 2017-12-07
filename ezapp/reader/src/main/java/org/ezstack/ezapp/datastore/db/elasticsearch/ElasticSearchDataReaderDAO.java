@@ -10,23 +10,21 @@ import org.ezstack.ezapp.datastore.api.Query;
 import java.util.List;
 import java.util.Map;
 
-public class ElasticSearchDataReader implements DataReader {
+public class ElasticSearchDataReaderDAO {
     private final Client _client;
 
     @Inject
-    public ElasticSearchDataReader (Client client) {
+    public ElasticSearchDataReaderDAO(Client client) {
         Preconditions.checkNotNull(client);
 
         _client = client;
     }
 
-    @Override
     public Map<String, Object> getDocument(String index, String type, String id) {
         GetResponse response = _client.prepareGet(index, type, id).get();
         return response.getSourceAsMap();
     }
 
-    @Override
     public List<Map<String, Object>> getDocuments(Query query) {
         // TODO
         return null;

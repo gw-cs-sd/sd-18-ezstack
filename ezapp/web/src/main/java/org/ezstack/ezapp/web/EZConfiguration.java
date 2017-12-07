@@ -7,7 +7,6 @@ import org.ezstack.ezapp.datastore.db.elasticsearch.ElasticSearchConfiguration;
 
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
-import java.util.Optional;
 
 public class EZConfiguration extends Configuration {
 
