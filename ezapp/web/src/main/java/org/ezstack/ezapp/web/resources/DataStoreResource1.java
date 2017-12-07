@@ -55,13 +55,13 @@ public class DataStoreResource1 {
     }
 
     @GET
-    @Path("{database}/{table}/{id}")
+    @Path("{database}/{table}/{key}")
     @Timed
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     public Map<String, Object> getDocument(@PathParam("database") String database,
                                            @PathParam("table") String table,
-                                           @PathPram("id") String id) {
+                                           @PathParam("key") String id) {
         Optional<Map<String, Object>> ret = Optional.ofNullable(_dataReader.getDocument(database, table, id));
         return ret.orElse(new HashMap<>());
     }
