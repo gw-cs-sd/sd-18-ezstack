@@ -2,7 +2,7 @@
 """
 Python Version: Python 2.7
 
-Simple Python script for reading, writing, and deleting documents from elasticsearch.
+Simple Python script for reading, writing documents from ezapp.
 """
 import requests
 import argparse
