@@ -59,6 +59,7 @@
     </dependency>
   </dependencies>
   <properties>
+    <metrics.version>3.2.5</metrics.version>
     <samza.version>0.13.0</samza.version>
   </properties>
 </project>
