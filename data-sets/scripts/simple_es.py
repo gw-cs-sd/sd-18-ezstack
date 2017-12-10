@@ -65,7 +65,7 @@ def get_document(list_ids, index='test_index', type='test_type'):
         if isinstance(doc, dict):
             res = es.get(index=index, doc_type=type, id=doc['id'])
         else:
-            res = es.get(index=index, doc_type=type, id=id)
+            res = es.get(index=index, doc_type=type, id=doc)
         ret.append(res['_source'])
         debug_print(res['_source'])
     return ret
