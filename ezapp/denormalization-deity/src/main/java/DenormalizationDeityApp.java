@@ -22,10 +22,11 @@ public class DenormalizationDeityApp implements StreamApplication {
 
     @Override
     public void init(StreamGraph streamGraph, Config config) {
+        DeityConfig deityConfig = new DeityConfig(config);
         MessageStream<Query> queryStream = streamGraph.<String, Map<String, Object>, Query>getInputStream("queries", this::convertToQuery);
         queryStream.map(this::processQuery);
 
-        HttpTransport transport = new HttpTransport.Builder().withApiKey("c8c1d236dc42e0acfdec46ed8614d20e").build();
+        HttpTransport transport = new HttpTransport.Builder().withApiKey(deityConfig.getDatadogKey()).build();
         DatadogReporter reporter = DatadogReporter.forRegistry(metrics).withTransport(transport).withExpansions(Expansion.ALL).build();
 
         reporter.start(10, TimeUnit.SECONDS);
