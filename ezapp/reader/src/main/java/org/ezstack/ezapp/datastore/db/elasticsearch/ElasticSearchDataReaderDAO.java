@@ -20,8 +20,8 @@ public class ElasticSearchDataReaderDAO {
         _client = client;
     }
 
-    public Map<String, Object> getDocument(String index, String type, String id) {
-        GetResponse response = _client.prepareGet(index, type, id).get();
+    public Map<String, Object> getDocument(String index, String id) {
+        GetResponse response = _client.prepareGet(index, index, id).get();
         return response.getSourceAsMap();
     }
 

@@ -20,8 +20,8 @@ public class DefaultDataReader implements DataReader {
     }
 
     @Override
-    public Map<String, Object> getDocument(String database, String table, String id) {
-        return _dataReaderDAO.getDocument(database, table, id);
+    public Map<String, Object> getDocument(String table, String id) {
+        return _dataReaderDAO.getDocument(table, id);
     }
 
     @Override

@@ -46,7 +46,7 @@ public class DocumentResolverApp implements StreamApplication {
         @Override
         public Document apply(Update update) {
             // TODO: replace this storekey with an actual hash function
-            String storeKey = update.getDatabase() + update.getTable() + update.getKey();
+            String storeKey = update.getTable() + update.getKey();
             Document storedDocument = mapper.convertValue(store.get(storeKey), Document.class);
             if (storedDocument != null) {
                 log.info("Object already existed in store. Need to merge.");
@@ -68,7 +68,7 @@ public class DocumentResolverApp implements StreamApplication {
         @Override
         public void apply(Document document, MessageCollector messageCollector, TaskCoordinator taskCoordinator) {
             log.info("about to index");
-            messageCollector.send(new OutgoingMessageEnvelope(new SystemStream("elasticsearch", document.getDatabase() + "/" + document.getTable()),
+            messageCollector.send(new OutgoingMessageEnvelope(new SystemStream("elasticsearch", document.getTable() + "/" + document.getTable()),
                     document.getKey(), document.getData()));
             log.info("indexed");
         }
