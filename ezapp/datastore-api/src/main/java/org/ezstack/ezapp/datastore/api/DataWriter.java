@@ -4,7 +4,7 @@ import java.util.Map;
 
 public interface DataWriter {
 
-    void create(String database, String table, String key, Map<String, Object> document);
+    void create(String table, String key, Map<String, Object> document);
 
-    void update(String database, String table, String key, Map<String, Object> update);
+    void update(String table, String key, Map<String, Object> update);
 }

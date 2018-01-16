@@ -31,38 +31,35 @@ public class DataStoreResource1 {
     }
 
     @POST
-    @Path ("{database}/{table}/{key}")
+    @Path ("{table}/{key}")
     @Timed
     @Consumes(MediaType.APPLICATION_JSON)
-    public SuccessResponse create(@PathParam("database") String database,
-                                  @PathParam("table") String table,
+    public SuccessResponse create(@PathParam("table") String table,
                                   @PathParam("key") String key,
                                   Map<String, Object> json) {
-        _dataWriter.create(database, table, key, json);
+        _dataWriter.create(table, key, json);
         return SuccessResponse.instance();
     }
 
     @PUT
-    @Path("{database}/{table}/{key}")
+    @Path("{table}/{key}")
     @Timed
     @Consumes(MediaType.APPLICATION_JSON)
-    public SuccessResponse update(@PathParam("database") String database,
-                                  @PathParam("table") String table,
+    public SuccessResponse update(@PathParam("table") String table,
                                   @PathParam("key") String key,
                                   Map<String, Object> json) {
-        _dataWriter.update(database, table, key, json);
+        _dataWriter.update(table, key, json);
         return SuccessResponse.instance();
     }
 
     @GET
-    @Path("{database}/{table}/{key}")
+    @Path("{table}/{key}")
     @Timed
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
-    public Map<String, Object> getDocument(@PathParam("database") String database,
-                                           @PathParam("table") String table,
+    public Map<String, Object> getDocument(@PathParam("table") String table,
                                            @PathParam("key") String id) {
-        Optional<Map<String, Object>> ret = Optional.ofNullable(_dataReader.getDocument(database, table, id));
+        Optional<Map<String, Object>> ret = Optional.ofNullable(_dataReader.getDocument(table, id));
         return ret.orElse(new HashMap<>());
     }
 

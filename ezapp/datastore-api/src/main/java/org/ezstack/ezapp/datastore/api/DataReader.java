@@ -5,7 +5,7 @@ import java.util.Map;
 
 public interface DataReader {
 
-    Map<String, Object> getDocument(String database, String table, String id);
+    Map<String, Object> getDocument(String table, String id);
 
     List<Map<String, Object>> getDocuments(Query query);
 }

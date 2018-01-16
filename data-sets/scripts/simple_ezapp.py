@@ -21,29 +21,29 @@ def get_json(r):
     except:
         return None
 
-def single_doc_write(list_docs, url='http://127.0.0.1:8080', index='test_index', type='test_type'):
+def single_doc_write(list_docs, url='http://127.0.0.1:8080', table='test_table'):
     for doc in list_docs:
         if 'id' in doc:
-            r = requests.post('{}/sor/1/{}/{}/{}'.format(url, index, type, doc['id']), data=json.dumps(doc), headers={'content-type': 'application/json'})
+            r = requests.post('{}/sor/1/{}/{}'.format(url, table, doc['id']), data=json.dumps(doc), headers={'content-type': 'application/json'})
         else:
-            r = requests.post('{}/sor/1/{}/{}/{}'.format(url, index, type, uuid.uuid4()), data=json.dumps(doc), headers={'content-type': 'application/json'})
+            r = requests.post('{}/sor/1/{}/{}'.format(url, table, uuid.uuid4()), data=json.dumps(doc), headers={'content-type': 'application/json'})
         debug_print(r.text)
 
-def single_doc_update(list_docs, url='http://127.0.0.1:8080', index='test_index', type='test_type'):
+def single_doc_update(list_docs, url='http://127.0.0.1:8080', table='test_table'):
     for doc in list_docs:
         if 'id' in doc:
-            r = requests.put('{}/sor/1/{}/{}/{}'.format(url, index, type, doc['id']), data=json.dumps(doc), headers={'content-type': 'application/json'})
+            r = requests.put('{}/sor/1/{}/{}'.format(url, table, doc['id']), data=json.dumps(doc), headers={'content-type': 'application/json'})
         else:
-            r = requests.put('{}/sor/1/{}/{}/{}'.format(url, index, type, uuid.uuid4()), data=json.dumps(doc), headers={'content-type': 'application/json'})
+            r = requests.put('{}/sor/1/{}/{}'.format(url, table, uuid.uuid4()), data=json.dumps(doc), headers={'content-type': 'application/json'})
         debug_print(r.text)
 
-def get_document(list_ids, url='http://127.0.0.1:8080', index='test_index', type='test_type'):
+def get_document(list_ids, url='http://127.0.0.1:8080', table='test_table'):
     ret = []
     for doc in list_ids:
         if isinstance(doc, dict):
-            r = requests.get('{}/sor/1/{}/{}/{}'.format(url, index, type, doc['id']))
+            r = requests.get('{}/sor/1/{}/{}'.format(url, table, doc['id']))
         else:
-            r = requests.get('{}/sor/1/{}/{}/{}'.format(url, index, type, doc))
+            r = requests.get('{}/sor/1/{}/{}'.format(url, table, doc))
         ret.append(get_json(r))
         debug_print(get_json(r))
     return ret
@@ -54,8 +54,7 @@ def setup_argparse(parser=None):
     parser.add_argument('-w', '--write', dest='write', action='store_true', default=False, help='writes documents to ezapp')
     parser.add_argument('-u', '--update', dest='update', action='store_true', default=False, help='update documents to ezapp')
     parser.add_argument('-g', '--get', dest='get', action='store_true', default=False, help='gets the following documents from ezapp')
-    parser.add_argument('-i', '--index', dest='index', help='sets index name otherwise uses default')
-    parser.add_argument('-t', '--type', dest='type', help='sets type name otherwise uses default')
+    parser.add_argument('-t', '--table', dest='table', help='sets table name otherwise uses default')
     parser.add_argument('-p', '--path', dest='path', help='specifies the location of the json file (required for '
                                                           'majority of options)')
     parser.add_argument('--url', dest='url', default='http://127.0.0.1:8080', help='sets url otherwise defaults to localhost')
@@ -67,21 +66,18 @@ if __name__=='__main__':
     args = parser.parse_args()
 
     documents = dict()
-    index = 'test_index'
-    type = 'test_type'
+    table = 'test_table'
     debug = args.debug
     url = args.url
 
     if args.path is not None:
         f = open(args.path, 'r')
         documents = json.loads(''.join(f.readlines()))
-    if args.index is not None:
-        index = args.index
-    if args.type is not None:
-        type = args.type
+    if args.table is not None:
+        table = args.table
     if args.write is True:
-        single_doc_write(documents, url=url, index=index, type=type)
+        single_doc_write(documents, url=url, table=table)
     if args.update is True:
-        single_doc_update(documents, url=url, index=index, type=type)
+        single_doc_update(documents, url=url, table=table)
     if args.get is True:
-        get_document(documents, url=url, index=index, type=type)
+        get_document(documents, url=url, table=table)
