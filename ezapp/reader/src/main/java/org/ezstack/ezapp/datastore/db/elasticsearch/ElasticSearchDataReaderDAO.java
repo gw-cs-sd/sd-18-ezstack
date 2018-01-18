@@ -4,9 +4,10 @@ import com.google.common.base.Preconditions;
 import com.google.inject.Inject;
 import org.elasticsearch.action.get.GetResponse;
 import org.elasticsearch.client.Client;
-import org.ezstack.ezapp.datastore.api.DataReader;
+import org.elasticsearch.index.IndexNotFoundException;
 import org.ezstack.ezapp.datastore.api.Query;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
@@ -21,8 +22,12 @@ public class ElasticSearchDataReaderDAO {
     }
 
     public Map<String, Object> getDocument(String index, String id) {
-        GetResponse response = _client.prepareGet(index, index, id).get();
-        return response.getSourceAsMap();
+        try {
+            GetResponse response = _client.prepareGet(index, index, id).get();
+            return response.getSourceAsMap();
+        } catch (IndexNotFoundException e) {
+            return Collections.emptyMap();
+        }
     }
 
     public List<Map<String, Object>> getDocuments(Query query) {
