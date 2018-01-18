@@ -1,20 +1,19 @@
 package org.ezstack.ezapp.datastore.api;
 
-import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Before;
 import org.junit.Test;
 
 import java.io.IOException;
+import java.util.List;
 import java.util.Map;
 
 import static org.junit.Assert.assertEquals;
 
 public class DataTypeTest {
 
-    private final String jsonObject = "{\"array\": [1,2,3],\"boolean\": true,\"null\": null,\"integer\": 1,\"double\" : 2.5,\"object\": {\"a\": \"b\",\"c\": \"d\",\"e\": \"f\"},\"string\": \"Hello World\"}";
+    private final String jsonObject = "{\"array\": [1, \"Hello\", true], \"boolean\": true, \"null\": null, \"integer\": 1, \"double\" : 2.5, \"object\": {\"a\": \"b\", \"c\": \"d\", \"e\": \"f\"}, \"string\": \"Hello World\"}";
     private Map<String, Object> json;
     private ObjectMapper mapper;
 
@@ -23,8 +22,7 @@ public class DataTypeTest {
         mapper = new ObjectMapper();
 
         try {
-            json = mapper.readValue(jsonObject, new TypeReference<Map<String, Object>>() {
-            });
+            json = mapper.readValue(jsonObject, Map.class);
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -33,6 +31,14 @@ public class DataTypeTest {
     @Test
     public void testDataTypeList() {
         assertEquals(DataType.getDataType(json.get("array")), DataType.JsonTypes.LIST);
+    }
+
+    @Test
+    public void testDataTypeListValues() {
+        List list = (List) json.get("array");
+        assertEquals(DataType.getDataType(list.get(0)), DataType.JsonTypes.INTEGER);
+        assertEquals(DataType.getDataType(list.get(1)), DataType.JsonTypes.STRING);
+        assertEquals(DataType.getDataType(list.get(2)), DataType.JsonTypes.BOOLEAN);
     }
 
     @Test
