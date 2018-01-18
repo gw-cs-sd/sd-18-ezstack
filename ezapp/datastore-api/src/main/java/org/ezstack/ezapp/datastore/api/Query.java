@@ -6,16 +6,16 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 public class Query {
     private final String _searchType;
     private final String _outerTable;
-    private final Object _outerAttribute;
+    private final String _outerAttribute;
     private final String _innerTable;
-    private final Object _innerAttribute;
+    private final String _innerAttribute;
 
     @JsonCreator
     public Query(String searchType,
                  String outerTable,
-                 Object outerAttribute,
+                 String outerAttribute,
                  String innerTable,
-                 Object innerAttribute) {
+                 String innerAttribute) {
         _searchType = searchType;
         _outerTable = outerTable;
         _outerAttribute = outerAttribute;
@@ -34,12 +34,8 @@ public class Query {
     }
 
     @JsonProperty("outerAttribute")
-    public Object getOuterAttribute() {
+    public String getOuterAttribute() {
         return _outerAttribute;
-    }
-
-    public DataType.JsonTypes getOuterAttributeType() {
-        return DataType.getDataType(getOuterAttribute());
     }
 
     @JsonProperty("innerTable")
@@ -48,11 +44,7 @@ public class Query {
     }
 
     @JsonProperty("innerAttribute")
-    public Object getInnerAttribute() {
+    public String getInnerAttribute() {
         return _innerAttribute;
-    }
-
-    public DataType.JsonTypes getInnerAttributeType() {
-        return DataType.getDataType(getInnerAttribute());
     }
 }
