@@ -13,6 +13,7 @@ import javax.ws.rs.Consumes;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.core.MediaType;
+import java.util.UUID;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.List;
@@ -31,9 +32,20 @@ public class DataStoreResource1 {
     }
 
     @POST
+    @Path("{table}")
+    @Timed
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON)
+    public SuccessResponse create(@PathParam("table") String table,
+                                  Map<String, Object> json) {
+        return create(table, UUID.randomUUID().toString(), json);
+    }
+
+    @POST
     @Path ("{table}/{key}")
     @Timed
     @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON)
     public SuccessResponse create(@PathParam("table") String table,
                                   @PathParam("key") String key,
                                   Map<String, Object> json) {
@@ -45,6 +57,7 @@ public class DataStoreResource1 {
     @Path("{table}/{key}")
     @Timed
     @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON)
     public SuccessResponse update(@PathParam("table") String table,
                                   @PathParam("key") String key,
                                   Map<String, Object> json) {
