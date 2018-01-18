@@ -11,7 +11,7 @@ import java.io.ObjectInputStream;
 import java.io.UnsupportedEncodingException;
 
 /**
- * A serializer for UTF-8 encoded JSON strings. JsonSerdeV2 differs from JsonSerde in that:
+ * A serializer for UTF-8 encoded JSON strings. JsonSerdeV3 differs from JsonSerde in that:
  * <ol>
  *   <li>
  *     It allows specifying the specific POJO type to deserialize to (using JsonSerdeV2(Class&lt;T&gt;)
