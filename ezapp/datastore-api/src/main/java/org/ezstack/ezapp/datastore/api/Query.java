@@ -11,11 +11,11 @@ public class Query {
     private final String _innerAttribute;
 
     @JsonCreator
-    public Query(String searchType,
-                 String outerTable,
-                 String outerAttribute,
-                 String innerTable,
-                 String innerAttribute) {
+    public Query(@JsonProperty("searchType") String searchType,
+                 @JsonProperty("outerTable") String outerTable,
+                 @JsonProperty("outerAttribute") String outerAttribute,
+                 @JsonProperty("innerTable") String innerTable,
+                 @JsonProperty("innerAttribute") String innerAttribute) {
         _searchType = searchType;
         _outerTable = outerTable;
         _outerAttribute = outerAttribute;
