@@ -44,11 +44,12 @@ public class NodeClientFactory implements ClientFactory {
 
   @Override
   public Client getClient() {
-    Settings settings = Settings.builder()
-        .put(clientSettings)
-        .build();
+    Settings.Builder settingsBuilder = Settings.builder();
+    for (String key : clientSettings.keySet()) {
+      settingsBuilder.put(key, clientSettings.get(key));
+    }
 
-    Node node = new Node(settings);
+    Node node = new Node(settingsBuilder.build());
 
     return node.client();
   }

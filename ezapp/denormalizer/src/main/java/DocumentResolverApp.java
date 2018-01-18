@@ -2,7 +2,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.samza.application.StreamApplication;
 import org.apache.samza.config.Config;
 import org.apache.samza.operators.MessageStream;
-import org.apache.samza.operators.OutputStream;
 import org.apache.samza.operators.StreamGraph;
 import org.apache.samza.operators.functions.MapFunction;
 import org.apache.samza.operators.functions.SinkFunction;
@@ -27,7 +26,7 @@ public class DocumentResolverApp implements StreamApplication {
     public void init(StreamGraph streamGraph, Config config) {
 
         // TODO: move input stream name into properties
-        MessageStream<Update> updates = streamGraph.<String, Map<String, Object>, Update>getInputStream("documents", (k, v) -> mapper.convertValue(v, Update.class));
+        MessageStream<Update> updates = streamGraph.<Update>getInputStream("documents", new JsonSerdeV3<>(Update.class));
 
         updates
                 .map(new ResolveFunction())

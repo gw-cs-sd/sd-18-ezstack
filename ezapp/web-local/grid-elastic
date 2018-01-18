@@ -41,13 +41,13 @@ SERVICE_WAIT_TIMEOUT_SEC=120
 KIBANA_PORT=5601
 ELASTICSEARCH_PORT=9200
 
-DOWNLOAD_ELASTICSEARCH=https://artifacts.elastic.co/downloads/elasticsearch/elasticsearch-6.0.0.tar.gz
+DOWNLOAD_ELASTICSEARCH=https://artifacts.elastic.co/downloads/elasticsearch/elasticsearch-6.1.1.tar.gz
 DOWNLOAD_KIBANA=
 
 if [ $KERNEL == "Linux" ]; then
-    DOWNLOAD_KIBANA_64=https://artifacts.elastic.co/downloads/kibana/kibana-6.0.0-linux-x86_64.tar.gz
+    DOWNLOAD_KIBANA_64=https://artifacts.elastic.co/downloads/kibana/kibana-6.1.1-linux-x86_64.tar.gz
 elif [ $KERNEL == "Darwin" ]; then
-    DOWNLOAD_KIBANA_64=https://artifacts.elastic.co/downloads/kibana/kibana-6.0.0-darwin-x86_64.tar.gz
+    DOWNLOAD_KIBANA_64=https://artifacts.elastic.co/downloads/kibana/kibana-6.1.1-darwin-x86_64.tar.gz
 else
     echo 'Your operating system is not currently supported'
     echo $KERNEL
@@ -61,15 +61,15 @@ install_all() {
 
 install_elasticsearch() {
   mkdir -p "$DEPLOY_ROOT_DIR"
-  install elasticsearch $DOWNLOAD_ELASTICSEARCH elasticsearch-6.0.0
+  install elasticsearch $DOWNLOAD_ELASTICSEARCH elasticsearch-6.1.1
 }
 
 install_kibana() {
   mkdir -p "$DEPLOY_ROOT_DIR"
   if [ $KERNEL == "Linux" ]; then
-    install kibana $DOWNLOAD_KIBANA_64 kibana-6.0.0-linux-x86_64
+    install kibana $DOWNLOAD_KIBANA_64 kibana-6.1.1-linux-x86_64
   elif [ $KERNEL == "Darwin" ]; then
-    install kibana $DOWNLOAD_KIBANA_64 kibana-6.0.0-darwin-x86_64
+    install kibana $DOWNLOAD_KIBANA_64 kibana-6.1.1-darwin-x86_64
   fi
 }
 

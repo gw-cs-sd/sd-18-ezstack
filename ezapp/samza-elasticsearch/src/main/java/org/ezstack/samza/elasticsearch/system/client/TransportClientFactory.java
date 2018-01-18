@@ -64,12 +64,13 @@ public class TransportClientFactory implements ClientFactory {
 
   @Override
   public Client getClient() {
-    Settings settings = Settings.builder()
-        .put(clientSettings)
-        .build();
+    Settings.Builder settingsBuilder = Settings.builder();
+    for (String key : clientSettings.keySet()) {
+      settingsBuilder.put(key, clientSettings.get(key));
+    }
 
     TransportAddress address = new TransportAddress(new InetSocketAddress(transportHost, transportPort));
 
-    return new PreBuiltTransportClient(settings).addTransportAddress(address);
+    return new PreBuiltTransportClient(settingsBuilder.build()).addTransportAddress(address);
   }
 }
