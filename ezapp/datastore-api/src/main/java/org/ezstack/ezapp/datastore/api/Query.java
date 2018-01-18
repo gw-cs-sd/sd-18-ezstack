@@ -1,17 +1,58 @@
 package org.ezstack.ezapp.datastore.api;
 
-import java.util.Map;
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 public class Query {
-    private Map<String, Object> _query;
+    private final String _searchType;
+    private final String _outerTable;
+    private final Object _outerAttribute;
+    private final String _innerTable;
+    private final Object _innerAttribute;
 
-    public Query(Map<String, Object> query) {
-        _query = query;
+    @JsonCreator
+    public Query(String searchType,
+                 String outerTable,
+                 Object outerAttribute,
+                 String innerTable,
+                 Object innerAttribute) {
+        _searchType = searchType;
+        _outerTable = outerTable;
+        _outerAttribute = outerAttribute;
+        _innerTable = innerTable;
+        _innerAttribute = innerAttribute;
     }
 
-    public Map<String, Object> getQuery() {
-        return _query;
+    @JsonProperty("searchType")
+    public String getSearchType() {
+        return _searchType;
     }
 
-    // TODO
+    @JsonProperty("outerTable")
+    public String getOuterTable() {
+        return _outerTable;
+    }
+
+    @JsonProperty("outerAttribute")
+    public Object getOuterAttribute() {
+        return _outerAttribute;
+    }
+
+    public DataType.JsonTypes getOuterAttributeType() {
+        return DataType.getDataType(getOuterAttribute());
+    }
+
+    @JsonProperty("innerTable")
+    public String getInnerTable() {
+        return _innerTable;
+    }
+
+    @JsonProperty("innerAttribute")
+    public Object getInnerAttribute() {
+        return _innerAttribute;
+    }
+
+    public DataType.JsonTypes getInnerAttributeType() {
+        return DataType.getDataType(getInnerAttribute());
+    }
 }
