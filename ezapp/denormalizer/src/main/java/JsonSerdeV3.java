@@ -14,14 +14,14 @@ import java.io.UnsupportedEncodingException;
  * A serializer for UTF-8 encoded JSON strings. JsonSerdeV3 differs from JsonSerde in that:
  * <ol>
  *   <li>
- *     It allows specifying the specific POJO type to deserialize to (using JsonSerdeV2(Class&lt;T&gt;)
- *     or JsonSerdeV2#of(Class&lt;T&gt;). JsonSerde always returns a LinkedHashMap&lt;String, Object&gt;
+ *     It allows specifying the specific POJO type to deserialize to (using JsonSerdeV3(Class&lt;T&gt;)
+ *     or JsonSerdeV3#of(Class&lt;T&gt;). JsonSerde always returns a LinkedHashMap&lt;String, Object&gt;
  *     upon deserialization.
  *   <li>
  *     It uses Jackson's default 'camelCase' property naming convention, which simplifies defining
  *     the POJO to bind to. JsonSerde enforces the 'dash-separated' property naming convention.
  * </ol>
- * This JsonSerdeV2 should be preferred over JsonSerde for High Level API applications, unless
+ * This JsonSerdeV3 should be preferred over JsonSerde for High Level API applications, unless
  * backwards compatibility with the older data format (with dasherized names) is required.
  *
  * @param <T> the type of the POJO being (de)serialized.
@@ -33,14 +33,14 @@ public class JsonSerdeV3<T> implements Serde<T> {
     private transient ObjectMapper mapper = new ObjectMapper();
 
     /**
-     * Constructs a JsonSerdeV2 that returns a LinkedHashMap&lt;String, Object&lt; upon deserialization.
+     * Constructs a JsonSerdeV3 that returns a LinkedHashMap&lt;String, Object&lt; upon deserialization.
      */
     public JsonSerdeV3() {
         this(null);
     }
 
     /**
-     * Constructs a JsonSerdeV2 that (de)serializes POJOs of class {@code clazz}.
+     * Constructs a JsonSerdeV3 that (de)serializes POJOs of class {@code clazz}.
      *
      * @param clazz the class of the POJO being (de)serialized.
      */
