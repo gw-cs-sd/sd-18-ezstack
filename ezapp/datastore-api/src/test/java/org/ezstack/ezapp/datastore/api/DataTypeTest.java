@@ -1,6 +1,5 @@
 package org.ezstack.ezapp.datastore.api;
 
-import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Before;
 import org.junit.Test;
