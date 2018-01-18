@@ -50,7 +50,7 @@
     </build>
 
     <properties>
-        <samza.version>0.13.0</samza.version>
+        <samza.version>0.14.0</samza.version>
     </properties>
 
     <dependencies>
