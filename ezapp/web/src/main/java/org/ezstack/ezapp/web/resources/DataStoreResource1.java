@@ -77,12 +77,12 @@ public class DataStoreResource1 {
     }
 
     @POST
-    @Path("search/")
+    @Path("_search/")
     @Timed
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
-    public List<Map<String, Object>> search(Map<String, Object> json) {
-        return _dataReader.getDocuments(new Query(json));
+    public List<Map<String, Object>> search(Query query) {
+        return _dataReader.getDocuments(query);
     }
 
 }

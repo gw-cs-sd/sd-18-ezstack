@@ -32,6 +32,6 @@ public class ElasticSearchDataReaderDAO {
 
     public List<Map<String, Object>> getDocuments(Query query) {
         // TODO
-        return null;
+        return Collections.emptyList();
     }
 }
