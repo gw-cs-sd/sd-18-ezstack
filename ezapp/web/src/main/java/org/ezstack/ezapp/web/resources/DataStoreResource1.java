@@ -36,7 +36,7 @@ public class DataStoreResource1 {
     @Timed
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
-    public SuccessResponse create(@PathParam("table") String table,
+    public WriteResponse create(@PathParam("table") String table,
                                   Map<String, Object> json) {
         return create(table, UUID.randomUUID().toString(), json);
     }
@@ -46,11 +46,11 @@ public class DataStoreResource1 {
     @Timed
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
-    public SuccessResponse create(@PathParam("table") String table,
+    public WriteResponse create(@PathParam("table") String table,
                                   @PathParam("key") String key,
                                   Map<String, Object> json) {
         _dataWriter.create(table, key, json);
-        return SuccessResponse.instance();
+        return new WriteResponse(key);
     }
 
     @PUT
@@ -58,11 +58,11 @@ public class DataStoreResource1 {
     @Timed
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
-    public SuccessResponse update(@PathParam("table") String table,
+    public WriteResponse update(@PathParam("table") String table,
                                   @PathParam("key") String key,
                                   Map<String, Object> json) {
         _dataWriter.update(table, key, json);
-        return SuccessResponse.instance();
+        return new WriteResponse(key);
     }
 
     @GET
@@ -71,8 +71,8 @@ public class DataStoreResource1 {
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     public Map<String, Object> getDocument(@PathParam("table") String table,
-                                           @PathParam("key") String id) {
-        Optional<Map<String, Object>> ret = Optional.ofNullable(_dataReader.getDocument(table, id));
+                                           @PathParam("key") String key) {
+        Optional<Map<String, Object>> ret = Optional.ofNullable(_dataReader.getDocument(table, key));
         return ret.orElse(new HashMap<>());
     }
 
