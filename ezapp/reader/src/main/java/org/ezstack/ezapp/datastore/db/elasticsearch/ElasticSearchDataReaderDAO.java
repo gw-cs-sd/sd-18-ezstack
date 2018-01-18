@@ -6,7 +6,7 @@ import org.elasticsearch.action.get.GetResponse;
 import org.elasticsearch.client.Client;
 import org.ezstack.ezapp.datastore.api.Query;
 
-import java.util.HashMap;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
@@ -23,7 +23,7 @@ public class ElasticSearchDataReaderDAO {
     public Map<String, Object> getDocument(String index, String id) {
         boolean hasIndex = _client.admin().indices().prepareExists(index).get().isExists();
         if (hasIndex == false) {
-            return new HashMap<>();
+            return Collections.emptyMap();
         }
         GetResponse response = _client.prepareGet(index, index, id).get();
         return response.getSourceAsMap();
