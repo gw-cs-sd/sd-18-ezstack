@@ -5,6 +5,7 @@ import com.google.inject.Inject;
 import org.elasticsearch.action.get.GetResponse;
 import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.client.Client;
+import org.elasticsearch.common.unit.TimeValue;
 import org.elasticsearch.index.IndexNotFoundException;
 import org.elasticsearch.search.SearchHit;
 import org.elasticsearch.search.SearchHits;
@@ -35,10 +36,12 @@ public class ElasticSearchDataReaderDAO {
         try {
             List<Map<String, Object>> results = new ArrayList<>();
             SearchResponse response = _client.prepareSearch(query.getOuterTable())
+                    .setScroll(new TimeValue(60000*2))
                     .setTypes(query.getOuterTable())
+                    .setSize(100)
                     .get();
-            SearchHits hits = response.getHits();
-            Iterator<SearchHit> iter = hits.iterator();
+
+            SearchHitIterator iter = new SearchHitIterator(_client, response);
 
             while (iter.hasNext()) {
                 SearchHit searchHit = iter.next();

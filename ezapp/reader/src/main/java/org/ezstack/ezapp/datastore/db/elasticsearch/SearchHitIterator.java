@@ -11,7 +11,7 @@ public class SearchHitIterator implements Iterator<SearchHit> {
     private final Client client;
     private SearchResponse scrollResponse;
     private Iterator<SearchHit> iter;
-    
+
     /**
      * The amount of time elasticsearch should keep the scroll active.
      */
