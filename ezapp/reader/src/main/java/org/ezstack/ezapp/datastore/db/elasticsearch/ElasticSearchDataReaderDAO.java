@@ -10,7 +10,10 @@ import org.elasticsearch.index.IndexNotFoundException;
 import org.elasticsearch.search.SearchHit;
 import org.ezstack.ezapp.datastore.api.Query;
 
-import java.util.*;
+import java.util.Map;
+import java.util.Collections;
+import java.util.List;
+import java.util.ArrayList;
 
 public class ElasticSearchDataReaderDAO {
     private final Client _client;
