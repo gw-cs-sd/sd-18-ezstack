@@ -47,10 +47,7 @@ public class SearchHitIterator implements Iterator<SearchHit> {
 
     @Override
     public SearchHit next() {
-        if (hasNext()) {
-            return iter.next();
-        }
-
-        return null;
+        hasNext();
+        return iter.next();
     }
 }

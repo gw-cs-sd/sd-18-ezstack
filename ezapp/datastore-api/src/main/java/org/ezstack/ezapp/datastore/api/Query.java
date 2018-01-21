@@ -1,50 +1,42 @@
 package org.ezstack.ezapp.datastore.api;
 
-import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
+import java.util.List;
+
 public class Query {
-    private final String _searchType;
-    private final String _outerTable;
-    private final String _outerAttribute;
-    private final String _innerTable;
-    private final String _innerAttribute;
-
-    @JsonCreator
-    public Query(@JsonProperty("searchType") String searchType,
-                 @JsonProperty("outerTable") String outerTable,
-                 @JsonProperty("outerAttribute") String outerAttribute,
-                 @JsonProperty("innerTable") String innerTable,
-                 @JsonProperty("innerAttribute") String innerAttribute) {
-        _searchType = searchType;
-        _outerTable = outerTable;
-        _outerAttribute = outerAttribute;
-        _innerTable = innerTable;
-        _innerAttribute = innerAttribute;
-    }
-
     @JsonProperty("searchType")
+    private String searchType;
+
+    @JsonProperty("table")
+    private String table;
+
+    @JsonProperty("filter")
+    private List<Filter> filter;
+
+    @JsonProperty("join")
+    private Query join;
+
+    @JsonProperty("matchAttribute")
+    private List<MatchAttribute> matchAttribute;
+
     public String getSearchType() {
-        return _searchType;
+        return searchType;
     }
 
-    @JsonProperty("outerTable")
-    public String getOuterTable() {
-        return _outerTable;
+    public String getTable() {
+        return table;
     }
 
-    @JsonProperty("outerAttribute")
-    public String getOuterAttribute() {
-        return _outerAttribute;
+    public List<Filter> getFilter() {
+        return filter;
     }
 
-    @JsonProperty("innerTable")
-    public String getInnerTable() {
-        return _innerTable;
+    public Query getJoin() {
+        return join;
     }
 
-    @JsonProperty("innerAttribute")
-    public String getInnerAttribute() {
-        return _innerAttribute;
+    public List<MatchAttribute> getMatchAttribute() {
+        return matchAttribute;
     }
 }

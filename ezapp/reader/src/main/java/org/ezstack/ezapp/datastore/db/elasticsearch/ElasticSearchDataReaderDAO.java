@@ -8,7 +8,6 @@ import org.elasticsearch.client.Client;
 import org.elasticsearch.common.unit.TimeValue;
 import org.elasticsearch.index.IndexNotFoundException;
 import org.elasticsearch.search.SearchHit;
-import org.elasticsearch.search.SearchHits;
 import org.ezstack.ezapp.datastore.api.Query;
 
 import java.util.*;
@@ -35,9 +34,9 @@ public class ElasticSearchDataReaderDAO {
     public List<Map<String, Object>> getDocuments(Query query) {
         try {
             List<Map<String, Object>> results = new ArrayList<>();
-            SearchResponse response = _client.prepareSearch(query.getOuterTable())
+            SearchResponse response = _client.prepareSearch(query.getTable())
                     .setScroll(new TimeValue(60000*2))
-                    .setTypes(query.getOuterTable())
+                    .setTypes(query.getTable())
                     .setSize(100)
                     .get();
 
