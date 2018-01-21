@@ -25,7 +25,7 @@ public class DefaultDataReader implements DataReader {
     }
 
     @Override
-    public List<Map<String, Object>> getDocuments(Query query) {
-        return _dataReaderDAO.getDocuments(query);
+    public List<Map<String, Object>> getDocuments(long scrollInMillis, int batchSize, Query query) {
+        return _dataReaderDAO.getDocuments(scrollInMillis, batchSize, query);
     }
 }

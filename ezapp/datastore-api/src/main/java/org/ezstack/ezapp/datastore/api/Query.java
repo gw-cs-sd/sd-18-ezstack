@@ -17,6 +17,9 @@ public class Query {
     @JsonProperty("join")
     private Query _join;
 
+    @JsonProperty("joinAttribute")
+    private String _joinAttribute = "joinedDocuments";
+
     @JsonProperty("matchAttribute")
     private List<MatchAttribute> _matchAttributes;
 
@@ -26,11 +29,12 @@ public class Query {
     public Query() {
     }
 
-    public Query(String searchType, String table, List<Filter> filters, Query join, List<MatchAttribute> matchAttributes) {
+    public Query(String searchType, String table, List<Filter> filters, Query join, String joinAttribute, List<MatchAttribute> matchAttributes) {
         _searchType = searchType;
         _table = table;
         _filters = filters;
         _join = join;
+        _joinAttribute = joinAttribute;
         _matchAttributes = matchAttributes;
     }
 
@@ -48,6 +52,10 @@ public class Query {
 
     public Query getJoin() {
         return _join;
+    }
+
+    public String getJoinAttribute() {
+        return _joinAttribute;
     }
 
     public List<MatchAttribute> getMatchAttribute() {
