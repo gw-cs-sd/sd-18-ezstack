@@ -22,6 +22,18 @@ public class Filter {
     @JsonProperty("value")
     private Object _value;
 
+    /**
+     * Empty constructor for serialization
+     */
+    public Filter() {
+    }
+
+    public Filter(String attribute, String opt, Object value) {
+        _attribute = attribute;
+        _opt = opt;
+        _value = value;
+    }
+
     public String getAttribute() {
         return _attribute;
     }

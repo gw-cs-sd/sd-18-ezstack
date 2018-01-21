@@ -16,6 +16,17 @@ public class MatchAttribute {
     @JsonProperty("innerAttribute")
     private String _innerAttribute;
 
+    /**
+     * Empty constructor for serialziation
+     */
+    public MatchAttribute() {
+    }
+
+    public MatchAttribute(String outerAttribute, String innerAttribute) {
+        _outerAttribute = outerAttribute;
+        _innerAttribute = innerAttribute;
+    }
+
     public String getOuterAttribute() {
         return _outerAttribute;
     }

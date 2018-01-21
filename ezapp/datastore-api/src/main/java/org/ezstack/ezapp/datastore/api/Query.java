@@ -12,13 +12,27 @@ public class Query {
     private String _table;
 
     @JsonProperty("filter")
-    private List<Filter> _filter;
+    private List<Filter> _filters;
 
     @JsonProperty("join")
     private Query _join;
 
     @JsonProperty("matchAttribute")
-    private List<MatchAttribute> _matchAttribute;
+    private List<MatchAttribute> _matchAttributes;
+
+    /**
+     * Empty constructor for serialization
+     */
+    public Query() {
+    }
+
+    public Query(String searchType, String table, List<Filter> filters, Query join, List<MatchAttribute> matchAttributes) {
+        _searchType = searchType;
+        _table = table;
+        _filters = filters;
+        _join = join;
+        _matchAttributes = matchAttributes;
+    }
 
     public String getSearchType() {
         return _searchType;
@@ -29,7 +43,7 @@ public class Query {
     }
 
     public List<Filter> getFilter() {
-        return _filter;
+        return _filters;
     }
 
     public Query getJoin() {
@@ -37,6 +51,6 @@ public class Query {
     }
 
     public List<MatchAttribute> getMatchAttribute() {
-        return _matchAttribute;
+        return _matchAttributes;
     }
 }
