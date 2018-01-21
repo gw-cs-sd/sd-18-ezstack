@@ -1,7 +1,6 @@
 package org.ezstack.ezapp.web.resources;
 
 import com.codahale.metrics.annotation.Timed;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.ezstack.ezapp.datastore.api.DataReader;
 import org.ezstack.ezapp.datastore.api.DataWriter;
 import org.ezstack.ezapp.datastore.api.Query;
@@ -26,12 +25,10 @@ public class DataStoreResource1 {
 
     private final DataWriter _dataWriter;
     private final DataReader _dataReader;
-    private final ObjectMapper _objectMapper;
 
     public DataStoreResource1(DataWriter dataWriter, DataReader dataReader) {
         _dataWriter = dataWriter;
         _dataReader = dataReader;
-        _objectMapper = new ObjectMapper();
     }
 
     @POST
@@ -84,8 +81,8 @@ public class DataStoreResource1 {
     @Timed
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
-    public List<Map<String, Object>> search(Map<String, Object> json) {
-        return _dataReader.getDocuments(_objectMapper.convertValue(json, Query.class));
+    public List<Map<String, Object>> search(Query query) {
+        return _dataReader.getDocuments(query);
     }
 
 }
