@@ -1,50 +1,56 @@
 package org.ezstack.ezapp.datastore.api;
 
-import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-public class Query {
-    private final String _searchType;
-    private final String _outerTable;
-    private final String _outerAttribute;
-    private final String _innerTable;
-    private final String _innerAttribute;
+import java.util.List;
 
-    @JsonCreator
-    public Query(String searchType,
-                 String outerTable,
-                 String outerAttribute,
-                 String innerTable,
-                 String innerAttribute) {
-        _searchType = searchType;
-        _outerTable = outerTable;
-        _outerAttribute = outerAttribute;
-        _innerTable = innerTable;
-        _innerAttribute = innerAttribute;
+public class Query {
+    @JsonProperty("searchType")
+    private String _searchType;
+
+    @JsonProperty("table")
+    private String _table;
+
+    @JsonProperty("filter")
+    private List<Filter> _filters;
+
+    @JsonProperty("join")
+    private Query _join;
+
+    @JsonProperty("matchAttribute")
+    private List<MatchAttribute> _matchAttributes;
+
+    /**
+     * Empty constructor for serialization
+     */
+    public Query() {
     }
 
-    @JsonProperty("searchType")
+    public Query(String searchType, String table, List<Filter> filters, Query join, List<MatchAttribute> matchAttributes) {
+        _searchType = searchType;
+        _table = table;
+        _filters = filters;
+        _join = join;
+        _matchAttributes = matchAttributes;
+    }
+
     public String getSearchType() {
         return _searchType;
     }
 
-    @JsonProperty("outerTable")
-    public String getOuterTable() {
-        return _outerTable;
+    public String getTable() {
+        return _table;
     }
 
-    @JsonProperty("outerAttribute")
-    public String getOuterAttribute() {
-        return _outerAttribute;
+    public List<Filter> getFilter() {
+        return _filters;
     }
 
-    @JsonProperty("innerTable")
-    public String getInnerTable() {
-        return _innerTable;
+    public Query getJoin() {
+        return _join;
     }
 
-    @JsonProperty("innerAttribute")
-    public String getInnerAttribute() {
-        return _innerAttribute;
+    public List<MatchAttribute> getMatchAttribute() {
+        return _matchAttributes;
     }
 }
