@@ -26,10 +26,12 @@ public class DataStoreResource1 {
 
     private final DataWriter _dataWriter;
     private final DataReader _dataReader;
+    private final ObjectMapper _objectMapper;
 
     public DataStoreResource1(DataWriter dataWriter, DataReader dataReader) {
         _dataWriter = dataWriter;
         _dataReader = dataReader;
+        _objectMapper = new ObjectMapper();
     }
 
     @POST
@@ -83,7 +85,7 @@ public class DataStoreResource1 {
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     public List<Map<String, Object>> search(Map<String, Object> json) {
-        return _dataReader.getDocuments(new ObjectMapper().convertValue(json, Query.class));
+        return _dataReader.getDocuments(_objectMapper.convertValue(json, Query.class));
     }
 
 }

@@ -12,22 +12,22 @@ public class Filter {
 
     @NotNull
     @JsonProperty("attribute")
-    private String attribute;
+    private String _attribute;
 
     @NotNull
     @JsonProperty("opt")
-    private String opt;
+    private String _opt;
 
     @NotNull
     @JsonProperty("value")
-    private Object value;
+    private Object _value;
 
     public String getAttribute() {
-        return attribute;
+        return _attribute;
     }
 
     public Operations getOpt() {
-        switch (opt.toLowerCase()) {
+        switch (_opt.toLowerCase()) {
             case "eq":
             case "==": // fall through
                 return Operations.EQ;
@@ -52,6 +52,6 @@ public class Filter {
     }
 
     public Object getValue() {
-        return value;
+        return _value;
     }
 }

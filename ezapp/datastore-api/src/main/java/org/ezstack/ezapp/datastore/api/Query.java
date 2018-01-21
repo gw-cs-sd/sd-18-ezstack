@@ -6,37 +6,37 @@ import java.util.List;
 
 public class Query {
     @JsonProperty("searchType")
-    private String searchType;
+    private String _searchType;
 
     @JsonProperty("table")
-    private String table;
+    private String _table;
 
     @JsonProperty("filter")
-    private List<Filter> filter;
+    private List<Filter> _filter;
 
     @JsonProperty("join")
-    private Query join;
+    private Query _join;
 
     @JsonProperty("matchAttribute")
-    private List<MatchAttribute> matchAttribute;
+    private List<MatchAttribute> _matchAttribute;
 
     public String getSearchType() {
-        return searchType;
+        return _searchType;
     }
 
     public String getTable() {
-        return table;
+        return _table;
     }
 
     public List<Filter> getFilter() {
-        return filter;
+        return _filter;
     }
 
     public Query getJoin() {
-        return join;
+        return _join;
     }
 
     public List<MatchAttribute> getMatchAttribute() {
-        return matchAttribute;
+        return _matchAttribute;
     }
 }

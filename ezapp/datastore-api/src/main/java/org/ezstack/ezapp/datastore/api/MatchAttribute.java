@@ -9,10 +9,18 @@ public class MatchAttribute {
     @Valid
     @NotNull
     @JsonProperty("outerAttribute")
-    private String outerAttribute;
+    private String _outerAttribute;
 
     @Valid
     @NotNull
     @JsonProperty("innerAttribute")
-    private String innerAttribute;
+    private String _innerAttribute;
+
+    public String getOuterAttribute() {
+        return _outerAttribute;
+    }
+
+    public String getInnerAttribute() {
+        return _innerAttribute;
+    }
 }

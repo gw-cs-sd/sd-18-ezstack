@@ -8,46 +8,46 @@ import org.elasticsearch.search.SearchHit;
 import java.util.Iterator;
 
 public class SearchHitIterator implements Iterator<SearchHit> {
-    private final Client client;
-    private SearchResponse scrollResponse;
-    private Iterator<SearchHit> iter;
+    private final Client _client;
+    private SearchResponse _scrollResponse;
+    private Iterator<SearchHit> _iter;
 
     /**
      * The amount of time elasticsearch should keep the scroll active.
      */
-    private long scrollTimeMillis;
+    private long _scrollTimeMillis;
 
     public SearchHitIterator(Client client, SearchResponse scrollResponse) {
-        this.client = client;
-        this.scrollResponse = scrollResponse;
-        scrollTimeMillis = 60000 * 2; // 2 minutes
-        iter = scrollResponse.getHits().iterator();
+        _client = client;
+        _scrollResponse = scrollResponse;
+        _scrollTimeMillis = 60000 * 2; // 2 minutes
+        _iter = scrollResponse.getHits().iterator();
     }
 
     public SearchHitIterator(Client client, SearchResponse scrollResponse, long scrollTimeMillis) {
-        this.client = client;
-        this.scrollResponse = scrollResponse;
-        this.scrollTimeMillis = scrollTimeMillis;
-        iter = scrollResponse.getHits().iterator();
+        _client = client;
+        _scrollResponse = scrollResponse;
+        _scrollTimeMillis = scrollTimeMillis;
+        _iter = scrollResponse.getHits().iterator();
     }
 
     @Override
     public boolean hasNext() {
-        if (iter.hasNext()) {
+        if (_iter.hasNext()) {
             return true;
         }
 
-        scrollResponse = client.prepareSearchScroll(scrollResponse.getScrollId())
-                .setScroll(new TimeValue(scrollTimeMillis))
+        _scrollResponse = _client.prepareSearchScroll(_scrollResponse.getScrollId())
+                .setScroll(new TimeValue(_scrollTimeMillis))
                 .execute()
                 .actionGet();
-        iter = scrollResponse.getHits().iterator();
-        return iter.hasNext();
+        _iter = _scrollResponse.getHits().iterator();
+        return _iter.hasNext();
     }
 
     @Override
     public SearchHit next() {
         hasNext();
-        return iter.next();
+        return _iter.next();
     }
 }
