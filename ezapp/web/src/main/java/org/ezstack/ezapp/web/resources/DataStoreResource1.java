@@ -1,6 +1,7 @@
 package org.ezstack.ezapp.web.resources;
 
 import com.codahale.metrics.annotation.Timed;
+import org.ezstack.ezapp.datastore.api.BulkDocument;
 import org.ezstack.ezapp.datastore.api.DataReader;
 import org.ezstack.ezapp.datastore.api.DataWriter;
 import org.ezstack.ezapp.datastore.api.Query;
@@ -16,7 +17,7 @@ import javax.ws.rs.QueryParam;
 import javax.ws.rs.DefaultValue;
 import javax.ws.rs.core.MediaType;
 import java.util.UUID;
-import java.util.HashMap;
+import java.util.Collections;
 import java.util.Map;
 import java.util.List;
 import java.util.Optional;
@@ -75,7 +76,7 @@ public class DataStoreResource1 {
     public Map<String, Object> getDocument(@PathParam("table") String table,
                                            @PathParam("key") String key) {
         Optional<Map<String, Object>> ret = Optional.ofNullable(_dataReader.getDocument(table, key));
-        return ret.orElse(new HashMap<>());
+        return ret.orElse(Collections.emptyMap());
     }
 
     @POST
@@ -89,4 +90,53 @@ public class DataStoreResource1 {
         return _dataReader.getDocuments(scrollInMillis, batchSize, query);
     }
 
+    @POST
+    @Path("_bulk/")
+    @Timed
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON)
+    public BulkResponse bulkWrite(List<BulkDocument> bulkDocuments) {
+        BulkResponse bulkResponse = new BulkResponse();
+
+        for (BulkDocument doc: bulkDocuments) {
+            switch (doc.getOpType()) {
+                case CREATE:
+                    try {
+                        if (doc.getKey() == null || doc.getKey().isEmpty()) {
+                            bulkResponse.addItem(create(doc.getTable(), doc.getDocument()));
+                        } else {
+                            bulkResponse.addItem(create(doc.getTable(), doc.getKey(), doc.getDocument()));
+                        }
+                    } catch (Exception e) {
+                        bulkResponse.addToErrorCount();
+                        bulkResponse.addErrorMessage(
+                                BulkResponse.createGenericErrorMessage("failed to create document", doc));
+                    }
+
+                    break;
+                case UPDATE:
+                    try {
+                        if (doc.getKey() == null || doc.getKey().isEmpty()) {
+                            bulkResponse.addToErrorCount();
+                            bulkResponse.addErrorMessage(
+                                    BulkResponse.createGenericErrorMessage("failed to update document due to missing key", doc));
+                        } else {
+                            bulkResponse.addItem(update(doc.getTable(), doc.getKey(), doc.getDocument()));
+                        }
+                    } catch (Exception e) {
+                        bulkResponse.addToErrorCount();
+                        bulkResponse.addErrorMessage(
+                                BulkResponse.createGenericErrorMessage("failed to update document", doc));
+                    }
+                    break;
+                default:
+                    bulkResponse.addToErrorCount();
+                    bulkResponse.addErrorMessage(
+                            BulkResponse.createGenericErrorMessage("unkown bulk operation", doc));
+                    break;
+            }
+        }
+
+        return bulkResponse;
+    }
 }
