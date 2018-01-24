@@ -54,7 +54,8 @@ public class ElasticQueryParser {
                 BoolQueryBuilder boolQuery = QueryBuilders.boolQuery();
                 for (MatchAttribute attribute: matchAttributes) {
                     if (doc.containsKey(attribute.getOuterAttribute())) {
-                        boolQuery.must(QueryBuilders.termQuery(attribute.getInnerAttribute(), doc.get(attribute.getOuterAttribute())));
+                        boolQuery.must(QueryBuilders.termQuery(
+                                attribute.getInnerAttribute(), doc.get(attribute.getOuterAttribute())));
                     }
                 }
                 SearchHitIterator joinIter = new SearchHitIterator(_client, builder.setQuery(boolQuery).get());
