@@ -1,3 +1,5 @@
+[![Build Status](https://travis-ci.com/gw-cs-sd/sd-18-ezstack.svg?token=JExnFh8q4Xp96JzLASUR&branch=master)](https://travis-ci.com/gw-cs-sd/sd-18-ezstack)
+
 # GW CS Senior Design Project Template
 
 Use the master branch of this repository for your **working** code.  You should use the [Feature Branch](https://www.atlassian.com/git/tutorials/comparing-workflows/feature-branch-workflow) or [Git Flow](https://www.atlassian.com/git/tutorials/comparing-workflows/gitflow-workflow) structure for your code and branches.
