@@ -87,7 +87,7 @@ public class Document {
             if (DataType.getDataType(updatedVal) == DataType.JsonTypes.MAP && DataType.getDataType(oldVal) == DataType.JsonTypes.MAP) {
                 resolveData((Map<String, Object>) updatedVal, (Map<String, Object>) oldVal, updatedDataTimestamp);
             } else {
-                if (updatedVal != null ? updatedVal.equals(oldVal) : updatedVal == oldVal) {
+                if (updatedVal != null ? !updatedVal.equals(oldVal) : updatedVal != oldVal) {
                     _hasMutated = true;
                     dataToUpdate.put(attribute.getKey(), updatedVal);
                 }
