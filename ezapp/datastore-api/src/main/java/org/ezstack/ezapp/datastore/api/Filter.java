@@ -6,7 +6,7 @@ import javax.validation.constraints.NotNull;
 
 
 public class Filter {
-    enum Operations {
+    public enum Operations {
         EQ, NOT_EQ, GT, GTE, LT, LTE, UNKOWN
     }
 

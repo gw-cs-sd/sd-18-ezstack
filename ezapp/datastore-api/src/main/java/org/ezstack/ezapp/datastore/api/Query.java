@@ -46,7 +46,7 @@ public class Query {
         return _table;
     }
 
-    public List<Filter> getFilter() {
+    public List<Filter> getFilters() {
         return _filters;
     }
 
@@ -58,7 +58,7 @@ public class Query {
         return _joinAttribute;
     }
 
-    public List<MatchAttribute> getMatchAttribute() {
+    public List<MatchAttribute> getMatchAttributes() {
         return _matchAttributes;
     }
 }
