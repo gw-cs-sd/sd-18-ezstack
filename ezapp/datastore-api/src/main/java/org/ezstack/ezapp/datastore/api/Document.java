@@ -5,7 +5,6 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.util.ISO8601Utils;
 
 import java.util.Date;
-import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
