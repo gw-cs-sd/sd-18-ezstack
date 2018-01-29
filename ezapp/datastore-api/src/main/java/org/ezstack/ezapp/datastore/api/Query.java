@@ -13,7 +13,7 @@ public class Query {
     private String _table;
     private List<Filter> _filters;
     private Query _join;
-    private String _joinAttribute = "_joinAttribute";
+    private String _joinAttributeName = "_joinAttributeName";
     private List<JoinAttribute> _joinAttributes;
 
     @JsonCreator
@@ -30,7 +30,7 @@ public class Query {
         _table = table;
         _filters = filters;
         _join = join;
-        _joinAttribute = joinAttributeName;
+        _joinAttributeName = joinAttributeName;
         _joinAttributes = joinAttributes;
     }
 
@@ -55,7 +55,7 @@ public class Query {
     }
 
     public String getJoinAttributeName() {
-        return _joinAttribute;
+        return _joinAttributeName;
     }
 
     public List<JoinAttribute> getJoinAttributes() {
