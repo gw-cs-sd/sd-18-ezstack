@@ -5,7 +5,15 @@ import java.util.Map;
 
 public interface DataReader {
 
-    Map<String, Object> getDocument(String table, String id);
+    Map<String, Object> getDocument(String table, String key);
 
-    List<Map<String, Object>> getDocuments(Query query);
+    /**
+     *
+     * @param retentionTimeInMillis how long a query result should be held
+     * @param batchSize the amount of records that should be batched at a time
+     * @param query
+     * @return
+     *
+     */
+    List<Map<String, Object>> getDocuments(long retentionTimeInMillis, int batchSize, Query query);
 }

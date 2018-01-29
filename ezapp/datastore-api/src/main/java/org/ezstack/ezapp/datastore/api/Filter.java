@@ -1,36 +1,52 @@
 package org.ezstack.ezapp.datastore.api;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import javax.validation.constraints.NotNull;
 
 
 public class Filter {
-    enum Operations {
-        EQ, NOT_EQ, GT, GTE, LT, LTE, UNKOWN
+    public enum Operations {
+        EQ, NOT_EQ, GT, GTE, LT, LTE, UNKOWN;
+
+        @Override
+        public String toString() {
+            switch (this) {
+                case EQ:
+                    return "eq";
+                case NOT_EQ:
+                    return "not_eq";
+                case GT:
+                    return "gt";
+                case GTE:
+                    return "gte";
+                case LT:
+                    return "lt";
+                case LTE:
+                    return "lte";
+                default:
+                    return "unkown";
+            }
+        }
     }
 
-    @NotNull
-    @JsonProperty("attribute")
     private String _attribute;
-
-    @NotNull
-    @JsonProperty("opt")
     private String _opt;
-
-    @NotNull
-    @JsonProperty("value")
     private Object _value;
 
-    /**
-     * Empty constructor for serialization
-     */
-    public Filter() {
-    }
-
-    public Filter(String attribute, String opt, Object value) {
+    @JsonCreator
+    public Filter(@NotNull @JsonProperty("attribute") String attribute,
+                  @NotNull @JsonProperty("opt") String opt,
+                  @NotNull @JsonProperty("value") Object value) {
         _attribute = attribute;
         _opt = opt;
+        _value = value;
+    }
+
+    public Filter(String attribute, Operations opt, Object value) {
+        _attribute = attribute;
+        _opt = opt.toString();
         _value = value;
     }
 

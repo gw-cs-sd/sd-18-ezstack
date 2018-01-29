@@ -4,7 +4,7 @@ import java.util.Collection;
 import java.util.Map;
 
 public class DataType {
-    enum JsonTypes {
+    public enum JsonTypes {
         INTEGER, DOUBLE, BOOLEAN, STRING, LIST, MAP, UNKNOWN
     }
 

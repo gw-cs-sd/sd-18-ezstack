@@ -1,28 +1,21 @@
 package org.ezstack.ezapp.datastore.api;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 
-public class MatchAttribute {
-    @Valid
-    @NotNull
-    @JsonProperty("outerAttribute")
+/**
+ * The following class is used to
+ */
+public class JoinAttribute {
     private String _outerAttribute;
 
-    @Valid
-    @NotNull
-    @JsonProperty("innerAttribute")
     private String _innerAttribute;
 
-    /**
-     * Empty constructor for serialziation
-     */
-    public MatchAttribute() {
-    }
-
-    public MatchAttribute(String outerAttribute, String innerAttribute) {
+    @JsonCreator
+    public JoinAttribute(@NotNull @JsonProperty("outerAttribute") String outerAttribute,
+                         @NotNull @JsonProperty("innerAttribute") String innerAttribute) {
         _outerAttribute = outerAttribute;
         _innerAttribute = innerAttribute;
     }

@@ -1,40 +1,40 @@
 package org.ezstack.ezapp.datastore.api;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
+import javax.validation.constraints.NotNull;
 import java.util.List;
 
 public class Query {
-    @JsonProperty("searchType")
-    private String _searchType;
 
-    @JsonProperty("table")
+    private List<SearchType> _searchType;
     private String _table;
-
-    @JsonProperty("filter")
     private List<Filter> _filters;
-
-    @JsonProperty("join")
     private Query _join;
+    private String _joinAttributeName = "_joinAttribute";
+    private List<JoinAttribute> _joinAttributes;
+    private List<String> _excludeAttributes;
 
-    @JsonProperty("matchAttribute")
-    private List<MatchAttribute> _matchAttributes;
+    @JsonCreator
+    public Query(@JsonProperty("searchType") List<SearchType> searchType,
+                 @NotNull @JsonProperty("table") String table,
+                 @JsonProperty("filter") List<Filter> filters,
+                 @JsonProperty("join") Query join,
+                 @JsonProperty("joinAttributeName") String joinAttributeName,
+                 @JsonProperty("joinAttributes") List<JoinAttribute> joinAttributes,
+                 @JsonProperty("excludeAttributes") List<String> excludeAttributes) {
 
-    /**
-     * Empty constructor for serialization
-     */
-    public Query() {
-    }
-
-    public Query(String searchType, String table, List<Filter> filters, Query join, List<MatchAttribute> matchAttributes) {
-        _searchType = searchType;
+         _searchType = searchType;
         _table = table;
         _filters = filters;
         _join = join;
-        _matchAttributes = matchAttributes;
+        _joinAttributeName = joinAttributeName;
+        _joinAttributes = joinAttributes;
+        _excludeAttributes = excludeAttributes;
     }
 
-    public String getSearchType() {
+    public List<SearchType> getSearchType() {
         return _searchType;
     }
 
@@ -42,7 +42,7 @@ public class Query {
         return _table;
     }
 
-    public List<Filter> getFilter() {
+    public List<Filter> getFilters() {
         return _filters;
     }
 
@@ -50,7 +50,15 @@ public class Query {
         return _join;
     }
 
-    public List<MatchAttribute> getMatchAttribute() {
-        return _matchAttributes;
+    public String getJoinAttributeName() {
+        return _joinAttributeName;
+    }
+
+    public List<JoinAttribute> getJoinAttributes() {
+        return _joinAttributes;
+    }
+
+    public List<String> getExcludeAttributes() {
+        return _excludeAttributes;
     }
 }
