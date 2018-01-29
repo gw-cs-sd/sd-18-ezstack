@@ -21,7 +21,7 @@ public class Query {
                  @NotNull @JsonProperty("table") String table,
                  @JsonProperty("filter") List<Filter> filters,
                  @JsonProperty("join") Query join,
-                 @JsonProperty("joinAttribute") String joinAttributeName,
+                 @JsonProperty("joinAttributeName") String joinAttributeName,
                  @JsonProperty("joinAttributes") List<JoinAttribute> joinAttributes,
                  @JsonProperty("excludeAttributes") List<String> excludeAttributes) {
 

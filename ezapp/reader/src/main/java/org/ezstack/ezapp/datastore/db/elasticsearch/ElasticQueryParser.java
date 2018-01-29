@@ -39,17 +39,17 @@ public class ElasticQueryParser {
         }
     }
 
-    private List<Map<String, Object>> join(Query outerQuery) {
-        if (outerQuery == null) {
+    private List<Map<String, Object>> join(Query q) {
+        if (q == null) {
             return Collections.emptyList();
         }
 
         List<Map<String, Object>> results = new LinkedList<>();
-        BoolQueryBuilder boolQuery = getFilterBoolQueryBuilder(safe(outerQuery.getFilters()));
+        BoolQueryBuilder boolQuery = getFilterBoolQueryBuilder(safe(q.getFilters()));
 
-        SearchResponse response = _client.prepareSearch(outerQuery.getTable())
+        SearchResponse response = _client.prepareSearch(q.getTable())
                 .setScroll(new TimeValue(_scrollInMillis))
-                .setTypes(outerQuery.getTable())
+                .setTypes(q.getTable())
                 .setSize(_batchSize)
                 .setQuery(boolQuery)
                 .get();
@@ -58,11 +58,11 @@ public class ElasticQueryParser {
         while (iter.hasNext()) {
             SearchHit searchHit = iter.next();
             Map<String, Object> doc = searchHit.getSourceAsMap();
-            if (outerQuery.getJoin() != null) {
-                Query innerJoin = outerQuery.getJoin();
-                List<Filter> innerJoinFilters = innerJoin.getFilters();
-                innerJoinFilters.addAll(convertJoinAttributesToFilters(doc, outerQuery.getJoinAttributes()));
-                doc.put(outerQuery.getJoinAttributeName(),
+            if (q.getJoin() != null) {
+                Query innerJoin = q.getJoin();
+                List<Filter> innerJoinFilters = innerJoin.getFilters() == null ? new LinkedList<>() : innerJoin.getFilters();
+                innerJoinFilters.addAll(convertJoinAttributesToFilters(doc, q.getJoinAttributes()));
+                doc.put(q.getJoinAttributeName(),
                         join(new Query(innerJoin.getSearchType(),
                                 innerJoin.getTable(),
                                 innerJoinFilters,
