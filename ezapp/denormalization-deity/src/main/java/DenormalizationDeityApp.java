@@ -97,8 +97,33 @@ public class DenormalizationDeityApp implements StreamApplication {
         }
         else {
             queryObject = new QueryObject(strippedQuery, priority, stamp);
+            priorityObjects.put(strippedQuery, queryObject);
+        }
+    }
+
+    private long startRuleCreation() {
+        Histogram histogram = metrics.histogram("baseline", histogramSupplier);
+        Snapshot snap = histogram.getSnapshot();
+
+        for(Map.Entry<String, QueryObject> entry : priorityObjects.entrySet()) {
+            QueryObject value = entry.getValue();
+            histogram.update(value.getPriority());
         }
 
-        priorityObjects.put(strippedQuery, queryObject);
+        return (long)snap.getMean();
+    }
+
+    private void addRules(long threshold) {
+        for(Map.Entry<String, QueryObject> entry : priorityObjects.entrySet()) {
+            String key = entry.getKey();
+            QueryObject value = entry.getValue();
+
+            if (value.getPriority() >= threshold) {
+                //add the rule
+            }
+            else {
+                //if the rule exists, remove the rule
+            }
+        }
     }
 }
