@@ -1,6 +1,5 @@
 package org.ezstack.ezapp.datastore.db.elasticsearch;
 
-import org.elasticsearch.action.search.SearchRequestBuilder;
 import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.client.Client;
 import org.elasticsearch.common.unit.TimeValue;
@@ -8,14 +7,12 @@ import org.elasticsearch.index.IndexNotFoundException;
 import org.elasticsearch.index.query.BoolQueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.search.SearchHit;
+import org.ezstack.ezapp.datastore.api.DataType;
 import org.ezstack.ezapp.datastore.api.Filter;
-import org.ezstack.ezapp.datastore.api.MatchAttribute;
+import org.ezstack.ezapp.datastore.api.JoinAttribute;
 import org.ezstack.ezapp.datastore.api.Query;
 
-import java.util.LinkedList;
-import java.util.Collections;
-import java.util.Map;
-import java.util.List;
+import java.util.*;
 
 public class ElasticQueryParser {
     private long _scrollInMillis;
@@ -32,22 +29,24 @@ public class ElasticQueryParser {
 
     List<Map<String, Object>> getDocuments() {
         try {
-            return join(_query, _query.getJoin());
+            return join(_query);
         } catch (IndexNotFoundException e) {
-            return Collections.emptyList();
+            HashMap<String, Object> err = new HashMap<>();
+            err.put("error", "IndexNotFoundException");
+            List<Map<String, Object>> errList = new LinkedList<>();
+            errList.add(err);
+            return errList;
         }
     }
 
-    private List<Map<String, Object>> join(Query outerQuery, Query innerQuery) {
+    private List<Map<String, Object>> join(Query outerQuery) {
         // ensure their is a query
         if (outerQuery == null) {
             return Collections.emptyList();
         }
 
-        List<MatchAttribute> matchAttributes = outerQuery.getMatchAttributes();
-        List<Filter> filters = outerQuery.getFilters();
         List<Map<String, Object>> results = new LinkedList<>();
-        BoolQueryBuilder boolQuery = getFilterBoolQueryBuilder(filters);
+        BoolQueryBuilder boolQuery = getFilterBoolQueryBuilder(safe(outerQuery.getFilters()));
 
         SearchResponse response = _client.prepareSearch(outerQuery.getTable())
                 .setScroll(new TimeValue(_scrollInMillis))
@@ -60,8 +59,18 @@ public class ElasticQueryParser {
         while (iter.hasNext()) {
             SearchHit searchHit = iter.next();
             Map<String, Object> doc = searchHit.getSourceAsMap();
-            if (innerQuery != null) {
-                doc.put(outerQuery.getJoinAttribute(), getNestedDocs(innerQuery, doc, matchAttributes));
+            if (outerQuery.getJoin() != null) {
+                Query innerJoin = outerQuery.getJoin();
+                List<Filter> innerJoinFilters = innerJoin.getFilters();
+                innerJoinFilters.addAll(convertMatchAttributesToFilters(doc, outerQuery.getJoinAttributes()));
+                doc.put(outerQuery.getJoinAttributeName(),
+                        join(new Query(innerJoin.getAggregationType(),
+                                innerJoin.getAggregationAttributeName(),
+                                innerJoin.getTable(),
+                                innerJoinFilters,
+                                innerJoin.getJoin(),
+                                innerJoin.getJoinAttributeName(),
+                                innerJoin.getJoinAttributes())));
             }
             results.add(doc);
         }
@@ -69,42 +78,13 @@ public class ElasticQueryParser {
         return results;
     }
 
-    private List<Map<String, Object>> getNestedDocs(Query innerQuery,
-                                                    Map<String, Object> doc,
-                                                    List<MatchAttribute> matchAttributes) {
-        List<Map<String, Object>> nestedDocs = new LinkedList<>();
-
-        SearchRequestBuilder builder = _client.prepareSearch(innerQuery.getTable())
-                .setSize(_batchSize)
-                .setScroll(new TimeValue(_scrollInMillis))
-                .setTypes(innerQuery.getTable());
-        BoolQueryBuilder boolQuery = getFilterBoolQueryBuilder(innerQuery.getFilters());
-        for (MatchAttribute attribute: matchAttributes) {
-            if (doc.containsKey(attribute.getOuterAttribute())) {
-                boolQuery.must(QueryBuilders.termQuery(
-                        attribute.getInnerAttribute(), doc.get(attribute.getOuterAttribute())));
-            }
-        }
-        SearchHitIterator joinIter = new SearchHitIterator(_client, builder.setQuery(boolQuery).get());
-
-        while (joinIter.hasNext()) {
-            SearchHit nestedHit = joinIter.next();
-            nestedDocs.add(nestedHit.getSourceAsMap());
-        }
-
-        return nestedDocs;
-    }
-
     private BoolQueryBuilder getFilterBoolQueryBuilder(List<Filter> filters) {
         BoolQueryBuilder boolQuery = QueryBuilders.boolQuery();
-        if (filters == null) {
-            return boolQuery;
-        }
 
         for (Filter f: filters) {
             switch (f.getOpt()) {
                 case EQ:
-                    boolQuery.must(QueryBuilders.termQuery(f.getAttribute(), f.getValue()));
+                    boolQuery.must(QueryBuilders.termsQuery(f.getAttribute(), f.getValue()));
                     break;
                 case GT:
                     boolQuery.must(QueryBuilders.rangeQuery(f.getAttribute()).gt(f.getValue()));
@@ -125,5 +105,21 @@ public class ElasticQueryParser {
         }
 
         return boolQuery;
+    }
+
+    private List<Filter> convertMatchAttributesToFilters(Map<String, Object> doc, List<JoinAttribute> attributes) {
+        List<Filter> filters = new LinkedList<>();
+        for (JoinAttribute ma: attributes) {
+            if (doc.containsKey(ma.getOuterAttribute())) {
+                String fa = ma.getInnerAttribute();
+                Object val = doc.get(ma.getOuterAttribute());
+                filters.add(new Filter(fa, Filter.Operations.EQ, val));
+            }
+        }
+        return filters;
+    }
+
+    private static List safe(List l) {
+        return l == null ? Collections.emptyList() : l;
     }
 }

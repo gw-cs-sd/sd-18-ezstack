@@ -1,45 +1,45 @@
 package org.ezstack.ezapp.datastore.api;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
+import javax.validation.constraints.NotNull;
 import java.util.List;
 
 public class Query {
-    @JsonProperty("searchType")
-    private String _searchType;
 
-    @JsonProperty("table")
+    private String _aggregationType;
+    private String _aggregationAttributeName;
     private String _table;
-
-    @JsonProperty("filter")
     private List<Filter> _filters;
-
-    @JsonProperty("join")
     private Query _join;
+    private String _joinAttribute = "_joinAttribute";
+    private List<JoinAttribute> _joinAttributes;
 
-    @JsonProperty("joinAttribute")
-    private String _joinAttribute = "joinedDocuments";
+    @JsonCreator
+    public Query(@JsonProperty("aggregationType") String aggregationType,
+                 @JsonProperty("aggregationAttributeName") String aggregationAttributeName,
+                 @NotNull @JsonProperty("table") String table,
+                 @JsonProperty("filter") List<Filter> filters,
+                 @JsonProperty("join") Query join,
+                 @JsonProperty("joinAttributeName") String joinAttributeName,
+                 @JsonProperty("joinAttributes") List<JoinAttribute> joinAttributes) {
 
-    @JsonProperty("matchAttribute")
-    private List<MatchAttribute> _matchAttributes;
-
-    /**
-     * Empty constructor for serialization
-     */
-    public Query() {
-    }
-
-    public Query(String searchType, String table, List<Filter> filters, Query join, String joinAttribute, List<MatchAttribute> matchAttributes) {
-        _searchType = searchType;
+        _aggregationType = aggregationType;
+        _aggregationAttributeName = aggregationAttributeName;
         _table = table;
         _filters = filters;
         _join = join;
-        _joinAttribute = joinAttribute;
-        _matchAttributes = matchAttributes;
+        _joinAttribute = joinAttributeName;
+        _joinAttributes = joinAttributes;
     }
 
-    public String getSearchType() {
-        return _searchType;
+    public String getAggregationType() {
+        return _aggregationType;
+    }
+
+    public String getAggregationAttributeName() {
+        return _aggregationAttributeName;
     }
 
     public String getTable() {
@@ -54,11 +54,11 @@ public class Query {
         return _join;
     }
 
-    public String getJoinAttribute() {
+    public String getJoinAttributeName() {
         return _joinAttribute;
     }
 
-    public List<MatchAttribute> getMatchAttributes() {
-        return _matchAttributes;
+    public List<JoinAttribute> getJoinAttributes() {
+        return _joinAttributes;
     }
 }
