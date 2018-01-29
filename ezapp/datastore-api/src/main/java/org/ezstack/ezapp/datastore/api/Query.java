@@ -8,38 +8,34 @@ import java.util.List;
 
 public class Query {
 
-    private String _aggregationType;
-    private String _aggregationAttributeName;
+    private List<SearchType> _searchType;
     private String _table;
     private List<Filter> _filters;
     private Query _join;
-    private String _joinAttributeName = "_joinAttributeName";
+    private String _joinAttributeName = "_joinAttribute";
     private List<JoinAttribute> _joinAttributes;
+    private List<String> _excludeAttributes;
 
     @JsonCreator
-    public Query(@JsonProperty("aggregationType") String aggregationType,
-                 @JsonProperty("aggregationAttributeName") String aggregationAttributeName,
+    public Query(@JsonProperty("searchType") List<SearchType> searchType,
                  @NotNull @JsonProperty("table") String table,
                  @JsonProperty("filter") List<Filter> filters,
                  @JsonProperty("join") Query join,
-                 @JsonProperty("joinAttributeName") String joinAttributeName,
-                 @JsonProperty("joinAttributes") List<JoinAttribute> joinAttributes) {
+                 @JsonProperty("joinAttribute") String joinAttributeName,
+                 @JsonProperty("joinAttributes") List<JoinAttribute> joinAttributes,
+                 @JsonProperty("excludeAttributes") List<String> excludeAttributes) {
 
-        _aggregationType = aggregationType;
-        _aggregationAttributeName = aggregationAttributeName;
+         _searchType = searchType;
         _table = table;
         _filters = filters;
         _join = join;
         _joinAttributeName = joinAttributeName;
         _joinAttributes = joinAttributes;
+        _excludeAttributes = excludeAttributes;
     }
 
-    public String getAggregationType() {
-        return _aggregationType;
-    }
-
-    public String getAggregationAttributeName() {
-        return _aggregationAttributeName;
+    public List<SearchType> getSearchType() {
+        return _searchType;
     }
 
     public String getTable() {
@@ -60,5 +56,9 @@ public class Query {
 
     public List<JoinAttribute> getJoinAttributes() {
         return _joinAttributes;
+    }
+
+    public List<String> getExcludeAttributes() {
+        return _excludeAttributes;
     }
 }

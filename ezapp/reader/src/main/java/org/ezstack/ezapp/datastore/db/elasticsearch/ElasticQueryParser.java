@@ -7,7 +7,6 @@ import org.elasticsearch.index.IndexNotFoundException;
 import org.elasticsearch.index.query.BoolQueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.search.SearchHit;
-import org.ezstack.ezapp.datastore.api.DataType;
 import org.ezstack.ezapp.datastore.api.Filter;
 import org.ezstack.ezapp.datastore.api.JoinAttribute;
 import org.ezstack.ezapp.datastore.api.Query;
@@ -29,6 +28,7 @@ public class ElasticQueryParser {
 
     List<Map<String, Object>> getDocuments() {
         try {
+            // TODO: evaluate searchtype query
             return join(_query);
         } catch (IndexNotFoundException e) {
             HashMap<String, Object> err = new HashMap<>();
@@ -40,7 +40,6 @@ public class ElasticQueryParser {
     }
 
     private List<Map<String, Object>> join(Query outerQuery) {
-        // ensure their is a query
         if (outerQuery == null) {
             return Collections.emptyList();
         }
@@ -62,15 +61,15 @@ public class ElasticQueryParser {
             if (outerQuery.getJoin() != null) {
                 Query innerJoin = outerQuery.getJoin();
                 List<Filter> innerJoinFilters = innerJoin.getFilters();
-                innerJoinFilters.addAll(convertMatchAttributesToFilters(doc, outerQuery.getJoinAttributes()));
+                innerJoinFilters.addAll(convertJoinAttributesToFilters(doc, outerQuery.getJoinAttributes()));
                 doc.put(outerQuery.getJoinAttributeName(),
-                        join(new Query(innerJoin.getAggregationType(),
-                                innerJoin.getAggregationAttributeName(),
+                        join(new Query(innerJoin.getSearchType(),
                                 innerJoin.getTable(),
                                 innerJoinFilters,
                                 innerJoin.getJoin(),
                                 innerJoin.getJoinAttributeName(),
-                                innerJoin.getJoinAttributes())));
+                                innerJoin.getJoinAttributes(),
+                                innerJoin.getExcludeAttributes())));
             }
             results.add(doc);
         }
@@ -107,7 +106,7 @@ public class ElasticQueryParser {
         return boolQuery;
     }
 
-    private List<Filter> convertMatchAttributesToFilters(Map<String, Object> doc, List<JoinAttribute> attributes) {
+    private List<Filter> convertJoinAttributesToFilters(Map<String, Object> doc, List<JoinAttribute> attributes) {
         List<Filter> filters = new LinkedList<>();
         for (JoinAttribute ma: attributes) {
             if (doc.containsKey(ma.getOuterAttribute())) {
