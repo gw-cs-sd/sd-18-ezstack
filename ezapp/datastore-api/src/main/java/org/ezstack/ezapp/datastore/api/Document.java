@@ -47,7 +47,7 @@ public class Document {
         _hasMutated = false;
     }
 
-    // This constructor should only be used if there is only one version of this document to consider
+    /** This constructor should only be used if there is only one version of this document to consider */
     public Document(Update update) {
         _table = update.getTable();
         _key = update.getKey();
@@ -59,7 +59,7 @@ public class Document {
         _hasMutated = false;
     }
 
-    // lastUpdateAt and version are only updated if the document data is actually modified by the update.
+    /** lastUpdateAt and version are only updated if the document data is actually modified by the update */
     public void addUpdate(Update update) {
         checkArgument(_table.equals(update.getTable()) && _key.equals(update.getKey()),
                 "Update is not to same record as existing document");
