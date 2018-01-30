@@ -26,11 +26,11 @@ public class DenormalizationDeityApp implements StreamApplication {
     private final ObjectMapper objectMapper;
     private final MetricRegistry.MetricSupplier<Histogram> histogramSupplier;
     private Map<String, QueryObject> priorityObjects;
-    private Date timestamp = new Date();
+    private final Date timestamp = new Date();
 
     private long globalStamp;
 
-    private long adjustmentPeriod = 86400000;
+    private long adjustmentPeriodMS = 0; // This is set up in the config file, this is the amount of time between updates, in milliseconds.
 
     public DenormalizationDeityApp() {
         metrics = new MetricRegistry();
@@ -43,6 +43,7 @@ public class DenormalizationDeityApp implements StreamApplication {
     @Override
     public void init(StreamGraph streamGraph, Config config) {
         DeityConfig deityConfig = new DeityConfig(config);
+        adjustmentPeriodMS = deityConfig.getAdjustmentPeriod();
         MessageStream<Query> queryStream = streamGraph.<String, Map<String, Object>, Query>getInputStream("queries", this::convertToQuery);
         queryStream.map(this::processQuery);
 
@@ -65,7 +66,7 @@ public class DenormalizationDeityApp implements StreamApplication {
         updateQueryObject(strippedQuery);
 
         long tempstamp = timestamp.getTime();
-        if (tempstamp - adjustmentPeriod >= globalStamp) {
+        if (tempstamp - adjustmentPeriodMS >= globalStamp) {
             globalStamp = tempstamp;
             rules();
         }
