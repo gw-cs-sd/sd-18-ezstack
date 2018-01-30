@@ -69,7 +69,8 @@ public class ElasticQueryParser {
                                 innerJoin.getJoin(),
                                 innerJoin.getJoinAttributeName(),
                                 innerJoin.getJoinAttributes(),
-                                innerJoin.getExcludeAttributes())));
+                                innerJoin.getExcludeAttributes(),
+                                innerJoin.getIncludeAttributes())));
             }
             results.add(doc);
         }
