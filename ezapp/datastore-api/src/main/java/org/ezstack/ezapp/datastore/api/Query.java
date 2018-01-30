@@ -20,10 +20,8 @@ public class Query {
     private String _joinAttributeName = "_joinAttribute";
     private List<JoinAttribute> _joinAttributes;
 
-
     private List<String> _excludeAttributes;
-
-
+    private List<String> _includeAttributes;
 
     @JsonCreator
     public Query(@JsonProperty("searchType") List<SearchType> searchType,
@@ -32,7 +30,8 @@ public class Query {
                  @JsonProperty("join") Query join,
                  @JsonProperty("joinAttributeName") String joinAttributeName,
                  @JsonProperty("joinAttributes") List<JoinAttribute> joinAttributes,
-                 @JsonProperty("excludeAttributes") List<String> excludeAttributes) {
+                 @JsonProperty("excludeAttributes") List<String> excludeAttributes,
+                 @JsonProperty("includeAttributes") List<String> includeAttributes) {
 
         _searchType = searchType;
         _table = table;
@@ -41,6 +40,7 @@ public class Query {
         _joinAttributeName = joinAttributeName;
         _joinAttributes = joinAttributes;
         _excludeAttributes = excludeAttributes;
+        _includeAttributes = includeAttributes;
     }
 
     @JsonProperty("searchType")
@@ -76,6 +76,11 @@ public class Query {
     @JsonProperty("excludeAttributes")
     public List<String> getExcludeAttributes() {
         return _excludeAttributes;
+    }
+
+    @JsonProperty("includeAttributes")
+    public List<String> getIncludeAttributes() {
+        return _includeAttributes;
     }
 
     public String toString() {
