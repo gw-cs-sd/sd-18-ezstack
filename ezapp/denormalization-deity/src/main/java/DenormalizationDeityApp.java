@@ -9,6 +9,7 @@ import org.apache.samza.operators.StreamGraph;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.coursera.metrics.datadog.DatadogReporter;
 import org.coursera.metrics.datadog.DatadogReporter.Expansion;
+import org.ezstack.ezapp.datastore.api.Query;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.coursera.metrics.datadog.transport.HttpTransport;
@@ -58,10 +59,10 @@ public class DenormalizationDeityApp implements StreamApplication {
     }
 
     private Query processQuery(Query query) {
-        String strippedQuery = query.getStrippedQuery();
+        String strippedQuery = "emptyString";//query.getStrippedQuery();
 
         Histogram histogram = metrics.histogram(strippedQuery, histogramSupplier);
-        histogram.update(query.getResponseTime());
+        histogram.update(10000);//query.getResponseTime());
 
         updateQueryObject(strippedQuery);
 
