@@ -1,10 +1,7 @@
 package org.ezstack.ezapp.web.resources;
 
 import com.codahale.metrics.annotation.Timed;
-import org.ezstack.ezapp.datastore.api.BulkDocument;
-import org.ezstack.ezapp.datastore.api.DataReader;
-import org.ezstack.ezapp.datastore.api.DataWriter;
-import org.ezstack.ezapp.datastore.api.Query;
+import org.ezstack.ezapp.datastore.api.*;
 
 import javax.ws.rs.Consumes;
 import javax.ws.rs.Produces;
@@ -87,7 +84,10 @@ public class DataStoreResource1 {
     public List<Map<String, Object>> search(@QueryParam("scroll") @DefaultValue("120000") long scrollInMillis,
                                             @QueryParam("batchSize") @DefaultValue("100") int batchSize,
                                             Query query) {
-        return _dataReader.getDocuments(scrollInMillis, batchSize, query);
+        long currentTimeInMs = System.currentTimeMillis();
+        List<Map<String, Object>> ret = _dataReader.getDocuments(scrollInMillis, batchSize, query);
+        // new QueryMetaData(query, System.currentTimeMillis()-currentTimeInMs); // send it to quag for analysis
+        return ret;
     }
 
     @POST
