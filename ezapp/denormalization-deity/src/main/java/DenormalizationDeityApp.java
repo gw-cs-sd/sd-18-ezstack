@@ -26,12 +26,18 @@ public class DenormalizationDeityApp implements StreamApplication {
     private final ObjectMapper objectMapper;
     private final MetricRegistry.MetricSupplier<Histogram> histogramSupplier;
     private Map<String, QueryObject> priorityObjects;
+    private Date timestamp = new Date();
+
+    private long globalStamp;
+
+    private long adjustmentPeriod = 86400000;
 
     public DenormalizationDeityApp() {
         metrics = new MetricRegistry();
         objectMapper = new ObjectMapper();
         histogramSupplier = () -> new Histogram(new UniformReservoir());
         priorityObjects = new HashMap<>();
+        globalStamp = timestamp.getTime();
     }
 
     @Override
@@ -57,6 +63,12 @@ public class DenormalizationDeityApp implements StreamApplication {
         histogram.update(query.getResponseTime());
 
         updateQueryObject(strippedQuery);
+
+        long tempstamp = timestamp.getTime();
+        if (tempstamp - adjustmentPeriod >= globalStamp) {
+            globalStamp = tempstamp;
+            rules();
+        }
 
         return query;
     }
@@ -85,7 +97,7 @@ public class DenormalizationDeityApp implements StreamApplication {
             priority = median + meanAbsoluteDeviation;
         }
 
-        Date timestamp = new Date();
+
         long stamp = timestamp.getTime();
 
         QueryObject queryObject;
@@ -99,6 +111,11 @@ public class DenormalizationDeityApp implements StreamApplication {
             queryObject = new QueryObject(strippedQuery, priority, stamp);
             priorityObjects.put(strippedQuery, queryObject);
         }
+    }
+
+    private void rules() {
+        long threshold = startRuleCreation();
+        addRules(threshold);
     }
 
     private long startRuleCreation() {
