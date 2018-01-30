@@ -48,8 +48,22 @@ public class WriterModule extends PrivateModule {
 
     @Provides
     @Singleton
+    @Named("documentTopicPartitionCount")
+    int provideDocumentTopicPartitionCount(WriterConfiguration configuration) {
+        return configuration.getWriterTopicPartitionCount();
+    }
+
+    @Provides
+    @Singleton
     @Named("documentTopic")
     String provideDocumentTopic(WriterConfiguration configuration) {
         return configuration.getWriterTopicName();
+    }
+
+    @Provides
+    @Singleton
+    @Named("zookeeperHosts")
+    String provideZookeeperHosts(WriterConfiguration configuration) {
+        return configuration.getZookeeperHosts();
     }
 }

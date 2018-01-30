@@ -1,6 +1,7 @@
 package org.ezstack.ezapp.datastore.api;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.util.ISO8601Utils;
 
@@ -105,10 +106,12 @@ public class Document {
         return (uuid.timestamp() - NUM_100NS_INTERVALS_SINCE_UUID_EPOCH) / 10000;
     }
 
+    @JsonIgnore
     public String getFirstUpdateAt() {
         return asISOTimestamp(_firstUpdateAt);
     }
 
+    @JsonIgnore
     public String getLastUpdateAt() {
         return asISOTimestamp(_lastUpdateAt);
     }
