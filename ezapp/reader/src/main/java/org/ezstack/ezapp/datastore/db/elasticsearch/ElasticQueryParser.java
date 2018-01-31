@@ -27,32 +27,29 @@ public class ElasticQueryParser {
     }
 
     List<Map<String, Object>> getDocuments() {
-        try {
-            // TODO: evaluate searchtype query
-            return join(_query);
-        } catch (IndexNotFoundException e) {
-            HashMap<String, Object> err = new HashMap<>();
-            err.put("error", "IndexNotFoundException");
-            List<Map<String, Object>> errList = new LinkedList<>();
-            errList.add(err);
-            return errList;
-        }
+        return exec(_query);
     }
 
-    private List<Map<String, Object>> join(Query q) {
+    private List<Map<String, Object>> exec(Query q) {
         if (q == null) {
             return Collections.emptyList();
         }
 
         List<Map<String, Object>> results = new LinkedList<>();
         BoolQueryBuilder boolQuery = getFilterBoolQueryBuilder(safe(q.getFilters()));
+        SearchResponse response;
 
-        SearchResponse response = _client.prepareSearch(q.getTable())
-                .setScroll(new TimeValue(_scrollInMillis))
-                .setTypes(q.getTable())
-                .setSize(_batchSize)
-                .setQuery(boolQuery)
-                .get();
+        try {
+            response = _client.prepareSearch(q.getTable())
+                    .setScroll(new TimeValue(_scrollInMillis))
+                    .setTypes(q.getTable())
+                    .setSize(_batchSize)
+                    .setQuery(boolQuery)
+                    .get();
+        } catch (IndexNotFoundException e) {
+            return Collections.emptyList();
+        }
+
         SearchHitIterator iter = new SearchHitIterator(_client, response);
 
         while (iter.hasNext()) {
@@ -63,7 +60,7 @@ public class ElasticQueryParser {
                 List<Filter> innerJoinFilters = innerJoin.getFilters() == null ? new LinkedList<>() : innerJoin.getFilters();
                 innerJoinFilters.addAll(convertJoinAttributesToFilters(doc, q.getJoinAttributes()));
                 doc.put(q.getJoinAttributeName(),
-                        join(new Query(innerJoin.getSearchType(),
+                        exec(new Query(innerJoin.getSearchType(),
                                 innerJoin.getTable(),
                                 innerJoinFilters,
                                 innerJoin.getJoin(),
