@@ -5,7 +5,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 
 public class SearchType {
     public enum Type {
-        COUNT, MAX, MIN, SUM, AVERAGE, SEARCH, UNKOWN;
+        COUNT, MAX, MIN, SUM, AVG, SEARCH, UNKOWN;
 
         @Override
         public String toString() {
@@ -18,8 +18,8 @@ public class SearchType {
                     return "min";
                 case SUM:
                     return "sum";
-                case AVERAGE:
-                    return "average";
+                case AVG:
+                    return "avg";
                 case SEARCH:
                     return "search";
                 default:
@@ -52,7 +52,7 @@ public class SearchType {
             case "sum":
                 return Type.SUM;
             case "average":
-                return Type.AVERAGE;
+                return Type.AVG;
             case "search":
                 return Type.SEARCH;
             default:
