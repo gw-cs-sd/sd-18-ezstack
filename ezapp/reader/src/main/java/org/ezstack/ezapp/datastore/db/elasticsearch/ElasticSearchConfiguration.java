@@ -17,7 +17,7 @@ public class ElasticSearchConfiguration {
         @Valid
         @NotNull
         @JsonProperty("port")
-        private  int _port;
+        private int _port;
 
         public String getAddress() {
             return _address;

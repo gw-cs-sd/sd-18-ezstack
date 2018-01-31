@@ -24,6 +24,11 @@
             <artifactId>ezapp-reader</artifactId>
             <version>${project.version}</version>
         </dependency>
+        <dependency>
+            <groupId>org.ezstack.ezapp</groupId>
+            <artifactId>ezapp-query-bus</artifactId>
+            <version>${project.version}</version>
+        </dependency>
     </dependencies>
 
     <build>
