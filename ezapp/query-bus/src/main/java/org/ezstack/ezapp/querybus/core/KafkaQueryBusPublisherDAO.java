@@ -82,7 +82,7 @@ public class KafkaQueryBusPublisherDAO {
         }
     }
 
-    public void publishQueryMetadata(QueryMetadata queryMetadata) {
+    public void publishQueryMetadataAsync(QueryMetadata queryMetadata) {
         Future<RecordMetadata> future = _producer.send(new ProducerRecord<String, JsonNode>(_queryBusTopic, queryMetadata.getQueryIdentifier(),
                 _objectMapper.valueToTree(queryMetadata)), new Callback() {
             // TODO: add a metric for failures and successes

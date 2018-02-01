@@ -6,6 +6,6 @@ import java.util.concurrent.Future;
 
 public interface QueryBusPublisher {
 
-    void publishQuery(Query query, long responseTimeMs);
+    void publishQueryAsync(Query query, long responseTimeMs);
 
 }

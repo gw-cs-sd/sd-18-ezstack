@@ -15,7 +15,7 @@ public class DefaultQueryBusPublisher implements QueryBusPublisher {
     }
 
     @Override
-    public void publishQuery(Query query, long responseTimeMs) {
-        _kafkaQueryBusPublisherDAO.publishQueryMetadata(new QueryMetadata(query, responseTimeMs));
+    public void publishQueryAsync(Query query, long responseTimeMs) {
+        _kafkaQueryBusPublisherDAO.publishQueryMetadataAsync(new QueryMetadata(query, responseTimeMs));
     }
 }

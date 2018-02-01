@@ -91,7 +91,7 @@ public class DataStoreResource1 {
         List<Map<String, Object>> ret = _dataReader.getDocuments(scrollInMillis, batchSize, query);
 
         //send to deity for analysis
-        _queryBusPublisher.publishQuery(query, System.currentTimeMillis() - timeStart);
+        _queryBusPublisher.publishQueryAsync(query, System.currentTimeMillis() - timeStart);
 
         return ret;
     }
