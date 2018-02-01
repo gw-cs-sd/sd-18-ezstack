@@ -20,6 +20,8 @@ public class QueryBusModule extends PrivateModule {
 
     private static final int MAX_PUBLISH_RETRIES = 2;
     private static final int BATCH_TIME_INTERVAL_MS = 250;
+    private static final int REQUEST_TIMEOUT_MS_CONFIG = 3000;
+    private static final int TRANSACTION_TIMEOUT_CONFIG = 3000;
 
     private final QueryBusConfiguration _configuration;
 
@@ -47,8 +49,8 @@ public class QueryBusModule extends PrivateModule {
 
         props.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, StringSerializer.class);
         props.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, JsonSerializer.class);
-        props.put(ProducerConfig.REQUEST_TIMEOUT_MS_CONFIG, 3000);
-        props.put(ProducerConfig.TRANSACTION_TIMEOUT_CONFIG, 3000);
+        props.put(ProducerConfig.REQUEST_TIMEOUT_MS_CONFIG, REQUEST_TIMEOUT_MS_CONFIG);
+        props.put(ProducerConfig.TRANSACTION_TIMEOUT_CONFIG, TRANSACTION_TIMEOUT_CONFIG);
         // TODO: find a way to call producer.close when service terminates
         return new KafkaProducer<String, JsonNode>(props);
     }
