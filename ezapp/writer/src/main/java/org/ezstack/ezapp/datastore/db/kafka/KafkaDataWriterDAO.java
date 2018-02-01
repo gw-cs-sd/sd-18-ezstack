@@ -27,7 +27,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 public class KafkaDataWriterDAO {
 
-    private final Logger _log = LoggerFactory.getLogger(KafkaDataWriterDAO.class);
+    private final static Logger LOG = LoggerFactory.getLogger(KafkaDataWriterDAO.class);
 
     private static final int ZK_SESSION_TIMEOUT_IN_MS = 15 * 1000;
     private static final int ZK_CONNECTION_TIMEOUT_IN_MS = 10 * 1000;
@@ -57,7 +57,7 @@ public class KafkaDataWriterDAO {
 
     private void createDocumentTopic() {
 
-        _log.info("Creating topic {}", _documentTopic);
+        LOG.info("Creating topic {}", _documentTopic);
 
         ZooKeeperClientWrapper zkClientWrapper = null;
         try {
@@ -69,7 +69,7 @@ public class KafkaDataWriterDAO {
             AdminUtils.createTopic(zkUtils, _documentTopic, _documentTopicPartitionCount, 1, topicConfiguration, RackAwareMode.Safe$.MODULE$);
         } catch (Exception e) {
             if (Throwables.getRootCause(e) instanceof TopicExistsException) {
-                _log.info("Topic {} already exists, proceeding without creation.", _documentTopic);
+                LOG.info("Topic {} already exists, proceeding without creation.", _documentTopic);
             } else {
                 Throwables.throwIfUnchecked(e);
             }

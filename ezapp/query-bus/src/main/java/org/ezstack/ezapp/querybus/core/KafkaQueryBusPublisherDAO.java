@@ -28,7 +28,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 public class KafkaQueryBusPublisherDAO {
 
-    private final Logger _log = LoggerFactory.getLogger(KafkaQueryBusPublisherDAO.class);
+    private static final Logger LOG = LoggerFactory.getLogger(KafkaQueryBusPublisherDAO.class);
 
     private static final int ZK_SESSION_TIMEOUT_IN_MS = 15 * 1000;
     private static final int ZK_CONNECTION_TIMEOUT_IN_MS = 10 * 1000;
@@ -59,7 +59,7 @@ public class KafkaQueryBusPublisherDAO {
 
     private void createQueryBusTopic() {
 
-        _log.info("Creating topic {}", _queryBusTopic);
+        LOG.info("Creating topic {}", _queryBusTopic);
 
         ZooKeeperClientWrapper zkClientWrapper = null;
         try {
@@ -71,7 +71,7 @@ public class KafkaQueryBusPublisherDAO {
             AdminUtils.createTopic(zkUtils, _queryBusTopic, _queryBusTopicPartitionCount, 1, topicConfiguration, RackAwareMode.Safe$.MODULE$);
         } catch (Exception e) {
             if (Throwables.getRootCause(e) instanceof TopicExistsException) {
-                _log.info("Topic {} already exists, proceeding without creation.", _queryBusTopic);
+                LOG.info("Topic {} already exists, proceeding without creation.", _queryBusTopic);
             } else {
                 Throwables.throwIfUnchecked(e);
             }

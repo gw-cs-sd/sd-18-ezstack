@@ -18,6 +18,9 @@ import java.util.Properties;
 
 public class QueryBusModule extends PrivateModule {
 
+    private static final int MAX_PUBLISH_RETRIES = 2;
+    private static final int BATCH_TIME_INTERVAL_MS = 250;
+
     private final QueryBusConfiguration _configuration;
 
     public QueryBusModule(QueryBusConfiguration configuration) {
@@ -37,9 +40,8 @@ public class QueryBusModule extends PrivateModule {
 
         Properties props = new Properties();
         props.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, _configuration.getBootstrapServers());
-        props.put(ProducerConfig.ACKS_CONFIG, "1");
-        props.put(ProducerConfig.RETRIES_CONFIG, 0);
-        props.put(ProducerConfig.LINGER_MS_CONFIG, 250);
+        props.put(ProducerConfig.RETRIES_CONFIG, MAX_PUBLISH_RETRIES);
+        props.put(ProducerConfig.LINGER_MS_CONFIG, BATCH_TIME_INTERVAL_MS);
 
         props.put(ProducerConfig.CLIENT_ID_CONFIG, _configuration.getProducerName());
 

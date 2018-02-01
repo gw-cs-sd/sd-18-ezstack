@@ -8,7 +8,7 @@ import java.util.List;
 
 
 public class ElasticSearchConfiguration {
-    public static class TransportAddressConfig {
+    public class TransportAddressConfig {
         @Valid
         @NotNull
         @JsonProperty("address")
