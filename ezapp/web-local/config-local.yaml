@@ -1,7 +1,7 @@
 
 dataWriter:
   bootstrapServers: "localhost:9092"
-  producerName: "EZapp"
+  producerName: "EZapp-dataWriter"
   writerTopicName: "documents"
   writerTopicPartitionCount: 1
   zookeeperHosts: "localhost:2181"
@@ -9,3 +9,9 @@ elasticConfiguration:
     transportAddresses:
         - address: "localhost"
           port: 9300
+queryBus:
+  bootstrapServers: "localhost:9092"
+  producerName: "EZapp-queryBus"
+  queryBusTopicName: "queries"
+  queryBusTopicPartitionCount: 1
+  zookeeperHosts: "localhost:2181"

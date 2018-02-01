@@ -8,7 +8,7 @@ import java.util.List;
 
 
 public class ElasticSearchConfiguration {
-    public static class TransportAddressConfig {
+    public class TransportAddressConfig {
         @Valid
         @NotNull
         @JsonProperty("address")
@@ -17,7 +17,7 @@ public class ElasticSearchConfiguration {
         @Valid
         @NotNull
         @JsonProperty("port")
-        private  int _port;
+        private int _port;
 
         public String getAddress() {
             return _address;

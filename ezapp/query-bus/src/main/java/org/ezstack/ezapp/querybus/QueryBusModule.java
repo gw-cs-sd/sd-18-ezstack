@@ -1,40 +1,39 @@
-package org.ezstack.ezapp.datastore;
+package org.ezstack.ezapp.querybus;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.google.inject.PrivateModule;
 import com.google.inject.Provides;
 import com.google.inject.Singleton;
 import com.google.inject.name.Named;
-import org.apache.kafka.connect.json.JsonSerializer;
-import org.ezstack.ezapp.datastore.api.DataWriter;
-import org.ezstack.ezapp.datastore.core.DefaultDataWriter;
 import org.apache.kafka.clients.producer.KafkaProducer;
 import org.apache.kafka.clients.producer.Producer;
 import org.apache.kafka.clients.producer.ProducerConfig;
 import org.apache.kafka.common.serialization.StringSerializer;
-import org.ezstack.ezapp.datastore.db.kafka.KafkaDataWriterDAO;
+import org.apache.kafka.connect.json.JsonSerializer;
+import org.ezstack.ezapp.querybus.api.QueryBusPublisher;
+import org.ezstack.ezapp.querybus.core.DefaultQueryBusPublisher;
+import org.ezstack.ezapp.querybus.core.KafkaQueryBusPublisherDAO;
 
 import java.util.Properties;
 
-public class WriterModule extends PrivateModule {
-    // batch size will remain at 0 until it is proven that this doesn't endanger durability
-    private static final int MAX_BATCH_SIZE = 0;
+public class QueryBusModule extends PrivateModule {
+
     private static final int MAX_PUBLISH_RETRIES = 2;
+    private static final int BATCH_TIME_INTERVAL_MS = 250;
     private static final int REQUEST_TIMEOUT_MS_CONFIG = 3000;
     private static final int TRANSACTION_TIMEOUT_CONFIG = 3000;
-    private static final String ACKS_CONFIG = "all";
 
+    private final QueryBusConfiguration _configuration;
 
-    private final WriterConfiguration _configuration;
-
-    public WriterModule(WriterConfiguration writerConfiguration) {
-        _configuration = writerConfiguration;
+    public QueryBusModule(QueryBusConfiguration configuration) {
+        _configuration = configuration;
     }
 
+    @Override
     protected void configure() {
-        bind(DataWriter.class).to(DefaultDataWriter.class).asEagerSingleton();
-        bind(KafkaDataWriterDAO.class).asEagerSingleton();
-        expose(DataWriter.class);
+        bind(KafkaQueryBusPublisherDAO.class).asEagerSingleton();
+        bind(QueryBusPublisher.class).to(DefaultQueryBusPublisher.class).asEagerSingleton();
+        expose(QueryBusPublisher.class);
     }
 
     @Provides
@@ -43,10 +42,8 @@ public class WriterModule extends PrivateModule {
 
         Properties props = new Properties();
         props.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, _configuration.getBootstrapServers());
-        props.put(ProducerConfig.ACKS_CONFIG, ACKS_CONFIG);
         props.put(ProducerConfig.RETRIES_CONFIG, MAX_PUBLISH_RETRIES);
-
-        props.put(ProducerConfig.BATCH_SIZE_CONFIG, MAX_BATCH_SIZE);
+        props.put(ProducerConfig.LINGER_MS_CONFIG, BATCH_TIME_INTERVAL_MS);
 
         props.put(ProducerConfig.CLIENT_ID_CONFIG, _configuration.getProducerName());
 
@@ -60,16 +57,16 @@ public class WriterModule extends PrivateModule {
 
     @Provides
     @Singleton
-    @Named("documentTopicPartitionCount")
+    @Named("queryBusTopicPartitionCount")
     int provideDocumentTopicPartitionCount() {
-        return _configuration.getWriterTopicPartitionCount();
+        return _configuration.getQueryBusTopicPartitionCount();
     }
 
     @Provides
     @Singleton
-    @Named("documentTopic")
+    @Named("queryBusTopic")
     String provideDocumentTopic() {
-        return _configuration.getWriterTopicName();
+        return _configuration.getQueryBusTopicName();
     }
 
     @Provides

@@ -2,6 +2,7 @@ package org.ezstack.ezapp.web.resources;
 
 import com.codahale.metrics.annotation.Timed;
 import org.ezstack.ezapp.datastore.api.*;
+import org.ezstack.ezapp.querybus.api.QueryBusPublisher;
 
 import javax.ws.rs.Consumes;
 import javax.ws.rs.Produces;
@@ -25,10 +26,12 @@ public class DataStoreResource1 {
 
     private final DataWriter _dataWriter;
     private final DataReader _dataReader;
+    private final QueryBusPublisher _queryBusPublisher;
 
-    public DataStoreResource1(DataWriter dataWriter, DataReader dataReader) {
+    public DataStoreResource1(DataWriter dataWriter, DataReader dataReader, QueryBusPublisher queryBusPublisher) {
         _dataWriter = dataWriter;
         _dataReader = dataReader;
+        _queryBusPublisher = queryBusPublisher;
     }
 
     @POST
@@ -84,9 +87,12 @@ public class DataStoreResource1 {
     public List<Map<String, Object>> search(@QueryParam("scroll") @DefaultValue("120000") long scrollInMillis,
                                             @QueryParam("batchSize") @DefaultValue("100") int batchSize,
                                             Query query) {
-        long currentTimeInMs = System.currentTimeMillis();
+        long timeStart = System.currentTimeMillis();
         List<Map<String, Object>> ret = _dataReader.getDocuments(scrollInMillis, batchSize, query);
-        // new QueryMetaData(query, System.currentTimeMillis()-currentTimeInMs); // send it to quag for analysis
+
+        //send to deity for analysis
+        _queryBusPublisher.publishQueryAsync(query, System.currentTimeMillis() - timeStart);
+
         return ret;
     }
 

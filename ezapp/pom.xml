@@ -16,6 +16,7 @@
         <module>denormalizer</module>
         <module>samza-elasticsearch</module>
         <module>reader</module>
+        <module>query-bus</module>
     </modules>
     <name>EZapp</name>
 

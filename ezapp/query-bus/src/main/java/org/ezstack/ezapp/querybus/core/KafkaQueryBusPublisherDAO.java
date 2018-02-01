@@ -1,9 +1,8 @@
-package org.ezstack.ezapp.datastore.db.kafka;
+package org.ezstack.ezapp.querybus.core;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.base.Throwables;
-import com.google.common.util.concurrent.Futures;
 import com.google.inject.Inject;
 import com.google.inject.name.Named;
 import kafka.admin.AdminUtils;
@@ -13,51 +12,54 @@ import kafka.utils.ZkUtils;
 import kafka.utils.ZooKeeperClientWrapper;
 import org.I0Itec.zkclient.ZkClient;
 import org.I0Itec.zkclient.ZkConnection;
+import org.apache.kafka.clients.producer.Callback;
 import org.apache.kafka.clients.producer.Producer;
 import org.apache.kafka.clients.producer.ProducerRecord;
+import org.apache.kafka.clients.producer.RecordMetadata;
 import org.apache.kafka.common.errors.TopicExistsException;
-import org.ezstack.ezapp.datastore.api.KeyBuilder;
-import org.ezstack.ezapp.datastore.api.Update;
+import org.ezstack.ezapp.querybus.api.QueryMetadata;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.Properties;
+import java.util.concurrent.*;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
-public class KafkaDataWriterDAO {
+public class KafkaQueryBusPublisherDAO {
 
-    private final static Logger LOG = LoggerFactory.getLogger(KafkaDataWriterDAO.class);
+    private static final Logger LOG = LoggerFactory.getLogger(KafkaQueryBusPublisherDAO.class);
 
     private static final int ZK_SESSION_TIMEOUT_IN_MS = 15 * 1000;
     private static final int ZK_CONNECTION_TIMEOUT_IN_MS = 10 * 1000;
 
     private final Producer<String, JsonNode> _producer;
-    private final String _documentTopic;
+    private final String _queryBusTopic;
     private final String _zookeeperHosts;
-    private final int _documentTopicPartitionCount;
+    private final int _queryBusTopicPartitionCount;
     private final ObjectMapper _objectMapper;
 
     @Inject
-    public KafkaDataWriterDAO(Producer<String, JsonNode> producer, @Named("documentTopic") String documentTopic,
+    public KafkaQueryBusPublisherDAO(Producer<String, JsonNode> producer, @Named("queryBusTopic") String queryBusTopic,
                               @Named("zookeeperHosts") String zookeeperHosts,
-                              @Named("documentTopicPartitionCount") int documentTopicPartitionCount) {
+                              @Named("queryBusTopicPartitionCount") int queryBusTopicPartitionCount) {
         checkNotNull(producer, "producer");
-        checkNotNull(documentTopic, "documentTopic");
+        checkNotNull(queryBusTopic, "queryBusTopic");
         checkNotNull(zookeeperHosts, "zookeeperHosts");
 
         _producer = producer;
-        _documentTopic = documentTopic;
+        _queryBusTopic = queryBusTopic;
         _zookeeperHosts = zookeeperHosts;
-        _documentTopicPartitionCount = documentTopicPartitionCount;
+        _queryBusTopicPartitionCount = queryBusTopicPartitionCount;
         _objectMapper = new ObjectMapper();
 
-        createDocumentTopic();
+        createQueryBusTopic();
     }
 
-    private void createDocumentTopic() {
 
-        LOG.info("Creating topic {}", _documentTopic);
+    private void createQueryBusTopic() {
+
+        LOG.info("Creating topic {}", _queryBusTopic);
 
         ZooKeeperClientWrapper zkClientWrapper = null;
         try {
@@ -66,10 +68,10 @@ public class KafkaDataWriterDAO {
 
             Properties topicConfiguration = new Properties();
             // TODO: make replication factor configurable
-            AdminUtils.createTopic(zkUtils, _documentTopic, _documentTopicPartitionCount, 1, topicConfiguration, RackAwareMode.Safe$.MODULE$);
+            AdminUtils.createTopic(zkUtils, _queryBusTopic, _queryBusTopicPartitionCount, 1, topicConfiguration, RackAwareMode.Safe$.MODULE$);
         } catch (Exception e) {
             if (Throwables.getRootCause(e) instanceof TopicExistsException) {
-                LOG.info("Topic {} already exists, proceeding without creation.", _documentTopic);
+                LOG.info("Topic {} already exists, proceeding without creation.", _queryBusTopic);
             } else {
                 Throwables.throwIfUnchecked(e);
             }
@@ -80,9 +82,17 @@ public class KafkaDataWriterDAO {
         }
     }
 
-    public void update(Update update) {
-        Futures.getUnchecked(_producer.send(new ProducerRecord<String, JsonNode>(_documentTopic,
-                KeyBuilder.hashKey(update.getTable(), update.getKey()),
-                _objectMapper.valueToTree(update))));
+    public void publishQueryMetadataAsync(QueryMetadata queryMetadata) {
+        Future<RecordMetadata> future = _producer.send(new ProducerRecord<String, JsonNode>(_queryBusTopic, queryMetadata.getQueryIdentifier(),
+                _objectMapper.valueToTree(queryMetadata)), new Callback() {
+            // TODO: add a metric for failures and successes
+            @Override
+            public void onCompletion(RecordMetadata metadata, Exception exception) {
+                if (exception != null) {
+                    throw new RuntimeException(exception);
+                }
+            }
+        });
+
     }
 }
