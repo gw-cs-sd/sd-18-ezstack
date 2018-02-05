@@ -54,6 +54,7 @@ function info {
 
 function clean {
     rm -rf ${DIR}/deploy
+    rm -rf /tmp/kafka-logs /tmp/zookeeper
     ${DIR}/grid install zookeeper
     ${DIR}/grid install kafka
     ${DIR}/grid-elastic install elasticsearch

@@ -1,11 +1,14 @@
-package org.ezstack.ezapp.datastore.api;
+package org.ezstack.denormalizer.model;
 
-import com.fasterxml.jackson.annotation.JsonCreator;
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.*;
 import com.fasterxml.jackson.databind.util.ISO8601Utils;
+import com.google.common.base.Preconditions;
+import org.ezstack.ezapp.datastore.api.DataType;
+import org.ezstack.ezapp.datastore.api.Names;
+import org.ezstack.ezapp.datastore.api.Update;
 
 import java.util.Date;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 
@@ -16,7 +19,7 @@ public class Document {
 
     private static final long NUM_100NS_INTERVALS_SINCE_UUID_EPOCH = 0x01b21dd213814000L;
 
-    private final String _table;
+    private String _table;
     private final String _key;
     private final UUID _firstUpdateAt;
     private UUID _lastUpdateAt;
@@ -28,21 +31,20 @@ public class Document {
     @JsonCreator
     public Document(@JsonProperty("_table") String table, @JsonProperty("_key") String key,
                     @JsonProperty("_firstUpdateAt") UUID firstUpdateAt, @JsonProperty("_lastUpdateAt") UUID lastUpdateAt,
-                    @JsonProperty("_data") Map<String, Object> data, @JsonProperty("_version") int version) {
+                    @JsonProperty("_version") int version) {
 
         checkNotNull(table, "table");
         checkNotNull(key, "key");
-        checkNotNull(data, "data");
         checkNotNull(firstUpdateAt, "firstUpdateAt");
         checkNotNull(lastUpdateAt, "lastUpdateAt");
-        checkArgument(Names.isLegalTableName(table), "Invalid Table Name");
+        Preconditions.checkArgument(Names.isLegalTableName(table), "Invalid Table Name");
         checkArgument(Names.isLegalKey("Invalid key"));
 
         _table = table;
         _key = key;
         _firstUpdateAt = firstUpdateAt;
         _lastUpdateAt = lastUpdateAt;
-        _data = data;
+        _data = new HashMap<>();
         _version = version;
 
         _hasMutated = false;
@@ -77,6 +79,12 @@ public class Document {
             _lastUpdateAt = update.getTimestamp();
             _hasMutated = false;
         }
+    }
+
+    @JsonIgnore
+    public void setTable(String table) {
+        checkArgument(Names.isLegalTableName(table), "Invalid Table Name");
+        _table = table;
     }
 
     private void resolveData(Map<String, Object> updatedData, Map<String, Object> dataToUpdate, UUID updatedDataTimestamp) {
@@ -136,13 +144,22 @@ public class Document {
         return _lastUpdateAt;
     }
 
-    @JsonProperty("_data")
+    @JsonProperty("_version")
+    public int getVersion() {
+        return _version;
+    }
+
+    @JsonAnyGetter
     public Map<String, Object> getData() {
         return _data;
     }
 
-    @JsonProperty("_version")
-    public int getVersion() {
-        return _version;
+    @JsonAnySetter
+    public void setDataField(String key, Object value) {
+        _data.put(key, value);
+    }
+
+    public Object getValue(String key) {
+        return _data.get(key);
     }
 }

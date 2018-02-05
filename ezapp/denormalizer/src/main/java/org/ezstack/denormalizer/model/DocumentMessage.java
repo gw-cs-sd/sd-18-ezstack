@@ -1,4 +1,4 @@
-import org.ezstack.ezapp.datastore.api.Document;
+package org.ezstack.denormalizer.model;
 
 public class DocumentMessage {
 

@@ -1,7 +1,8 @@
-package org.ezstack.ezapp.datastore.api;
+package org.ezstack.denormalizer;
 
-import com.datastax.driver.core.utils.UUIDs;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.ezstack.denormalizer.model.Document;
+import org.ezstack.ezapp.datastore.api.Update;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -15,7 +16,7 @@ import java.util.UUID;
 
 public class DocumentTest {
 
-    private final String jsonDoc = "{\"_table\":\"comment\",\"_key\":\"dsfaf3\",\"_firstUpdateAt\":\"90cec5d0-c8b7-11e7-8a28-ff35eed18bcb\",\"_lastUpdateAt\":\"90cec5d0-c8b7-11e7-8a28-ff35eed18bcb\",\"_data\":{\"author\":{\"firstName\":\"Bob\",\"lastName\":\"Johnson\"},\"title\":\"Best Ever!\",\"likes\":50},\"_version\":2}";
+    private final String jsonDoc = "{\"_table\":\"comment\",\"_key\":\"dsfaf3\",\"_firstUpdateAt\":\"90cec5d0-c8b7-11e7-8a28-ff35eed18bcb\",\"_lastUpdateAt\":\"90cec5d0-c8b7-11e7-8a28-ff35eed18bcb\",\"author\":{\"firstName\":\"Bob\",\"lastName\":\"Johnson\"},\"title\":\"Best Ever!\",\"likes\":50,\"_version\":2}";
     private Document document;
     private ObjectMapper mapper;
 
@@ -23,6 +24,13 @@ public class DocumentTest {
     public void buildDoc() throws IOException {
         mapper = new ObjectMapper();
         document = mapper.readValue(jsonDoc, Document.class);
+
+        try {
+            System.out.println(mapper.writeValueAsString(document));
+        }
+        catch (Exception e) {
+
+        }
     }
 
     @Test
