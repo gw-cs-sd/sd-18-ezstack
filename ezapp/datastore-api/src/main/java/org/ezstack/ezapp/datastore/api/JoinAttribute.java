@@ -13,9 +13,9 @@ import javax.validation.constraints.NotNull;
  * The following class is used to
  */
 public class JoinAttribute {
-    private String _outerAttribute;
+    private final String _outerAttribute;
 
-    private String _innerAttribute;
+    private final String _innerAttribute;
 
     @JsonCreator
     public JoinAttribute(@NotNull @JsonProperty("outerAttribute") String outerAttribute,

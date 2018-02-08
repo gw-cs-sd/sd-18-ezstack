@@ -1,8 +1,9 @@
 package org.ezstack.denormalizer.core;
 
-import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.common.base.MoreObjects;
 import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.Lists;
 import org.apache.samza.application.StreamApplication;
 import org.apache.samza.config.Config;
 import org.apache.samza.operators.MessageStream;
@@ -18,6 +19,7 @@ import org.apache.samza.task.TaskCoordinator;
 import org.ezstack.denormalizer.model.DocumentMessage;
 import org.ezstack.denormalizer.serde.JsonSerdeV3;
 import org.ezstack.denormalizer.model.Document;
+import org.ezstack.ezapp.datastore.api.JoinAttribute;
 import org.ezstack.ezapp.datastore.api.KeyBuilder;
 import org.ezstack.ezapp.datastore.api.Query;
 import org.ezstack.ezapp.datastore.api.Update;
@@ -25,53 +27,61 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.*;
-import java.util.function.Function;
+
+import static org.ezstack.ezapp.datastore.api.KeyBuilder.*;
 
 public class DocumentResolverApp implements StreamApplication {
 
     private static final Logger log = LoggerFactory.getLogger(DocumentResolverApp.class);
     private static final ObjectMapper mapper = new ObjectMapper();
-    Query query = createSampleQuery();
-    List queries = new ArrayList<Query>();
-    Map<String, Query> queryMap = new HashMap<>();
+    Collection<Query> queries = createSampleQuerys();
+    Map<String, List<Query>> queryMap = new HashMap<>();
 
     public void init(StreamGraph streamGraph, Config config) {
 
         // TODO: move input stream name into properties
         MessageStream<Update> updates = streamGraph.getInputStream("documents", new JsonSerdeV3<>(Update.class));
-        
+
         MessageStream<Document> documents = updates.flatMap(new ResolveFunction());
 
         IndexToESFunction indexToESFunction = new IndexToESFunction();
 
         documents.sink(indexToESFunction);
 
-        documents.flatMap(new FanoutFunction()).flatMap(new JoinFunction()).sink(indexToESFunction);
-//        updates
-//                .flatMap(new ResolveFunction())
-//                .sink(new IndexToESFunction());
+        documents.flatMap(new FanoutFunction())
+                .partitionBy(DocumentMessage::getPartitionKey, DocumentMessage::getDocument, "partition").flatMap(new JoinFunction()).sink(indexToESFunction);
     }
 
     private void buildQueryMap() {
-
+        for (Query query : queries) {
+            Query outerQuery = query;
+            while (query != null) {
+                String tableKey = query.getTable();
+                List<Query> queriesForTable = MoreObjects.firstNonNull(queryMap.get(tableKey), new LinkedList<>());
+                queriesForTable.add(outerQuery);
+                queryMap.put(tableKey, queriesForTable);
+                query = query.getJoin();
+            }
+        }
     }
 
-    private Query createSampleQuery() {
-//        String jsonObject = "{\n" +
-//                "  \"searchType\" : [],\n" +
-//                "  \"table\" : \"teachers\",\n" +
-//                "  \"join\" : {\n" +
-//                "    \"table\": \"students\"\n" +
-//                "  },\n" +
-//                "  \"joinAttributeName\" : \"students\",\n" +
-//                "  \"joinAttributes\" : [\n" +
-//                "    {\n" +
-//                "      \"outerAttribute\" : \"id\",\n" +
-//                "      \"innerAttribute\" : \"teacher_id\"\n" +
-//                "    }\n" +
-//                "  ]\n" +
-//                "}";
+    private Collection<Query> createSampleQuerys() {
         String jsonObject = "{\n" +
+                "  \"searchType\" : [],\n" +
+                "  \"table\" : \"teachers\",\n" +
+                "  \"join\" : {\n" +
+                "    \"table\": \"students\"\n" +
+                "  },\n" +
+                "  \"joinAttributeName\" : \"students\",\n" +
+                "  \"joinAttributes\" : [\n" +
+                "    {\n" +
+                "      \"outerAttribute\" : \"id\",\n" +
+                "      \"innerAttribute\" : \"teacher_id\"\n" +
+                "    }\n" +
+                "  ]\n" +
+                "}";
+
+        String jsonObject1 = "{\n" +
                 "  \"searchType\" : [],\n" +
                 "  \"table\" : \"students\",\n" +
                 "  \"join\" : {\n" +
@@ -86,18 +96,10 @@ public class DocumentResolverApp implements StreamApplication {
                 "  ]\n" +
                 "}";
         try {
-            return mapper.readValue(jsonObject, Query.class);
+            return ImmutableSet.of(mapper.readValue(jsonObject, Query.class), mapper.readValue(jsonObject1, Query.class));
         } catch (Exception e) {
             log.error(e.toString());
             return null;
-        }
-    }
-
-    private class KeyPartitionFunction implements Function<DocumentMessage, String> {
-
-        @Override
-        public String apply(DocumentMessage documentMessage) {
-            return documentMessage.getPartitionKey();
         }
     }
 
@@ -106,7 +108,46 @@ public class DocumentResolverApp implements StreamApplication {
         // This is a simple pass through implementation for the time being
         @Override
         public Collection<DocumentMessage> apply(Document document) {
-            return ImmutableSet.of(new DocumentMessage(document, document.getKey()));
+            String table = document.getTable();
+            Collection<Query> applicableQueries = MoreObjects.firstNonNull(queryMap.get(table), ImmutableSet.of());
+            Collection<DocumentMessage> messages = new LinkedList<>();
+
+            queryLoop:
+            for (Query query : applicableQueries) {
+
+                // apply filters here, and if it is not applicable, then continue
+
+                if (query.getJoin() == null) {
+                    messages.add(new DocumentMessage(document, hashKey(query.getTable(), document.getKey())));
+                    continue;
+                }
+
+
+                if (query.getTable().equals(document.getTable())) {
+                    // TODO: make this hash function avoid collisions
+                    String[] valuesForKey = new String[query.getJoinAttributes().size()];
+                    Iterator<JoinAttribute> atts = query.getJoinAttributes().iterator();
+                    for (int i = 0; i < valuesForKey.length; i++) {
+                        valuesForKey[i] = document.getValue(atts.next().getOuterAttribute()).toString();
+                        if (valuesForKey[i] == null) continue queryLoop;
+                    }
+                    messages.add(new DocumentMessage(document, hash(valuesForKey)));
+                }
+
+                if (query.getJoin().getTable().equals(document.getTable())) {
+                    // TODO: make this hash function avoid collisions
+                    String[] valuesForKey = new String[query.getJoinAttributes().size()];
+                    Iterator<JoinAttribute> atts = query.getJoinAttributes().iterator();
+                    for (int i = 0; i < valuesForKey.length; i++) {
+                        valuesForKey[i] = document.getValue(atts.next().getInnerAttribute()).toString();
+                        if (valuesForKey[i] == null) continue queryLoop;
+                    }
+                    messages.add(new DocumentMessage(document, hash(valuesForKey)));
+                }
+            }
+
+            return messages;
+
         }
     }
 
@@ -118,71 +159,6 @@ public class DocumentResolverApp implements StreamApplication {
         public void init(Config config, TaskContext context) {
             store = (KeyValueStore<String, Map<String, Object>>) context.getStore("join-store");
         }
-
-//        @Override
-//        public Collection<Document> apply(org.ezstack.denormalizer.model.DocumentMessage message) {
-//
-//            if (query.getJoin() == null) {
-//                log.info("join is null");
-//                return ImmutableSet.of();
-//            }
-//
-//            Document document = message.getDocument();
-//            String joinAttName = query.getJoinAttributeName();
-//
-//            if (query.getTable().equals(document.getTable())) {
-//                String dbKey = document.getData().get(query.getJoinAttributes().get(0).getOuterAttribute()).toString();
-//                if (dbKey == null) return ImmutableSet.of(document);
-//                Document storedDoc = mapper.convertValue(store.get(dbKey), Document.class);
-//                document.getData().put(joinAttName, storedDoc != null ? storedDoc.getData().get(joinAttName) : ImmutableSet.of());
-//                document.setTable(("denormalizedtablename"));
-//                store.put(dbKey, mapper.convertValue(document, Map.class));
-//                return ImmutableSet.of(document);
-//            }
-//
-//            else if (document.getTable().equals(query.getJoin().getTable())) {
-//                String dbKey = document.getData().get(query.getJoinAttributes().get(0).getInnerAttribute()).toString();
-//                if (dbKey == null) return ImmutableSet.of();
-//                Document storedDoc = mapper.convertValue(store.get(dbKey), Document.class);
-//
-//                if (storedDoc == null) {
-//                    storedDoc = new Document(document.getTable(), null, null,
-//                            null, new HashMap<String, Object>(), 0);
-//                    storedDoc.getData().put(joinAttName, ImmutableSet.of(document.getData()));
-//                    store.put(dbKey, mapper.convertValue(document, Map.class));
-//                    return ImmutableSet.of();
-//                }
-//
-//                List<Document> results = mapper.convertValue(storedDoc.getData().get(joinAttName), new TypeReference<List<Document>>(){});
-//                boolean objectAdded = false;
-//                for (int i = 0; i < results.size(); i++) {
-//                    if (results.get(i).getKey().equals(document.getKey())) {
-//                        results.set(i, document);
-//                        objectAdded = true;
-//                        break;
-//                    }
-//                }
-//
-//                if (!objectAdded) {
-//                    results.add(document);
-//                }
-//
-//                storedDoc.getData().put(joinAttName, mapper.convertValue(results, new TypeReference<List<Map<String, Object>>>(){}));
-//
-//                store.put(dbKey, mapper.convertValue(storedDoc, Map.class));
-//
-//                if (storedDoc.getKey() != null) {
-//                    storedDoc.setTable("denormalizedtablename");
-//                    return ImmutableSet.of(storedDoc);
-//                }
-//
-//                return ImmutableSet.of();
-//
-//
-//            }
-//
-//            return ImmutableSet.of();
-//        }
 
         private Map<String, Map<String, Document>> getJoinDataStructure(Query query) {
             Query currentQuery = query;
@@ -196,7 +172,8 @@ public class DocumentResolverApp implements StreamApplication {
             return indexMap;
         }
 
-        public Collection<Document> apply2(DocumentMessage message) {
+        @Override
+        public Collection<Document> apply(DocumentMessage message) {
             if (query.getJoin() == null) {
                 log.info("join is null");
                 return ImmutableSet.of();
