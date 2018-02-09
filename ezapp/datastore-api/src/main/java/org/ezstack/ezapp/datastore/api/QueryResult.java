@@ -2,31 +2,34 @@ package org.ezstack.ezapp.datastore.api;
 
 import com.fasterxml.jackson.annotation.JsonUnwrapped;
 
+import java.util.HashMap;
 import java.util.Map;
+import java.util.List;
 
 public class QueryResult {
     private Map<String, Object> _queryResults;
+
+    public QueryResult() {
+        _queryResults = new HashMap<>();
+    }
 
     @JsonUnwrapped
     public Map<String, Object> getQueryResults() {
         return _queryResults;
     }
 
-    public void setQueryResults( Map<String, Object> queryResults) {
-        _queryResults = queryResults;
+    public boolean addAggregation(SearchType type, Object value) {
+        if (SearchTypeAggregationHelper.isValidAggregation(value) == null) {
+            return false;
+        }
+
+        _queryResults.put(type.toString(), value);
+        return true;
     }
 
-    /**
-     * @param agg
-     * @return agg if it is of type int or double, otherwise null
-     */
-    public static Object isValidAggregation(Object agg) {
-        switch (DataType.getDataType(agg)) {
-            case DOUBLE:
-            case INTEGER: // fall through
-                return agg;
-            default:
-                return null;
-        }
+    public void addDocuments(List<Map<String, Object>> docs) {
+        _queryResults.put("_documents", docs);
     }
+
+
 }
