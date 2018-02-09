@@ -59,4 +59,9 @@ public class SearchType {
                 return Type.UNKOWN;
         }
     }
+
+    @Override
+    public String toString() {
+        return "_" + getType().toString() + "_" + _attributeOn;
+    }
 }
