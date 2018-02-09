@@ -10,6 +10,7 @@ import org.elasticsearch.search.SearchHit;
 import org.ezstack.ezapp.datastore.api.Filter;
 import org.ezstack.ezapp.datastore.api.JoinAttribute;
 import org.ezstack.ezapp.datastore.api.Query;
+import org.ezstack.ezapp.datastore.api.QueryHelper;
 
 import java.util.*;
 
@@ -59,6 +60,7 @@ public class ElasticQueryParser {
                 Query innerJoin = q.getJoin();
                 List<Filter> innerJoinFilters = innerJoin.getFilters() == null ? new LinkedList<>() : innerJoin.getFilters();
                 innerJoinFilters.addAll(convertJoinAttributesToFilters(doc, q.getJoinAttributes()));
+                doc = QueryHelper.filterAttributes(q.getExcludeAttributes(), q.getIncludeAttributes(), doc);
                 doc.put(q.getJoinAttributeName(),
                         exec(new Query(innerJoin.getSearchType(),
                                 innerJoin.getTable(),
@@ -68,6 +70,8 @@ public class ElasticQueryParser {
                                 innerJoin.getJoinAttributes(),
                                 innerJoin.getExcludeAttributes(),
                                 innerJoin.getIncludeAttributes())));
+            } else {
+                doc = QueryHelper.filterAttributes(q.getExcludeAttributes(), q.getIncludeAttributes(), doc);
             }
             results.add(doc);
         }
