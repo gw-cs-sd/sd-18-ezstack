@@ -37,6 +37,10 @@ public class SearchTypeAggregationHelper {
         }
     }
 
+    public SearchType getSearchType() {
+        return _searchType;
+    }
+
     public Object getResult() {
         switch (_searchType.getType()) {
             case COUNT:

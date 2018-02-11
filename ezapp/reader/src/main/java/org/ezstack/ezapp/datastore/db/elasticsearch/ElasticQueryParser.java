@@ -7,10 +7,7 @@ import org.elasticsearch.index.IndexNotFoundException;
 import org.elasticsearch.index.query.BoolQueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.search.SearchHit;
-import org.ezstack.ezapp.datastore.api.Filter;
-import org.ezstack.ezapp.datastore.api.JoinAttribute;
-import org.ezstack.ezapp.datastore.api.Query;
-import org.ezstack.ezapp.datastore.api.QueryHelper;
+import org.ezstack.ezapp.datastore.api.*;
 
 import java.util.*;
 
@@ -52,6 +49,10 @@ public class ElasticQueryParser {
         }
 
         SearchHitIterator iter = new SearchHitIterator(_client, response);
+        List<SearchTypeAggregationHelper> helpers = QueryHelper.createAggHelpers(q.getSearchTypes());
+        // if search types is empty then defaults to getting documents
+        boolean userWantsDocuments = q.getSearchTypes() == null || q.getSearchTypes().isEmpty() ?
+                true : QueryHelper.hasSearchRequest(q.getSearchTypes());
 
         while (iter.hasNext()) {
             SearchHit searchHit = iter.next();
@@ -60,9 +61,12 @@ public class ElasticQueryParser {
                 Query innerJoin = q.getJoin();
                 List<Filter> innerJoinFilters = innerJoin.getFilters() == null ? new LinkedList<>() : innerJoin.getFilters();
                 innerJoinFilters.addAll(convertJoinAttributesToFilters(doc, q.getJoinAttributes()));
+
+                QueryHelper.updateAggHelpers(helpers, doc);
                 doc = QueryHelper.filterAttributes(q.getExcludeAttributes(), q.getIncludeAttributes(), doc);
+
                 doc.put(q.getJoinAttributeName(),
-                        exec(new Query(innerJoin.getSearchType(),
+                        exec(new Query(innerJoin.getSearchTypes(),
                                 innerJoin.getTable(),
                                 innerJoinFilters,
                                 innerJoin.getJoin(),
@@ -71,6 +75,7 @@ public class ElasticQueryParser {
                                 innerJoin.getExcludeAttributes(),
                                 innerJoin.getIncludeAttributes())));
             } else {
+                QueryHelper.updateAggHelpers(helpers, doc);
                 doc = QueryHelper.filterAttributes(q.getExcludeAttributes(), q.getIncludeAttributes(), doc);
             }
             results.add(doc);
