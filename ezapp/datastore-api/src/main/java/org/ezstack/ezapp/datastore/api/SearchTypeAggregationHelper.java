@@ -4,15 +4,15 @@ import java.util.Map;
 
 public class SearchTypeAggregationHelper {
     private SearchType _searchType;
-    private int _documentCount;
-    private int _intResult;
+    private long _documentCount;
+    private long _longResult;
     private double _doubleResult;
     private DataType.JsonTypes _jsonType;
 
     public SearchTypeAggregationHelper(SearchType searchType) {
         _searchType = searchType;
         _documentCount = 0;
-        _intResult = 0;
+        _longResult = 0;
         _doubleResult = 0.0;
         _jsonType = DataType.JsonTypes.UNKNOWN;
     }
@@ -32,40 +32,102 @@ public class SearchTypeAggregationHelper {
                 sum(doc);
                 break;
             case AVG:
-                avg(doc);
+                sum(doc); // resultVariable/documentCount upon retrieving result
                 break;
         }
     }
 
     public Object getResult() {
-        switch (_jsonType) {
-            case INTEGER:
-                return _intResult;
-            case DOUBLE:
-                return _doubleResult;
-            default: // not a valid agg
-                return 0;
+        switch (_searchType.getType()) {
+            case COUNT:
+                return _documentCount;
+            case MAX:
+            case MIN:
+            case SUM:
+                switch (_jsonType) {
+                    case INTEGER:
+                        return _longResult;
+                    case DOUBLE:
+                        return _doubleResult;
+                }
+            case AVG:
+                switch (_jsonType) {
+                    case INTEGER:
+                        return ((double) _longResult)/_documentCount;
+                    case DOUBLE:
+                        return ((double) _doubleResult)/_documentCount;
+                }
         }
+
+        return 0; // unrecognized
     }
 
     private void count(Map<String, Object> doc) {
-        // TODO
+        if (doc.containsKey(_searchType.getAttributeOn())) {
+            _documentCount++;
+        }
     }
 
     private void max(Map<String, Object> doc) {
-        // TODO
+        Object value = doc.get(_searchType.getAttributeOn());
+        if (isValidAggregation(value) == null) {
+            return;
+        }
+
+        count(doc);
+        detectAndChangeTypeValue(value);
+
+        if (_jsonType == DataType.JsonTypes.INTEGER) {
+            long val = (long) value;
+            if (_longResult < val) {
+                _longResult = val;
+            }
+        } else if (_jsonType == DataType.JsonTypes.DOUBLE) {
+            double val = (double) value;
+            if (_doubleResult < val) {
+                _doubleResult = val;
+            }
+        }
     }
 
     private void min(Map<String, Object> doc) {
-        // TODO
+        Object value = doc.get(_searchType.getAttributeOn());
+        if (isValidAggregation(value) == null) {
+            return;
+        }
+
+        count(doc);
+        detectAndChangeTypeValue(value);
+
+        if (_jsonType == DataType.JsonTypes.INTEGER) {
+            long val = (long) value;
+            if (_longResult > val) {
+                _longResult = val;
+            }
+        } else if (_jsonType == DataType.JsonTypes.DOUBLE) {
+            double val = (double) value;
+            if (_doubleResult > val) {
+                _doubleResult = val;
+            }
+        }
     }
 
     private void sum(Map<String, Object> doc) {
-        // TODO
-    }
+        Object value = doc.get(_searchType.getAttributeOn());
+        if (isValidAggregation(value) == null) {
+            return;
+        }
 
-    private void avg(Map<String, Object> doc) {
-        // TODO
+        count(doc);
+        detectAndChangeTypeValue(value);
+
+        if (_jsonType == DataType.JsonTypes.INTEGER) {
+            long val = (long) value;
+            _longResult += val;
+        } else if (_jsonType == DataType.JsonTypes.DOUBLE) {
+            double val = (double) value;
+            _doubleResult += val;
+        }
     }
 
     /**
@@ -89,8 +151,8 @@ public class SearchTypeAggregationHelper {
             }
         } else if (_jsonType == DataType.JsonTypes.INTEGER &&
                 DataType.getDataType(value) == DataType.JsonTypes.DOUBLE) {
-            _doubleResult = _intResult + 0.0;
-            _intResult = 0;
+            _doubleResult = _longResult + 0.0;
+            _longResult = 0;
         }
     }
 
