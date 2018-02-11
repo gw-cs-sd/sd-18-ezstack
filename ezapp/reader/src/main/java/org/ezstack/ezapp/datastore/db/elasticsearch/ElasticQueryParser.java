@@ -37,7 +37,7 @@ public class ElasticQueryParser {
         }
 
         List<Map<String, Object>> results = new LinkedList<>();
-        BoolQueryBuilder boolQuery = getFilterBoolQueryBuilder(safe(q.getFilters()));
+        BoolQueryBuilder boolQuery = getFilterBoolQueryBuilder(QueryHelper.safe(q.getFilters()));
         SearchResponse response;
 
         try {
@@ -118,9 +118,5 @@ public class ElasticQueryParser {
             }
         }
         return filters;
-    }
-
-    private static List safe(List l) {
-        return l == null ? Collections.emptyList() : l;
     }
 }
