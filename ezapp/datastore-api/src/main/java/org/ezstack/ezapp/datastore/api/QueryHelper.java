@@ -1,8 +1,6 @@
 package org.ezstack.ezapp.datastore.api;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class QueryHelper {
 
@@ -11,6 +9,53 @@ public class QueryHelper {
                                                        Map<String, Object> doc) {
         return includeAttributes == null ?
                 excludeAttributes(excludeAttributes, doc) : includeAttributes(includeAttributes, doc);
+    }
+
+    public static List<SearchTypeAggregationHelper> createAggHelpers(List<SearchType> searchTypeList) {
+        searchTypeList = safe(searchTypeList);
+        List<SearchTypeAggregationHelper> ret = new LinkedList<>();
+
+        for (SearchType st: searchTypeList) {
+            if (st.getType() != SearchType.Type.SEARCH) {
+                ret.add(new SearchTypeAggregationHelper(st));
+            }
+        }
+
+        return ret;
+    }
+
+    public static void updateAggHelpers(List<SearchTypeAggregationHelper> aggregationHelpers, Map<String, Object> doc) {
+        aggregationHelpers = safe(aggregationHelpers);
+
+        for (SearchTypeAggregationHelper helper: aggregationHelpers) {
+            helper.computeDocument(doc);
+        }
+    }
+
+    public static boolean hasSearchRequest(List<SearchType> searchTypeList) {
+        searchTypeList = safe(searchTypeList);
+
+        for (SearchType st: searchTypeList) {
+            if (st.getType() == SearchType.Type.SEARCH) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    /**
+     * @param filters
+     * @param doc
+     * @return true if document passes all filters, otherwise false
+     */
+    public static boolean meetsFilters(List<Filter> filters, Map<String, Object> doc) {
+        // TODO
+        return false;
+    }
+
+    public static List safe(List l) {
+        return l == null ? Collections.emptyList() : l;
     }
 
     private static Map<String, Object> excludeAttributes(List<String> excludeAttributes, Map<String, Object> doc) {
@@ -37,15 +82,5 @@ public class QueryHelper {
             }
         }
         return newDoc;
-    }
-
-    /**
-     * @param query
-     * @param doc
-     * @return true if document passes all filters, otherwise false
-     */
-    public static boolean meetsFilters(Query query, Map<String, Object> doc) {
-        // TODO
-        return false;
     }
 }
