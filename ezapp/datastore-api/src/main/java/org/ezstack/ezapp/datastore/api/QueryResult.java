@@ -19,12 +19,28 @@ public class QueryResult {
     }
 
     public boolean addAggregation(SearchType type, Object value) {
-        if (SearchTypeAggregationHelper.isValidAggregation(value) == null) {
+        if (SearchTypeAggregationHelper.isValidAggregation(value) == null || type.getType() == SearchType.Type.SEARCH) {
             return false;
         }
 
         _queryResults.put(type.toString(), value);
         return true;
+    }
+
+    public boolean addAggregation(SearchTypeAggregationHelper searchTypeAggregationHelper) {
+        if (searchTypeAggregationHelper.getSearchType().getType() == SearchType.Type.SEARCH) {
+            return false;
+        }
+
+        _queryResults.put(searchTypeAggregationHelper.getSearchType().toString(), searchTypeAggregationHelper.getResult());
+        return true;
+    }
+
+    public void addAggregations(List<SearchTypeAggregationHelper> helpers) {
+        helpers = QueryHelper.safe(helpers);
+        for (SearchTypeAggregationHelper helper: helpers) {
+            _queryResults.put(helper.getSearchType().toString(), helper.getResult());
+        }
     }
 
     public void addDocuments(List<Map<String, Object>> docs) {

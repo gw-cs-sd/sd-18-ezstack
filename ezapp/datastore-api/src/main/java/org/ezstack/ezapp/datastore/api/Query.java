@@ -44,7 +44,7 @@ public class Query {
     }
 
     @JsonProperty("searchType")
-    public List<SearchType> getSearchType() {
+    public List<SearchType> getSearchTypes() {
         return _searchType;
     }
 
