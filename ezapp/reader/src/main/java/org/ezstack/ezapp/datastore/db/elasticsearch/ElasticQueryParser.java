@@ -7,9 +7,7 @@ import org.elasticsearch.index.IndexNotFoundException;
 import org.elasticsearch.index.query.BoolQueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.search.SearchHit;
-import org.ezstack.ezapp.datastore.api.Filter;
-import org.ezstack.ezapp.datastore.api.JoinAttribute;
-import org.ezstack.ezapp.datastore.api.Query;
+import org.ezstack.ezapp.datastore.api.*;
 
 import java.util.*;
 
@@ -26,34 +24,35 @@ public class ElasticQueryParser {
         _client = client;
     }
 
-    List<Map<String, Object>> getDocuments() {
-        try {
-            // TODO: evaluate searchtype query
-            return join(_query);
-        } catch (IndexNotFoundException e) {
-            HashMap<String, Object> err = new HashMap<>();
-            err.put("error", "IndexNotFoundException");
-            List<Map<String, Object>> errList = new LinkedList<>();
-            errList.add(err);
-            return errList;
-        }
+    Map<String, Object> getDocuments() {
+        return exec(_query);
     }
 
-    private List<Map<String, Object>> join(Query q) {
+    private Map<String, Object> exec(Query q) {
         if (q == null) {
-            return Collections.emptyList();
+            return Collections.emptyMap();
         }
 
         List<Map<String, Object>> results = new LinkedList<>();
-        BoolQueryBuilder boolQuery = getFilterBoolQueryBuilder(safe(q.getFilters()));
+        BoolQueryBuilder boolQuery = getFilterBoolQueryBuilder(QueryHelper.safe(q.getFilters()));
+        SearchResponse response;
 
-        SearchResponse response = _client.prepareSearch(q.getTable())
-                .setScroll(new TimeValue(_scrollInMillis))
-                .setTypes(q.getTable())
-                .setSize(_batchSize)
-                .setQuery(boolQuery)
-                .get();
+        try {
+            response = _client.prepareSearch(q.getTable())
+                    .setScroll(new TimeValue(_scrollInMillis))
+                    .setTypes(q.getTable())
+                    .setSize(_batchSize)
+                    .setQuery(boolQuery)
+                    .get();
+        } catch (IndexNotFoundException e) {
+            return Collections.emptyMap();
+        }
+
         SearchHitIterator iter = new SearchHitIterator(_client, response);
+        List<SearchTypeAggregationHelper> helpers = QueryHelper.createAggHelpers(q.getSearchTypes());
+        // if search types is empty then defaults to getting documents
+        boolean userWantsDocuments = q.getSearchTypes() == null || q.getSearchTypes().isEmpty() ?
+                true : QueryHelper.hasSearchRequest(q.getSearchTypes());
 
         while (iter.hasNext()) {
             SearchHit searchHit = iter.next();
@@ -62,8 +61,12 @@ public class ElasticQueryParser {
                 Query innerJoin = q.getJoin();
                 List<Filter> innerJoinFilters = innerJoin.getFilters() == null ? new LinkedList<>() : innerJoin.getFilters();
                 innerJoinFilters.addAll(convertJoinAttributesToFilters(doc, q.getJoinAttributes()));
+
+                QueryHelper.updateAggHelpers(helpers, doc);
+                doc = QueryHelper.filterAttributes(q.getExcludeAttributes(), q.getIncludeAttributes(), doc);
+
                 doc.put(q.getJoinAttributeName(),
-                        join(new Query(innerJoin.getSearchType(),
+                        exec(new Query(innerJoin.getSearchTypes(),
                                 innerJoin.getTable(),
                                 innerJoinFilters,
                                 innerJoin.getJoin(),
@@ -71,11 +74,24 @@ public class ElasticQueryParser {
                                 innerJoin.getJoinAttributes(),
                                 innerJoin.getExcludeAttributes(),
                                 innerJoin.getIncludeAttributes())));
+            } else {
+                QueryHelper.updateAggHelpers(helpers, doc);
+                doc = QueryHelper.filterAttributes(q.getExcludeAttributes(), q.getIncludeAttributes(), doc);
             }
-            results.add(doc);
+
+            if (userWantsDocuments) {
+                results.add(doc);
+            }
         }
 
-        return results;
+        QueryResult queryResult = new QueryResult();
+        queryResult.addAggregations(helpers);
+
+        if (userWantsDocuments) {
+            queryResult.addDocuments(results);
+        }
+
+        return queryResult.getQueryResults();
     }
 
     private BoolQueryBuilder getFilterBoolQueryBuilder(List<Filter> filters) {
@@ -117,9 +133,5 @@ public class ElasticQueryParser {
             }
         }
         return filters;
-    }
-
-    private static List safe(List l) {
-        return l == null ? Collections.emptyList() : l;
     }
 }

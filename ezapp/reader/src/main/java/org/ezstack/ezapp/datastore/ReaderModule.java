@@ -11,6 +11,7 @@ import org.ezstack.ezapp.datastore.api.DataReader;
 import org.ezstack.ezapp.datastore.core.DefaultDataReader;
 import org.ezstack.ezapp.datastore.db.elasticsearch.ElasticSearchConfiguration;
 import org.ezstack.ezapp.datastore.db.elasticsearch.ElasticSearchDataReaderDAO;
+import org.ezstack.ezapp.datastore.db.elasticsearch.TransportAddressConfig;
 
 import java.net.InetAddress;
 import java.net.UnknownHostException;
@@ -40,12 +41,12 @@ public class ReaderModule extends PrivateModule {
                 .build();
         PreBuiltTransportClient client = new PreBuiltTransportClient(settings);
 
-        List<ElasticSearchConfiguration.TransportAddressConfig> transportAddresses = _elasticSearchConfiguration.getTransportAddresses();
+        List<TransportAddressConfig> transportAddresses = _elasticSearchConfiguration.getTransportAddresses();
         if (transportAddresses == null) {
             return client;
         }
 
-        for (ElasticSearchConfiguration.TransportAddressConfig node: transportAddresses) {
+        for (TransportAddressConfig node: transportAddresses) {
             try {
                 client.addTransportAddress(new TransportAddress(InetAddress.getByName(node.getAddress()), node.getPort()));
             } catch (UnknownHostException e) {

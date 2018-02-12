@@ -1,6 +1,5 @@
 package org.ezstack.ezapp.datastore.api;
 
-import java.util.List;
 import java.util.Map;
 
 public interface DataReader {
@@ -15,5 +14,5 @@ public interface DataReader {
      * @return
      *
      */
-    List<Map<String, Object>> getDocuments(long retentionTimeInMillis, int batchSize, Query query);
+    Map<String, Object> getDocuments(long retentionTimeInMillis, int batchSize, Query query);
 }

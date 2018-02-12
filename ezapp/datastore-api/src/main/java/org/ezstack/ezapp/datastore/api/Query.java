@@ -13,7 +13,7 @@ public class Query {
     @JsonIgnore
     private static final ObjectMapper mapper = new ObjectMapper();
 
-    private List<SearchType> _searchType;
+    private List<SearchType> _searchTypes;
     private String _table;
     private List<Filter> _filters;
     private Query _join;
@@ -24,7 +24,7 @@ public class Query {
     private List<String> _includeAttributes;
 
     @JsonCreator
-    public Query(@JsonProperty("searchType") List<SearchType> searchType,
+    public Query(@JsonProperty("searchTypes") List<SearchType> searchTypes,
                  @NotNull @JsonProperty("table") String table,
                  @JsonProperty("filter") List<Filter> filters,
                  @JsonProperty("join") Query join,
@@ -33,7 +33,7 @@ public class Query {
                  @JsonProperty("excludeAttributes") List<String> excludeAttributes,
                  @JsonProperty("includeAttributes") List<String> includeAttributes) {
 
-        _searchType = searchType;
+        _searchTypes = searchTypes;
         _table = table;
         _filters = filters;
         _join = join;
@@ -43,9 +43,9 @@ public class Query {
         _includeAttributes = includeAttributes;
     }
 
-    @JsonProperty("searchType")
-    public List<SearchType> getSearchType() {
-        return _searchType;
+    @JsonProperty("searchTypes")
+    public List<SearchType> getSearchTypes() {
+        return _searchTypes;
     }
 
     @JsonProperty("table")

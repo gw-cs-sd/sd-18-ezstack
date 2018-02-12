@@ -84,15 +84,12 @@ public class DataStoreResource1 {
     @Timed
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
-    public List<Map<String, Object>> search(@QueryParam("scroll") @DefaultValue("120000") long scrollInMillis,
+    public Map<String, Object> search(@QueryParam("scroll") @DefaultValue("120000") long scrollInMillis,
                                             @QueryParam("batchSize") @DefaultValue("100") int batchSize,
                                             Query query) {
         long timeStart = System.currentTimeMillis();
-        List<Map<String, Object>> ret = _dataReader.getDocuments(scrollInMillis, batchSize, query);
-
-        //send to deity for analysis
+        Map<String, Object> ret = _dataReader.getDocuments(scrollInMillis, batchSize, query);
         _queryBusPublisher.publishQueryAsync(query, System.currentTimeMillis() - timeStart);
-
         return ret;
     }
 
