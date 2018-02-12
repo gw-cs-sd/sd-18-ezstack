@@ -81,11 +81,11 @@ public class DataStoreResource1 {
     @Timed
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
-    public List<Map<String, Object>> search(@QueryParam("scroll") @DefaultValue("120000") long scrollInMillis,
+    public Map<String, Object> search(@QueryParam("scroll") @DefaultValue("120000") long scrollInMillis,
                                             @QueryParam("batchSize") @DefaultValue("100") int batchSize,
                                             Query query) {
         long currentTimeInMs = System.currentTimeMillis();
-        List<Map<String, Object>> ret = _dataReader.getDocuments(scrollInMillis, batchSize, query);
+        Map<String, Object> ret = _dataReader.getDocuments(scrollInMillis, batchSize, query);
         // new QueryMetaData(query, System.currentTimeMillis()-currentTimeInMs); // send it to quag for analysis
         return ret;
     }

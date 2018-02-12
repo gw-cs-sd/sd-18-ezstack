@@ -51,7 +51,7 @@ public class SearchType {
                 return Type.MIN;
             case "sum":
                 return Type.SUM;
-            case "average":
+            case "avg":
                 return Type.AVG;
             case "search":
                 return Type.SEARCH;

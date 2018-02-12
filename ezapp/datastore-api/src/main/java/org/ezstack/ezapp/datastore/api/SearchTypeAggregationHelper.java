@@ -82,13 +82,13 @@ public class SearchTypeAggregationHelper {
         detectAndChangeTypeValue(value);
 
         if (_jsonType == DataType.JsonTypes.INTEGER) {
-            long val = (long) value;
-            if (_longResult < val) {
+            long val = (int) value;
+            if (_longResult < val || _documentCount == 1) {
                 _longResult = val;
             }
         } else if (_jsonType == DataType.JsonTypes.DOUBLE) {
             double val = (double) value;
-            if (_doubleResult < val) {
+            if (_doubleResult < val || _documentCount == 1) {
                 _doubleResult = val;
             }
         }
@@ -104,13 +104,13 @@ public class SearchTypeAggregationHelper {
         detectAndChangeTypeValue(value);
 
         if (_jsonType == DataType.JsonTypes.INTEGER) {
-            long val = (long) value;
-            if (_longResult > val) {
+            long val = (int) value;
+            if (_longResult > val || _documentCount == 1) {
                 _longResult = val;
             }
         } else if (_jsonType == DataType.JsonTypes.DOUBLE) {
             double val = (double) value;
-            if (_doubleResult > val) {
+            if (_doubleResult > val || _documentCount == 1) {
                 _doubleResult = val;
             }
         }
@@ -126,7 +126,7 @@ public class SearchTypeAggregationHelper {
         detectAndChangeTypeValue(value);
 
         if (_jsonType == DataType.JsonTypes.INTEGER) {
-            long val = (long) value;
+            long val = (int) value;
             _longResult += val;
         } else if (_jsonType == DataType.JsonTypes.DOUBLE) {
             double val = (double) value;
