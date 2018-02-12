@@ -9,7 +9,6 @@ import org.ezstack.ezapp.datastore.api.Query;
 
 import java.util.Map;
 import java.util.Collections;
-import java.util.List;
 
 public class ElasticSearchDataReaderDAO {
     private final Client _client;
@@ -30,7 +29,7 @@ public class ElasticSearchDataReaderDAO {
         }
     }
 
-    public List<Map<String, Object>> getDocuments(long scrollInMillis, int batchSize, Query query) {
+    public Map<String, Object> getDocuments(long scrollInMillis, int batchSize, Query query) {
         return new ElasticQueryParser(scrollInMillis, batchSize, query, _client).getDocuments();
     }
 }

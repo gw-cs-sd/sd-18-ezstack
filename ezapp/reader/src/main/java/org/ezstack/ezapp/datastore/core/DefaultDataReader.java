@@ -6,7 +6,6 @@ import org.ezstack.ezapp.datastore.api.DataReader;
 import org.ezstack.ezapp.datastore.api.Query;
 import org.ezstack.ezapp.datastore.db.elasticsearch.ElasticSearchDataReaderDAO;
 
-import java.util.List;
 import java.util.Map;
 
 public class DefaultDataReader implements DataReader {
@@ -25,7 +24,7 @@ public class DefaultDataReader implements DataReader {
     }
 
     @Override
-    public List<Map<String, Object>> getDocuments(long scrollInMillis, int batchSize, Query query) {
+    public Map<String, Object> getDocuments(long scrollInMillis, int batchSize, Query query) {
         return _dataReaderDAO.getDocuments(scrollInMillis, batchSize, query);
     }
 }
