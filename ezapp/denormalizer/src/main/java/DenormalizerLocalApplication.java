@@ -2,7 +2,7 @@ import joptsimple.OptionSet;
 import org.apache.samza.config.Config;
 import org.apache.samza.runtime.LocalApplicationRunner;
 import org.apache.samza.util.CommandLine;
-import org.ezstack.denormalizer.core.DocumentResolverApp;
+import org.ezstack.denormalizer.core.DenormalizerApp;
 
 public class DenormalizerLocalApplication {
 
@@ -14,7 +14,7 @@ public class DenormalizerLocalApplication {
 
         LocalApplicationRunner runner = new LocalApplicationRunner(config);
 
-        DocumentResolverApp app = new DocumentResolverApp();
+        DenormalizerApp app = new DenormalizerApp();
 
         runner.run(app);
         runner.waitForFinish();

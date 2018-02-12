@@ -24,13 +24,6 @@ public class DocumentTest {
     public void buildDoc() throws IOException {
         mapper = new ObjectMapper();
         document = mapper.readValue(jsonDoc, Document.class);
-
-        try {
-            System.out.println(mapper.writeValueAsString(document));
-        }
-        catch (Exception e) {
-
-        }
     }
 
     @Test
