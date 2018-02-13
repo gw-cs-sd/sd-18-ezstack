@@ -4,6 +4,7 @@ import com.codahale.metrics.Snapshot;
 import com.codahale.metrics.UniformReservoir;
 import org.apache.samza.application.StreamApplication;
 import org.apache.samza.config.Config;
+import org.apache.samza.Partition;
 import org.apache.samza.operators.MessageStream;
 import org.apache.samza.operators.StreamGraph;
 import org.codehaus.jackson.map.ObjectMapper;
@@ -32,6 +33,7 @@ public class DenormalizationDeityApp implements StreamApplication {
     private long globalStamp;
 
     private long adjustmentPeriodMS = 0; // This is set up in the config file, this is the amount of time between updates, in milliseconds.
+    private int partitionCount = 0; //Number of partitions that the deity will run, which is set up in the config file.
 
     public DenormalizationDeityApp() {
         metrics = new MetricRegistry();
@@ -45,8 +47,11 @@ public class DenormalizationDeityApp implements StreamApplication {
     public void init(StreamGraph streamGraph, Config config) {
         DeityConfig deityConfig = new DeityConfig(config);
         adjustmentPeriodMS = deityConfig.getAdjustmentPeriod();
+
         MessageStream<Query> queryStream = streamGraph.<String, Map<String, Object>, Query>getInputStream("queries", this::convertToQuery);
         queryStream.map(this::processQuery);
+
+        //queryStream.partitionBy();
 
         HttpTransport transport = new HttpTransport.Builder().withApiKey(deityConfig.getDatadogKey()).build();
         DatadogReporter reporter = DatadogReporter.forRegistry(metrics).withTransport(transport).withExpansions(Expansion.ALL).build();
@@ -139,9 +144,11 @@ public class DenormalizationDeityApp implements StreamApplication {
 
             if (value.getPriority() >= threshold) {
                 //add the rule
+                log.info("We are adding the rule for " + key);
             }
             else {
                 //if the rule exists, remove the rule
+                log.info("We are removing the rule for " + key);
             }
         }
     }
