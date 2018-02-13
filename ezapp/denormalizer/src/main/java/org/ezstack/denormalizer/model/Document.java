@@ -29,9 +29,9 @@ public class Document {
     private boolean _hasMutated;
 
     @JsonCreator
-    public Document(@JsonProperty("_table") String table, @JsonProperty("_key") String key,
-                    @JsonProperty("_firstUpdateAt") UUID firstUpdateAt, @JsonProperty("_lastUpdateAt") UUID lastUpdateAt,
-                    @JsonProperty("_version") int version) {
+    public Document(@JsonProperty("~table") String table, @JsonProperty("~key") String key,
+                    @JsonProperty("~firstUpdateAt") UUID firstUpdateAt, @JsonProperty("~lastUpdateAt") UUID lastUpdateAt,
+                    @JsonProperty("~version") int version) {
 
         checkNotNull(table, "table");
         checkNotNull(key, "key");
@@ -124,27 +124,27 @@ public class Document {
         return asISOTimestamp(_lastUpdateAt);
     }
 
-    @JsonProperty("_table")
+    @JsonProperty("~table")
     public String getTable() {
         return _table;
     }
 
-    @JsonProperty("_key")
+    @JsonProperty("~key")
     public String getKey() {
         return _key;
     }
 
-    @JsonProperty("_firstUpdateAt")
+    @JsonProperty("~firstUpdateAt")
     public UUID getFirstUpdateAtUUID() {
         return _firstUpdateAt;
     }
 
-    @JsonProperty("_lastUpdateAt")
+    @JsonProperty("~lastUpdateAt")
     public UUID getLastUpdateAtUUID() {
         return _lastUpdateAt;
     }
 
-    @JsonProperty("_version")
+    @JsonProperty("~version")
     public int getVersion() {
         return _version;
     }

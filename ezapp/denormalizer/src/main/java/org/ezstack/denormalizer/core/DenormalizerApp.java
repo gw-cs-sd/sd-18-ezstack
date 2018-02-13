@@ -38,20 +38,21 @@ public class DenormalizerApp implements StreamApplication {
         // TODO: move input stream name into properties
         MessageStream<Update> updates = streamGraph.getInputStream("documents", new JsonSerdeV3<>(Update.class));
 
-        MessageStream<Document> documents = updates.flatMap(new DocumentResolver());
+        MessageStream<Document> documents = updates.flatMap(new DocumentResolver("document-resolver"));
 
-        IndexToESFunction indexToESFunction = new IndexToESFunction();
 
-//        documents.sink(indexToESFunction);
+        ElasticsearchIndexer elasticsearchIndexer = new ElasticsearchIndexer();
+
+//        documents.sink(elasticseachIndexer);
 
         documents.flatMap(new DocumentMessageMapper(queries))
                 .partitionBy(DocumentMessage::getPartitionKey, v -> v, KVSerde.of(new StringSerde(), new JsonSerdeV3<>(DocumentMessage.class)), "partition")
-                .map(KV::getValue).flatMap(new JoinFunction()).sink(indexToESFunction);
+                .map(KV::getValue).flatMap(new JoinFunction()).sink(elasticsearchIndexer);
     }
 
     private Collection<Query> createSampleQuerys() {
         String jsonObject = "{\n" +
-                "  \"searchType\" : [],\n" +
+                "  \"searchTypes\" : [],\n" +
                 "  \"table\" : \"teacher\",\n" +
                 "  \"join\" : {\n" +
                 "    \"table\": \"student\"\n" +
@@ -66,7 +67,7 @@ public class DenormalizerApp implements StreamApplication {
                 "}";
 
         String jsonObject1 = "{\n" +
-                "  \"searchType\" : [],\n" +
+                "  \"searchTypes\" : [],\n" +
                 "  \"table\" : \"student\",\n" +
                 "  \"join\" : {\n" +
                 "    \"table\": \"teacher\"\n" +
@@ -136,15 +137,6 @@ public class DenormalizerApp implements StreamApplication {
 
             return ImmutableSet.of(message.getDocument());
 
-        }
-    }
-
-    private class IndexToESFunction implements SinkFunction<Document> {
-
-        @Override
-        public void apply(Document document, MessageCollector messageCollector, TaskCoordinator taskCoordinator) {
-            messageCollector.send(new OutgoingMessageEnvelope(new SystemStream("elasticsearch", document.getTable() + "/" + document.getTable()),
-                    document.getKey(), mapper.convertValue(document, Map.class)));
         }
     }
 

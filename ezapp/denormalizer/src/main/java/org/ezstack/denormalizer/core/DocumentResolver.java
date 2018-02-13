@@ -17,11 +17,16 @@ public class DocumentResolver implements FlatMapFunction<Update, Document> {
 
     private static final ObjectMapper _mapper = new ObjectMapper();
 
+    private final String _storeName;
     private KeyValueStore<String, Map<String, Object>> _store;
+
+    public DocumentResolver(String storeName) {
+        _storeName = storeName;
+    }
 
     @Override
     public void init(Config config, TaskContext context) {
-        _store = (KeyValueStore<String, Map<String, Object>>) context.getStore("document-resolver");
+        _store = (KeyValueStore<String, Map<String, Object>>) context.getStore(_storeName);
     }
 
     @Override
