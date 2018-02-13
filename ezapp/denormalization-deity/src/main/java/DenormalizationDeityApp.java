@@ -4,13 +4,14 @@ import com.codahale.metrics.Snapshot;
 import com.codahale.metrics.UniformReservoir;
 import org.apache.samza.application.StreamApplication;
 import org.apache.samza.config.Config;
-import org.apache.samza.Partition;
+import org.apache.samza.operators.KV;
 import org.apache.samza.operators.MessageStream;
 import org.apache.samza.operators.StreamGraph;
-import org.codehaus.jackson.map.ObjectMapper;
+import org.apache.samza.serializers.KVSerde;
+import org.apache.samza.serializers.StringSerde;
 import org.coursera.metrics.datadog.DatadogReporter;
 import org.coursera.metrics.datadog.DatadogReporter.Expansion;
-import org.ezstack.ezapp.datastore.api.Query;
+import org.ezstack.ezapp.querybus.api.QueryMetadata;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.coursera.metrics.datadog.transport.HttpTransport;
@@ -21,67 +22,62 @@ import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 public class DenormalizationDeityApp implements StreamApplication {
+    private static final Logger LOG = LoggerFactory.getLogger(DenormalizationDeityApp.class);
 
-    private static final Logger log = LoggerFactory.getLogger(DenormalizationDeityApp.class);
+    private final MetricRegistry _metrics;
+    private final MetricRegistry.MetricSupplier<Histogram> _histogramSupplier;
+    private Map<String, QueryObject> _priorityObjects;
+    private final Date _timestamp = new Date();
 
-    private final MetricRegistry metrics;
-    private final ObjectMapper objectMapper;
-    private final MetricRegistry.MetricSupplier<Histogram> histogramSupplier;
-    private Map<String, QueryObject> priorityObjects;
-    private final Date timestamp = new Date();
-
-    private long globalStamp;
-
-    private long adjustmentPeriodMS = 0; // This is set up in the config file, this is the amount of time between updates, in milliseconds.
-    private int partitionCount = 0; //Number of partitions that the deity will run, which is set up in the config file.
+    private long _globalStamp;
+    private long _adjustmentPeriodMS = 0; // This is set up in the config file, this is the amount of time between updates, in milliseconds.
 
     public DenormalizationDeityApp() {
-        metrics = new MetricRegistry();
-        objectMapper = new ObjectMapper();
-        histogramSupplier = () -> new Histogram(new UniformReservoir());
-        priorityObjects = new HashMap<>();
-        globalStamp = timestamp.getTime();
+        _metrics = new MetricRegistry();
+        _histogramSupplier = () -> new Histogram(new UniformReservoir());
+        _priorityObjects = new HashMap<>();
+        _globalStamp = _timestamp.getTime();
     }
 
     @Override
     public void init(StreamGraph streamGraph, Config config) {
         DeityConfig deityConfig = new DeityConfig(config);
-        adjustmentPeriodMS = deityConfig.getAdjustmentPeriod();
+        _adjustmentPeriodMS = deityConfig.getAdjustmentPeriod();
 
-        MessageStream<Query> queryStream = streamGraph.<String, Map<String, Object>, Query>getInputStream("queries", this::convertToQuery);
-        queryStream.map(this::processQuery);
+        MessageStream<QueryMetadata> queryStream = streamGraph.getInputStream("queries", new JsonSerdeV3<>(QueryMetadata.class));
+        queryStream.map(this::processQueryMetadata);
 
-        //queryStream.partitionBy();
-
+        MessageStream<KV<String, QueryMetadata>> partionedQueryMetadata =
+                queryStream.partitionBy(queryMetadata -> queryMetadata.hash(),
+                        queryMetadata -> queryMetadata,
+                        KVSerde.of(new StringSerde(), new JsonSerdeV3<>(QueryMetadata.class)),
+                        "partition-query-metadata");
         HttpTransport transport = new HttpTransport.Builder().withApiKey(deityConfig.getDatadogKey()).build();
-        DatadogReporter reporter = DatadogReporter.forRegistry(metrics).withTransport(transport).withExpansions(Expansion.ALL).build();
+        DatadogReporter reporter = DatadogReporter.forRegistry(_metrics).withTransport(transport).withExpansions(Expansion.ALL).build();
 
         reporter.start(10, TimeUnit.SECONDS);
     }
 
-    private Query convertToQuery(String key, Map<String, Object> msg) {
-        return objectMapper.convertValue(msg, Query.class);
-    }
 
-    private Query processQuery(Query query) {
-        String strippedQuery = "emptyString";//query.getStrippedQuery();
+    private QueryMetadata processQueryMetadata(QueryMetadata queryMetadata) {
+        String strippedQuery = queryMetadata.toString();
 
-        Histogram histogram = metrics.histogram(strippedQuery, histogramSupplier);
-        histogram.update(10000);//query.getResponseTime());
+        Histogram histogram = _metrics.histogram(strippedQuery, _histogramSupplier);
+        histogram.update(queryMetadata.getResponseTimeInMs());
 
         updateQueryObject(strippedQuery);
 
-        long tempstamp = timestamp.getTime();
-        if (tempstamp - adjustmentPeriodMS >= globalStamp) {
-            globalStamp = tempstamp;
+        long tempstamp = _timestamp.getTime();
+        if (tempstamp - _adjustmentPeriodMS >= _globalStamp) {
+            _globalStamp = tempstamp;
             rules();
         }
 
-        return query;
+        return queryMetadata;
     }
 
     private void updateQueryObject(String strippedQuery) { //Priority is represented as the Median, skewed by the mean absolute deviation from the median
-        Histogram histogram = metrics.histogram(strippedQuery, histogramSupplier);
+        Histogram histogram = _metrics.histogram(strippedQuery, _histogramSupplier);
         Snapshot snap = histogram.getSnapshot();
 
         long mean = (long) snap.getMean();
@@ -105,18 +101,18 @@ public class DenormalizationDeityApp implements StreamApplication {
         }
 
 
-        long stamp = timestamp.getTime();
+        long stamp = _timestamp.getTime();
 
         QueryObject queryObject;
 
-        if (priorityObjects.containsKey(strippedQuery)) {
-            queryObject = priorityObjects.get(strippedQuery);
+        if (_priorityObjects.containsKey(strippedQuery)) {
+            queryObject = _priorityObjects.get(strippedQuery);
             queryObject.setRecentTimestamp(stamp);
             queryObject.setPriority(priority);
         }
         else {
             queryObject = new QueryObject(strippedQuery, priority, stamp);
-            priorityObjects.put(strippedQuery, queryObject);
+            _priorityObjects.put(strippedQuery, queryObject);
         }
     }
 
@@ -126,10 +122,10 @@ public class DenormalizationDeityApp implements StreamApplication {
     }
 
     private long startRuleCreation() {
-        Histogram histogram = metrics.histogram("baseline", histogramSupplier);
+        Histogram histogram = _metrics.histogram("baseline", _histogramSupplier);
         Snapshot snap = histogram.getSnapshot();
 
-        for(Map.Entry<String, QueryObject> entry : priorityObjects.entrySet()) {
+        for(Map.Entry<String, QueryObject> entry : _priorityObjects.entrySet()) {
             QueryObject value = entry.getValue();
             histogram.update(value.getPriority());
         }
@@ -138,17 +134,17 @@ public class DenormalizationDeityApp implements StreamApplication {
     }
 
     private void addRules(long threshold) {
-        for(Map.Entry<String, QueryObject> entry : priorityObjects.entrySet()) {
+        for(Map.Entry<String, QueryObject> entry : _priorityObjects.entrySet()) {
             String key = entry.getKey();
             QueryObject value = entry.getValue();
 
             if (value.getPriority() >= threshold) {
                 //add the rule
-                log.info("We are adding the rule for " + key);
+                LOG.info("We are adding the rule for " + key);
             }
             else {
                 //if the rule exists, remove the rule
-                log.info("We are removing the rule for " + key);
+                LOG.info("We are removing the rule for " + key);
             }
         }
     }

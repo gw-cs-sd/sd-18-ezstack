@@ -51,7 +51,7 @@
     </build>
 
     <properties>
-        <samza.version>0.13.0</samza.version>
+        <samza.version>0.14.0</samza.version>
         <metrics.version>3.2.5</metrics.version>
     </properties>
 
@@ -108,7 +108,13 @@
         <dependency>
             <groupId>org.ezstack.ezapp</groupId>
             <artifactId>ezapp-datastore-api</artifactId>
-            <version>0.1-SNAPSHOT</version>
+            <version>${project.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.ezstack.ezapp</groupId>
+            <artifactId>ezapp-query-bus</artifactId>
+            <version>${project.version}</version>
         </dependency>
     </dependencies>
 
