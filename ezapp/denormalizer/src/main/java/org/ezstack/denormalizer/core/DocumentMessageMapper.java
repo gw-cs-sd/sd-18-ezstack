@@ -14,6 +14,8 @@ import java.util.*;
 
 import static org.ezstack.ezapp.datastore.api.KeyBuilder.hash;
 import static org.ezstack.ezapp.datastore.api.KeyBuilder.hashKey;
+import static org.ezstack.denormalizer.model.DocumentMessage.DocumentLevel;
+import static org.ezstack.denormalizer.model.DocumentMessage.OpCode;
 
 public class DocumentMessageMapper implements FlatMapFunction<Document, DocumentMessage> {
 
@@ -52,7 +54,8 @@ public class DocumentMessageMapper implements FlatMapFunction<Document, Document
             // apply filters here, and if it is not applicable, then continue
 
             if (query.getJoin() == null) {
-                messages.add(new DocumentMessage(document, hashKey(query.getTable(), document.getKey())));
+                messages.add(new DocumentMessage(document, hashKey(query.getTable(), document.getKey()),
+                        DocumentLevel.OUTER, OpCode.UPDATE));
                 continue;
             }
 
@@ -65,7 +68,8 @@ public class DocumentMessageMapper implements FlatMapFunction<Document, Document
                     valuesForKey[i] = document.getValue(atts.next().getOuterAttribute()).toString();
                     if (valuesForKey[i] == null) continue queryLoop;
                 }
-                messages.add(new DocumentMessage(document, hash(valuesForKey)));
+                messages.add(new DocumentMessage(document, hash(valuesForKey),
+                        DocumentLevel.OUTER, OpCode.UPDATE));
             }
 
             if (query.getJoin().getTable().equals(document.getTable())) {
@@ -76,7 +80,8 @@ public class DocumentMessageMapper implements FlatMapFunction<Document, Document
                     valuesForKey[i] = document.getValue(atts.next().getInnerAttribute()).toString();
                     if (valuesForKey[i] == null) continue queryLoop;
                 }
-                messages.add(new DocumentMessage(document, hash(valuesForKey)));
+                messages.add(new DocumentMessage(document, hash(valuesForKey),
+                        DocumentLevel.INNER, OpCode.UPDATE));
             }
         }
 

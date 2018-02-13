@@ -18,7 +18,7 @@ public class DocumentResolver implements FlatMapFunction<Update, Document> {
     private static final ObjectMapper _mapper = new ObjectMapper();
 
     private final String _storeName;
-    private KeyValueStore<String, Map<String, Object>> _store;
+    private KeyValueStore<String, Document> _store;
 
     public DocumentResolver(String storeName) {
         _storeName = storeName;
@@ -26,24 +26,24 @@ public class DocumentResolver implements FlatMapFunction<Update, Document> {
 
     @Override
     public void init(Config config, TaskContext context) {
-        _store = (KeyValueStore<String, Map<String, Object>>) context.getStore(_storeName);
+        _store = (KeyValueStore<String, Document>) context.getStore(_storeName);
     }
 
     @Override
     public Collection<Document> apply(Update update) {
         String storeKey = KeyBuilder.hashKey(update.getTable(), update.getKey());
-        Document storedDocument = _mapper.convertValue(_store.get(storeKey), Document.class);
+        Document storedDocument = _store.get(storeKey);
 
         if (storedDocument == null) {
             storedDocument = new Document(update);
-            _store.put(storeKey, _mapper.convertValue(storedDocument, Map.class));
+            _store.put(storeKey, storedDocument);
             return ImmutableSet.of(storedDocument);
         }
 
         int versionBeforeUpdate = storedDocument.getVersion();
         storedDocument.addUpdate(update);
         if (storedDocument.getVersion() != versionBeforeUpdate) {
-            _store.put(storeKey, _mapper.convertValue(storedDocument, Map.class));
+            _store.put(storeKey,storedDocument);
             return ImmutableSet.of(storedDocument);
         }
 
