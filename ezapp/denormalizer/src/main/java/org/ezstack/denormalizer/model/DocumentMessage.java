@@ -5,11 +5,6 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 
 public class DocumentMessage {
 
-    public enum DocumentLevel {
-        OUTER,
-        INNER
-    }
-
     public enum OpCode {
         UPDATE,
         DELETE
@@ -18,13 +13,13 @@ public class DocumentMessage {
 
     private final Document _document;
     private final String _partitionKey;
-    private final DocumentLevel _level;
+    private final QueryLevel _level;
     private final OpCode _opCode;
 
     @JsonCreator
     public DocumentMessage(@JsonProperty("document") Document document,
                            @JsonProperty("partitionKey") String partitionKey,
-                           @JsonProperty("documentLevel") DocumentLevel level,
+                           @JsonProperty("documentLevel") QueryLevel level,
                            @JsonProperty("opCode") OpCode opCode) {
         _document = document;
         _partitionKey = partitionKey;
@@ -40,7 +35,7 @@ public class DocumentMessage {
         return _partitionKey;
     }
 
-    public DocumentLevel getDocumentLevel() {
+    public QueryLevel getDocumentLevel() {
         return _level;
     }
 

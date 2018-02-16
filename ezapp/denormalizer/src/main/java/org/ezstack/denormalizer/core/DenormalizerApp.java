@@ -17,6 +17,7 @@ import org.apache.samza.system.SystemStream;
 import org.apache.samza.task.MessageCollector;
 import org.apache.samza.task.TaskContext;
 import org.apache.samza.task.TaskCoordinator;
+import org.ezstack.denormalizer.model.DocumentChangePair;
 import org.ezstack.denormalizer.model.DocumentMessage;
 import org.ezstack.denormalizer.serde.JsonSerdeV3;
 import org.ezstack.denormalizer.model.Document;
@@ -38,7 +39,7 @@ public class DenormalizerApp implements StreamApplication {
         // TODO: move input stream name into properties
         MessageStream<Update> updates = streamGraph.getInputStream("documents", new JsonSerdeV3<>(Update.class));
 
-        MessageStream<Document> documents = updates.flatMap(new DocumentResolver("document-resolver"));
+        MessageStream<DocumentChangePair> documents = updates.flatMap(new DocumentResolver("document-resolver"));
 
 
         ElasticsearchIndexer elasticsearchIndexer = new ElasticsearchIndexer();
@@ -47,7 +48,7 @@ public class DenormalizerApp implements StreamApplication {
 
         documents.flatMap(new DocumentMessageMapper(queries))
                 .partitionBy(DocumentMessage::getPartitionKey, v -> v, KVSerde.of(new StringSerde(), new JsonSerdeV3<>(DocumentMessage.class)), "partition")
-                .map(KV::getValue).flatMap(new JoinFunction()).sink(elasticsearchIndexer);
+                .map(KV::getValue).flatMap(new DocumentJoiner("join-store")).sink(elasticsearchIndexer);
     }
 
     private Collection<Query> createSampleQuerys() {

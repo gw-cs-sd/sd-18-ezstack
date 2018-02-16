@@ -7,13 +7,14 @@ import org.apache.samza.operators.functions.FlatMapFunction;
 import org.apache.samza.storage.kv.KeyValueStore;
 import org.apache.samza.task.TaskContext;
 import org.ezstack.denormalizer.model.Document;
+import org.ezstack.denormalizer.model.DocumentChangePair;
 import org.ezstack.ezapp.datastore.api.KeyBuilder;
 import org.ezstack.ezapp.datastore.api.Update;
 
 import java.util.Collection;
 import java.util.Map;
 
-public class DocumentResolver implements FlatMapFunction<Update, Document> {
+public class DocumentResolver implements FlatMapFunction<Update, DocumentChangePair> {
 
     private static final ObjectMapper _mapper = new ObjectMapper();
 
@@ -30,21 +31,21 @@ public class DocumentResolver implements FlatMapFunction<Update, Document> {
     }
 
     @Override
-    public Collection<Document> apply(Update update) {
+    public Collection<DocumentChangePair> apply(Update update) {
         String storeKey = KeyBuilder.hashKey(update.getTable(), update.getKey());
         Document storedDocument = _store.get(storeKey);
 
         if (storedDocument == null) {
             storedDocument = new Document(update);
             _store.put(storeKey, storedDocument);
-            return ImmutableSet.of(storedDocument);
+            return ImmutableSet.of(new DocumentChangePair(null, storedDocument));
         }
 
-        int versionBeforeUpdate = storedDocument.getVersion();
+        Document oldDocument = storedDocument.clone();
         storedDocument.addUpdate(update);
-        if (storedDocument.getVersion() != versionBeforeUpdate) {
-            _store.put(storeKey,storedDocument);
-            return ImmutableSet.of(storedDocument);
+        if (storedDocument.getVersion() != oldDocument.getVersion()) {
+            _store.put(storeKey, storedDocument);
+            return ImmutableSet.of(new DocumentChangePair(oldDocument, storedDocument));
         }
 
         return ImmutableSet.of();

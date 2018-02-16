@@ -1,5 +1,6 @@
 package org.ezstack.denormalizer.model;
 
+import com.datastax.driver.core.utils.UUIDs;
 import com.fasterxml.jackson.annotation.*;
 import com.fasterxml.jackson.databind.util.ISO8601Utils;
 import com.google.common.base.Preconditions;
@@ -7,10 +8,7 @@ import org.ezstack.ezapp.datastore.api.DataType;
 import org.ezstack.ezapp.datastore.api.Names;
 import org.ezstack.ezapp.datastore.api.Update;
 
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
@@ -60,6 +58,11 @@ public class Document {
         _version = 1;
 
         _hasMutated = false;
+    }
+
+    // This constructor is used to construct empty documents. These generally signify that the document was deleted.
+    public Document(String table, String key) {
+        this(new Update(table, key,null, Collections.emptyMap(), false));
     }
 
     /** lastUpdateAt and version are only updated if the document data is actually modified by the update */
@@ -160,6 +163,48 @@ public class Document {
     }
 
     public Object getValue(String key) {
-        return _data.get(key);
+        switch (key) {
+            case "~key":
+                return getKey();
+            case "~table":
+                return getTable();
+            case "~firstUpdateAt":
+                return getFirstUpdateAt();
+            case "~lastUpdateAt":
+                return getLastUpdateAt();
+            case "~version":
+                return getVersion();
+            default:
+                return _data.get(key);
+        }
+    }
+
+    private void setData(Map<String, Object> data) {
+        _data = data;
+    }
+
+    @Override
+    public Document clone() {
+        Document clone = new Document(_table, _key, _firstUpdateAt, _lastUpdateAt, _version);
+        clone.setData(getDataCopy(_data));
+        return clone;
+    }
+
+    private static Map<String, Object> getDataCopy(Map<String, Object> data) {
+        Map<String, Object> newMap = new LinkedHashMap<>();
+
+        for (Map.Entry<String, Object> attribute : data.entrySet()) {
+            Object val = data.get(attribute.getKey());
+
+            if (DataType.getDataType(val) == DataType.JsonTypes.MAP) {
+                newMap.put(attribute.getKey(), getDataCopy((Map<String, Object>) val));
+            } else {
+                // if not a map, we can assign the same reference because all java.lang wrapper
+                // classes are immutable
+                newMap.put(attribute.getKey(), attribute.getValue());
+            }
+        }
+
+        return newMap;
     }
 }
