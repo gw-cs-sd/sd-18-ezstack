@@ -1,7 +1,11 @@
 package org.ezstack.ezapp.datastore.api;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.google.common.base.Charsets;
+import com.google.common.hash.HashCode;
+import com.google.common.hash.Hashing;
 
 import javax.validation.constraints.NotNull;
 
@@ -26,5 +30,19 @@ public class JoinAttribute {
 
     public String getInnerAttribute() {
         return _innerAttribute;
+    }
+
+    @JsonIgnore
+    public HashCode getMurmur3Hash() {
+        StringBuilder sb = new StringBuilder();
+        sb.append(getOuterAttribute()).append("~").append(getInnerAttribute());
+
+        return Hashing.murmur3_128().newHasher()
+                .putString(sb.toString(), Charsets.UTF_8)
+                .hash();
+    }
+
+    public String getMurmur3HashAsString() {
+        return getMurmur3Hash().toString();
     }
 }
