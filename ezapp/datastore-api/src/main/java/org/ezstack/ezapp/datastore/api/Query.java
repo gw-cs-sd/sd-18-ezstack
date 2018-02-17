@@ -11,10 +11,7 @@ import com.google.common.hash.Hashing;
 
 import javax.validation.constraints.NotNull;
 import javax.ws.rs.DefaultValue;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 public class Query {
     @JsonIgnore
@@ -251,5 +248,56 @@ public class Query {
     public Query getCoreQuery() {
         return new Query(null, _table, null, _join != null ? _join.getCoreQuery() : null,
                 DEFAULT_JOIN_ATTRIBUTE_NAME, _joinAttributes, null, null);
+    }
+
+    public Query compactQuery(Query q) {
+        return compactQuery(this, q);
+    }
+
+    /**
+     * If two queries share the same core query then they will be compacted into one large query that applies both scopes.
+     * @param q1
+     * @param q2
+     * @return
+     */
+    public static Query compactQuery(Query q1, Query q2) {
+        if (!q1.getCoreQuery().equals(q2.getCoreQuery())) {
+            return null; // queries don't share core query
+        }
+
+        Set<SearchType> sTypes1 = q1.getSearchTypesAsSet();
+        Set<SearchType> sTypes2 = q2.getSearchTypesAsSet();
+        Set<SearchType> sTypes = new HashSet<>(sTypes1);
+        sTypes.addAll(sTypes2);
+
+        Set<Filter> filters1 = q1.getFiltersAsSet();
+        Set<Filter> filters2 = q2.getFiltersAsSet();
+        Set<Filter> filters = new HashSet<>(filters1);
+        filters.addAll(filters2);
+
+        Set<JoinAttribute> joinAtt1 = q1.getJoinAttributesAsSet();
+        Set<JoinAttribute> joinAtt2 = q2.getJoinAttributesAsSet();
+        Set<JoinAttribute> joinAtt = new HashSet<>(joinAtt1);
+        joinAtt.addAll(joinAtt2);
+
+        Set<String> excludeAtt1 = q1.getExcludeAttributesAsSet();
+        Set<String> excludeAtt2 = q2.getExcludeAttributesAsSet();
+        Set<String> excludeAtt = new HashSet<>(excludeAtt1);
+        excludeAtt.addAll(excludeAtt2);
+
+        Set<String> includeAtt1 = q1.getIncludeAttributesAsSet();
+        Set<String> includeAtt2 = q2.getIncludeAttributesAsSet();
+        Set<String> includeAtt = new HashSet<>(includeAtt1);
+        includeAtt.addAll(includeAtt2);
+
+        List<SearchType> searchTypes = sTypes.isEmpty() ? null : new LinkedList<>(sTypes);
+        List<Filter> filtersList = filters.isEmpty() ? null : new LinkedList<>(filters);
+        List<JoinAttribute> joinAttributes = joinAtt.isEmpty() ? null : new LinkedList<>(joinAtt);
+        List<String> excludeAttributes = excludeAtt.isEmpty() ? null : new LinkedList<>(excludeAtt);
+        List<String> includeAttributes = includeAtt.isEmpty() ? null : new LinkedList<>(includeAtt);
+
+        return new Query(searchTypes, q1.getTable(), filtersList,
+                q1.getJoin() != null ? compactQuery(q1.getJoin(), q2.getJoin()) : null,
+                DEFAULT_JOIN_ATTRIBUTE_NAME, joinAttributes, excludeAttributes, includeAttributes);
     }
 }
