@@ -79,4 +79,22 @@ public class SearchType {
     public String getMurmur3HashAsString() {
         return getMurmur3Hash().toString();
     }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        SearchType that = (SearchType) o;
+
+        if (getType() != that.getType()) return false;
+        return _attributeOn != null ? _attributeOn.equals(that._attributeOn) : that._attributeOn == null;
+    }
+
+    @Override
+    public int hashCode() {
+        int result = getType().toString().hashCode();
+        result = 31 * result + (_attributeOn != null ? _attributeOn.hashCode() : 0);
+        return result;
+    }
 }

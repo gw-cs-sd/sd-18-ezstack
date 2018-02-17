@@ -45,4 +45,23 @@ public class JoinAttribute {
     public String getMurmur3HashAsString() {
         return getMurmur3Hash().toString();
     }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        JoinAttribute that = (JoinAttribute) o;
+
+        if (_outerAttribute != null ? !_outerAttribute.equals(that._outerAttribute) : that._outerAttribute != null)
+            return false;
+        return _innerAttribute != null ? _innerAttribute.equals(that._innerAttribute) : that._innerAttribute == null;
+    }
+
+    @Override
+    public int hashCode() {
+        int result = _outerAttribute != null ? _outerAttribute.hashCode() : 0;
+        result = 31 * result + (_innerAttribute != null ? _innerAttribute.hashCode() : 0);
+        return result;
+    }
 }

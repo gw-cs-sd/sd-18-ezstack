@@ -101,4 +101,24 @@ public class Filter {
     public String getMurmur3HashAsString() {
         return getMurmur3Hash().toString();
     }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        Filter filter = (Filter) o;
+
+        if (_attribute != null ? !_attribute.equals(filter._attribute) : filter._attribute != null) return false;
+        if (getOpt() != filter.getOpt()) return false;
+        return _value != null ? _value.equals(filter._value) : filter._value == null;
+    }
+
+    @Override
+    public int hashCode() {
+        int result = _attribute != null ? _attribute.hashCode() : 0;
+        result = 31 * result + getOpt().toString().hashCode();
+        result = 31 * result + (_value != null ? _value.hashCode() : 0);
+        return result;
+    }
 }
