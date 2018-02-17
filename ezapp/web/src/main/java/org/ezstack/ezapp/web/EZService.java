@@ -27,7 +27,7 @@ public class EZService extends Application<EZConfiguration> {
     @Override
     public void initialize(Bootstrap<EZConfiguration> bootstrap) {
         // Quick call to UUID in order to allow the system to call getPid() before the first request
-        // This is nearly instantaneous is some systems, which makes it harmless to do.
+        // This is nearly instantaneous in some systems, which makes it harmless to do.
         // On other system's however, this call can take several seconds. Because of the delay, it makes sense
         // to do it on startup so that the first query does not get delayed by this call
         UUIDs.timeBased();
