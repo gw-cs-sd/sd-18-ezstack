@@ -12,7 +12,9 @@ import static org.junit.Assert.assertEquals;
 
 public class DataTypeTest {
 
-    private final String jsonObject = "{\"array\": [1, \"Hello\", true], \"boolean\": true, \"null\": null, \"integer\": 1, \"double\" : 2.5, \"object\": {\"a\": \"b\", \"c\": \"d\", \"e\": \"f\"}, \"string\": \"Hello World\"}";
+    private final String jsonObject = "{\"array\": [1, \"Hello\", true], \"boolean\": true, \"null\": null, " +
+            "\"integer\": 1, \"long\": 9223372036854775806, \"double\" : 2.5, " +
+            "\"object\": {\"a\": \"b\", \"c\": \"d\", \"e\": \"f\"}, \"string\": \"Hello World\"}";
     private Map<String, Object> json;
     private ObjectMapper mapper;
 
@@ -53,6 +55,11 @@ public class DataTypeTest {
     @Test
     public void testDataTypeInteger() {
         assertEquals(DataType.getDataType(json.get("integer")), DataType.JsonTypes.INTEGER);
+    }
+
+    @Test
+    public void testDataTypeLong() {
+        assertEquals(DataType.getDataType(json.get("long")), DataType.JsonTypes.LONG);
     }
 
     @Test

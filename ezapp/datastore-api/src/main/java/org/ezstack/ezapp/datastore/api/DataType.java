@@ -5,12 +5,14 @@ import java.util.Map;
 
 public class DataType {
     public enum JsonTypes {
-        INTEGER, DOUBLE, BOOLEAN, STRING, LIST, MAP, UNKNOWN
+        INTEGER, LONG, DOUBLE, BOOLEAN, STRING, LIST, MAP, UNKNOWN
     }
 
     public static JsonTypes getDataType(Object obj) {
         if (obj instanceof Integer) {
             return JsonTypes.INTEGER;
+        } else if (obj instanceof Long) {
+            return JsonTypes.LONG;
         } else if (obj instanceof Double) {
             return JsonTypes.DOUBLE;
         } else if (obj instanceof Boolean) {
