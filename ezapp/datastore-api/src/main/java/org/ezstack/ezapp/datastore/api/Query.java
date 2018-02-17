@@ -10,6 +10,7 @@ import com.google.common.hash.HashCode;
 import com.google.common.hash.Hashing;
 
 import javax.validation.constraints.NotNull;
+import javax.ws.rs.DefaultValue;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
@@ -18,12 +19,14 @@ import java.util.Set;
 public class Query {
     @JsonIgnore
     private static final ObjectMapper mapper = new ObjectMapper();
+    @JsonIgnore
+    private static final String DEFAULT_JOIN_ATTRIBUTE_NAME = "_joinAttribute";
 
     private List<SearchType> _searchTypes;
     private String _table;
     private List<Filter> _filters;
     private Query _join;
-    private String _joinAttributeName = "_joinAttribute";
+    private String _joinAttributeName = DEFAULT_JOIN_ATTRIBUTE_NAME;
     private List<JoinAttribute> _joinAttributes;
 
     private List<String> _excludeAttributes;
@@ -34,7 +37,7 @@ public class Query {
                  @NotNull @JsonProperty("table") String table,
                  @JsonProperty("filter") List<Filter> filters,
                  @JsonProperty("join") Query join,
-                 @JsonProperty("joinAttributeName") String joinAttributeName,
+                 @JsonProperty("joinAttributeName") @DefaultValue(DEFAULT_JOIN_ATTRIBUTE_NAME) String joinAttributeName,
                  @JsonProperty("joinAttributes") List<JoinAttribute> joinAttributes,
                  @JsonProperty("excludeAttributes") List<String> excludeAttributes,
                  @JsonProperty("includeAttributes") List<String> includeAttributes) {
@@ -203,5 +206,50 @@ public class Query {
         result = 31 * result + getExcludeAttributesAsSet().hashCode();
         result = 31 * result + getIncludeAttributesAsSet().hashCode();
         return result;
+    }
+
+    /**
+     * new query includes the following data:
+     * SearchTypes
+     * Table
+     * Join Query
+     * JoinAttributes
+     * JoinAttributeName is replaced with the default name
+     * @return
+     */
+    @JsonIgnore
+    public Query getStrippedQuery() {
+        return new Query(_searchTypes, _table, null, _join != null ? _join.getStrippedQuery() : null,
+                DEFAULT_JOIN_ATTRIBUTE_NAME, _joinAttributes, null, null);
+    }
+
+    /**
+     * new query includes the following data:
+     * SearchTypes
+     * Table
+     * Filters
+     * Join Query
+     * JoinAttributes
+     * JoinAttributeName is replaced with the default name
+     * @return
+     */
+    @JsonIgnore
+    public Query getStrippedQueryWithFilters() {
+        return new Query(_searchTypes, _table, _filters, _join != null ? _join.getStrippedQueryWithFilters() : null,
+                DEFAULT_JOIN_ATTRIBUTE_NAME, _joinAttributes, null, null);
+    }
+
+    /**
+     * new query includes the following data:
+     * Table
+     * Join Query
+     * JoinAttributes
+     * JoinAttributeName is replaced with the default name
+     * @return
+     */
+    @JsonIgnore
+    public Query getCoreQuery() {
+        return new Query(null, _table, null, _join != null ? _join.getCoreQuery() : null,
+                DEFAULT_JOIN_ATTRIBUTE_NAME, _joinAttributes, null, null);
     }
 }
