@@ -82,8 +82,6 @@ public class Query {
         return new HashSet<>(_filters);
     }
 
-    @JsonIgnore
-
     @JsonProperty("join")
     public Query getJoin() {
         return _join;
