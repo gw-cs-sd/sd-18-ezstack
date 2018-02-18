@@ -50,7 +50,30 @@ public class QueryHelper {
      * @return true if document passes all filters, otherwise false
      */
     public static boolean meetsFilters(List<Filter> filters, Map<String, Object> doc) {
-        // TODO
+        filters = safe(filters);
+        for (Filter f: filters) {
+            if (!meetsFilter(f, doc)) return false;
+        }
+        return true;
+    }
+
+    public static boolean meetsFilter(Filter f, Map<String, Object> doc) {
+        Object val = doc.get(f.getAttribute());
+        if (val == null) {
+            return false;
+        }
+
+        switch (f.getOpt()) {
+            case EQ:
+                return val.equals(f.getValue());
+            case NOT_EQ:
+                return !val.equals(f.getValue());
+                // TODO
+            case GT:
+            case GTE:
+            case LT:
+            case LTE:
+        }
         return false;
     }
 
