@@ -1,7 +1,11 @@
 package org.ezstack.ezapp.datastore.api;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.google.common.base.Charsets;
+import com.google.common.hash.HashCode;
+import com.google.common.hash.Hashing;
 
 import javax.validation.constraints.NotNull;
 
@@ -26,5 +30,38 @@ public class JoinAttribute {
 
     public String getInnerAttribute() {
         return _innerAttribute;
+    }
+
+    @JsonIgnore
+    public HashCode getMurmur3Hash() {
+        StringBuilder sb = new StringBuilder();
+        sb.append(getOuterAttribute()).append("~").append(getInnerAttribute());
+
+        return Hashing.murmur3_128().newHasher()
+                .putString(sb.toString(), Charsets.UTF_8)
+                .hash();
+    }
+
+    public String getMurmur3HashAsString() {
+        return getMurmur3Hash().toString();
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        JoinAttribute that = (JoinAttribute) o;
+
+        if (_outerAttribute != null ? !_outerAttribute.equals(that._outerAttribute) : that._outerAttribute != null)
+            return false;
+        return _innerAttribute != null ? _innerAttribute.equals(that._innerAttribute) : that._innerAttribute == null;
+    }
+
+    @Override
+    public int hashCode() {
+        int result = _outerAttribute != null ? _outerAttribute.hashCode() : 0;
+        result = 31 * result + (_innerAttribute != null ? _innerAttribute.hashCode() : 0);
+        return result;
     }
 }

@@ -57,6 +57,7 @@ public class SearchTypeAggregationHelper {
             case AVG:
                 switch (_jsonType) {
                     case INTEGER:
+                    case LONG: // fall through
                         return ((double) _longResult)/_documentCount;
                     case DOUBLE:
                         return ((double) _doubleResult)/_documentCount;
@@ -86,6 +87,11 @@ public class SearchTypeAggregationHelper {
             if (_longResult < val || _documentCount == 1) {
                 _longResult = val;
             }
+        } else if (_jsonType == DataType.JsonTypes.LONG) {
+            long val = (long) value;
+            if (_longResult < val || _documentCount == 1) {
+                _longResult = val;
+            }
         } else if (_jsonType == DataType.JsonTypes.DOUBLE) {
             double val = (double) value;
             if (_doubleResult < val || _documentCount == 1) {
@@ -105,6 +111,11 @@ public class SearchTypeAggregationHelper {
 
         if (_jsonType == DataType.JsonTypes.INTEGER) {
             long val = (int) value;
+            if (_longResult > val || _documentCount == 1) {
+                _longResult = val;
+            }
+        } else if (_jsonType == DataType.JsonTypes.LONG) {
+            long val = (long) value;
             if (_longResult > val || _documentCount == 1) {
                 _longResult = val;
             }
@@ -128,6 +139,9 @@ public class SearchTypeAggregationHelper {
         if (_jsonType == DataType.JsonTypes.INTEGER) {
             long val = (int) value;
             _longResult += val;
+        } else if (_jsonType == DataType.JsonTypes.LONG) {
+            long val = (long) value;
+            _longResult += val;
         } else if (_jsonType == DataType.JsonTypes.DOUBLE) {
             double val = (double) value;
             _doubleResult += val;
@@ -144,25 +158,35 @@ public class SearchTypeAggregationHelper {
      * @param value
      */
     private void detectAndChangeTypeValue(Object value) {
+        DataType.JsonTypes type = DataType.getDataType(value);
+
         if (_jsonType == DataType.JsonTypes.UNKNOWN) {
-            switch (DataType.getDataType(value)) {
+            switch (type) {
                 case DOUBLE:
                     _jsonType = DataType.JsonTypes.DOUBLE;
                     break;
                 case INTEGER:
                     _jsonType = DataType.JsonTypes.INTEGER;
                     break;
+                case LONG:
+                    _jsonType = DataType.JsonTypes.LONG;
+                    break;
             }
-        } else if (_jsonType == DataType.JsonTypes.INTEGER &&
-                DataType.getDataType(value) == DataType.JsonTypes.DOUBLE) {
+        } else if ((_jsonType == DataType.JsonTypes.INTEGER || _jsonType == DataType.JsonTypes.LONG) &&
+                type == DataType.JsonTypes.DOUBLE) {
             _doubleResult = _longResult + 0.0;
             _longResult = 0;
+            _jsonType = DataType.JsonTypes.DOUBLE;
+        } else if ((_jsonType == DataType.JsonTypes.INTEGER && type == DataType.JsonTypes.LONG) ||
+                (_jsonType == DataType.JsonTypes.LONG && type == DataType.JsonTypes.INTEGER)) {
+            _jsonType = type;
         }
     }
 
     public static Object isValidAggregation(Object agg) {
         switch (DataType.getDataType(agg)) {
             case DOUBLE:
+            case LONG:
             case INTEGER: // fall through
                 return agg;
             default:

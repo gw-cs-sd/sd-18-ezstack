@@ -1,7 +1,12 @@
 package org.ezstack.ezapp.datastore.api;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
+
+import com.google.common.base.Charsets;
+import com.google.common.hash.HashCode;
+import com.google.common.hash.Hashing;
 
 import javax.validation.constraints.NotNull;
 
@@ -81,5 +86,39 @@ public class Filter {
 
     public Object getValue() {
         return _value;
+    }
+
+    @JsonIgnore
+    public HashCode getMurmur3Hash() {
+        StringBuilder sb = new StringBuilder();
+        sb.append(getAttribute()).append("~").append(getOpt().toString()).append("~").append(getValue().toString());
+
+        return Hashing.murmur3_128().newHasher()
+                .putString(sb.toString(), Charsets.UTF_8)
+                .hash();
+    }
+
+    public String getMurmur3HashAsString() {
+        return getMurmur3Hash().toString();
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        Filter filter = (Filter) o;
+
+        if (_attribute != null ? !_attribute.equals(filter._attribute) : filter._attribute != null) return false;
+        if (getOpt() != filter.getOpt()) return false;
+        return _value != null ? _value.equals(filter._value) : filter._value == null;
+    }
+
+    @Override
+    public int hashCode() {
+        int result = _attribute != null ? _attribute.hashCode() : 0;
+        result = 31 * result + getOpt().toString().hashCode();
+        result = 31 * result + (_value != null ? _value.hashCode() : 0);
+        return result;
     }
 }
