@@ -134,6 +134,65 @@ public class Query {
         return new HashSet<>(_includeAttributes);
     }
 
+    /**
+     * new query includes the following data:
+     * SearchTypes
+     * Table
+     * Join Query
+     * JoinAttributes
+     * JoinAttributeName is replaced with the default name
+     * @return
+     */
+    @JsonIgnore
+    public Query getStrippedQuery() {
+        return new Query(_searchTypes, _table, null, _join != null ? _join.getStrippedQuery() : null,
+                DEFAULT_JOIN_ATTRIBUTE_NAME, _joinAttributes, null, null);
+    }
+
+    /**
+     * new query includes the following data:
+     * SearchTypes
+     * Table
+     * Filters
+     * Join Query
+     * JoinAttributes
+     * JoinAttributeName is replaced with the default name
+     * @return
+     */
+    @JsonIgnore
+    public Query getStrippedQueryWithFilters() {
+        return new Query(_searchTypes, _table, _filters, _join != null ? _join.getStrippedQueryWithFilters() : null,
+                DEFAULT_JOIN_ATTRIBUTE_NAME, _joinAttributes, null, null);
+    }
+
+    /**
+     * new query includes the following data:
+     * Table
+     * Join Query
+     * JoinAttributes
+     * JoinAttributeName is replaced with the default name
+     * @return
+     */
+    @JsonIgnore
+    public Query getCoreQuery() {
+        return new Query(null, _table, null, _join != null ? _join.getCoreQuery() : null,
+                DEFAULT_JOIN_ATTRIBUTE_NAME, _joinAttributes, null, null);
+    }
+
+    public Query compactQuery(Query q) {
+        return compactQuery(this, q);
+    }
+
+    public void addRule() {
+        // TODO
+    }
+
+    public boolean isRule() {
+        // TODO
+        return false;
+    }
+
+    @Override
     public String toString() {
         try {
             return mapper.writeValueAsString(this);
@@ -203,55 +262,6 @@ public class Query {
         result = 31 * result + getExcludeAttributesAsSet().hashCode();
         result = 31 * result + getIncludeAttributesAsSet().hashCode();
         return result;
-    }
-
-    /**
-     * new query includes the following data:
-     * SearchTypes
-     * Table
-     * Join Query
-     * JoinAttributes
-     * JoinAttributeName is replaced with the default name
-     * @return
-     */
-    @JsonIgnore
-    public Query getStrippedQuery() {
-        return new Query(_searchTypes, _table, null, _join != null ? _join.getStrippedQuery() : null,
-                DEFAULT_JOIN_ATTRIBUTE_NAME, _joinAttributes, null, null);
-    }
-
-    /**
-     * new query includes the following data:
-     * SearchTypes
-     * Table
-     * Filters
-     * Join Query
-     * JoinAttributes
-     * JoinAttributeName is replaced with the default name
-     * @return
-     */
-    @JsonIgnore
-    public Query getStrippedQueryWithFilters() {
-        return new Query(_searchTypes, _table, _filters, _join != null ? _join.getStrippedQueryWithFilters() : null,
-                DEFAULT_JOIN_ATTRIBUTE_NAME, _joinAttributes, null, null);
-    }
-
-    /**
-     * new query includes the following data:
-     * Table
-     * Join Query
-     * JoinAttributes
-     * JoinAttributeName is replaced with the default name
-     * @return
-     */
-    @JsonIgnore
-    public Query getCoreQuery() {
-        return new Query(null, _table, null, _join != null ? _join.getCoreQuery() : null,
-                DEFAULT_JOIN_ATTRIBUTE_NAME, _joinAttributes, null, null);
-    }
-
-    public Query compactQuery(Query q) {
-        return compactQuery(this, q);
     }
 
     /**

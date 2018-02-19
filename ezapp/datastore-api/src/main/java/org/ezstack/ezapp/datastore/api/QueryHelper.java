@@ -83,7 +83,7 @@ public class QueryHelper {
     private static boolean compare(Object o1, Object o2, Filter.Operations op) {
         DataType.JsonTypes type = DataType.getDataType(o1);
         if (type != DataType.getDataType(o2) || type == DataType.JsonTypes.UNKNOWN ||
-                // should we have some fun with list and map comparisons
+                // should we have some fun with list and map comparisons ?
                 type == DataType.JsonTypes.LIST || type == DataType.JsonTypes.MAP) {
             return false;
         }
