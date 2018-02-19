@@ -183,15 +183,6 @@ public class Query {
         return compactQuery(this, q);
     }
 
-    public void addRule() {
-        // TODO
-    }
-
-    public boolean isRule() {
-        // TODO
-        return false;
-    }
-
     @Override
     public String toString() {
         try {
@@ -266,6 +257,7 @@ public class Query {
 
     /**
      * If two queries share the same core query then they will be compacted into one large query that applies both scopes.
+     * If they do not share the same core query it returns null.
      * @param q1
      * @param q2
      * @return

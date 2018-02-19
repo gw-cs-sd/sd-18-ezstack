@@ -120,7 +120,17 @@ public class QueryHelper {
             case DOUBLE:
                 double o1Double = (double) o1;
                 double o2Double = (double) o2;
-                return o1Double > o2Double;
+                switch (op) {
+                    case GT:
+                        return o1Double > o2Double;
+                    case GTE:
+                        return o1Double >= o2Double;
+                    case LT:
+                        return o1Double < o2Double;
+                    case LTE:
+                        return o1Double <= o2Double;
+                }
+                break;
             case BOOLEAN:
                 Boolean o1Bool = (Boolean) o1;
                 Boolean o2Bool = (Boolean) o2;
