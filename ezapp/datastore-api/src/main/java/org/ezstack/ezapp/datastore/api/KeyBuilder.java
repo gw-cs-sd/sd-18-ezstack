@@ -13,8 +13,10 @@ public class KeyBuilder {
     public static String hash(String... inputs) {
         StringBuilder builder = new StringBuilder();
         for (String input : inputs) {
-            builder.append(Hashing.murmur3_128().hashString(input, Charsets.UTF_8).toString());
+            builder.append(input);
+            builder.append("~");
         }
+        Hashing.murmur3_128().hashString(builder.toString(), Charsets.UTF_8);
         return builder.toString();
     }
 }

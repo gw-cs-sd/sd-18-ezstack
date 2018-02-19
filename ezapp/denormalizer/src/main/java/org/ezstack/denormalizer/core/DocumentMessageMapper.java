@@ -78,16 +78,9 @@ public class DocumentMessageMapper implements FlatMapFunction<DocumentChangePair
                     queryPair.getValue(), OpCode.UPDATE));
         }
 
-        // Instead of sending the the full document in a DELETE message, instead send a stripped
-        // down one which is smaller in size, as the data isn't necessary for deletion
-        Document deletedDocument = changePair.getOldDocument() != null ?
-                new Document(changePair.getOldDocument().getTable(),
-                        changePair.getOldDocument().getKey())
-                : null;
-
         // add all the delete messages
         for (KeyValue<Query, QueryLevel> queryPair : queriesForDeletion) {
-            messages.add(new DocumentMessage(deletedDocument,
+            messages.add(new DocumentMessage(changePair.getOldDocument(),
                     FanoutHashingUtils.getPartitionKey(changePair.getOldDocument(),
                             queryPair.getValue(), queryPair.getKey().getJoinAttributes()),
                     queryPair.getValue(), OpCode.DELETE));

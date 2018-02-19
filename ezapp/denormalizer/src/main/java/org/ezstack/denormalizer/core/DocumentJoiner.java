@@ -7,6 +7,7 @@ import org.apache.samza.storage.kv.KeyValueStore;
 import org.apache.samza.task.TaskContext;
 import org.ezstack.denormalizer.model.Document;
 import org.ezstack.denormalizer.model.DocumentMessage;
+import org.ezstack.denormalizer.model.JoinQueryIndex;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -18,7 +19,7 @@ public class DocumentJoiner implements FlatMapFunction<DocumentMessage, Document
     private static final Logger log = LoggerFactory.getLogger(DocumentJoiner.class);
 
     private final String _storeName;
-    private KeyValueStore<String, Map<String, Object>> _store;
+    private KeyValueStore<String, JoinQueryIndex> _store;
 
     public DocumentJoiner(String storeName) {
         _storeName = storeName;
@@ -26,12 +27,12 @@ public class DocumentJoiner implements FlatMapFunction<DocumentMessage, Document
 
     @Override
     public void init(Config config, TaskContext context) {
-        _store = (KeyValueStore<String, Map<String, Object>>) context.getStore(_storeName);
+        _store = (KeyValueStore<String, JoinQueryIndex>) context.getStore(_storeName);
     }
 
     @Override
     public Collection<Document> apply(DocumentMessage message) {
-
         return ImmutableSet.of();
+
     }
 }

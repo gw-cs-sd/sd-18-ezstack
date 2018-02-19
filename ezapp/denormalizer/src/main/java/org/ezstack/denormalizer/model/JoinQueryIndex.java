@@ -1,76 +1,69 @@
 package org.ezstack.denormalizer.model;
 
-import com.fasterxml.jackson.annotation.JsonAnyGetter;
-import com.fasterxml.jackson.annotation.JsonAnySetter;
-import com.google.common.base.Throwables;
-import com.google.common.collect.Iterators;
-import org.ezstack.ezapp.datastore.api.Query;
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
-import java.util.*;
+import java.util.HashMap;
+import java.util.Map;
 
 import static com.google.common.base.Preconditions.checkArgument;
-import static com.google.common.base.Preconditions.checkNotNull;
 
 public class JoinQueryIndex {
 
-    private Map<String, Map<String, Document>> subQueryResults;
+    @JsonProperty("outerDocs")
+    private final Map<String, Document> _outerDocs;
 
-    // For Jackson
-    private JoinQueryIndex() {
+    @JsonProperty("innnerDocs")
+    private final Map<String, Document> _innerDocs;
+
+    private Document _modifiedDocument;
+    private QueryLevel _modifiedLevel;
+    private boolean _isModified;
+
+    public JoinQueryIndex() {
+        _outerDocs = new HashMap<>();
+        _innerDocs = new HashMap<>();
+
     }
 
-    public JoinQueryIndex(Query query) {
-        subQueryResults = getJoinDataStructure(query);
+    @JsonCreator
+    private JoinQueryIndex(@JsonProperty("outerDocs") Map<String, Document> outerDocs,
+                           @JsonProperty("innerDocs") Map<String, Document> innerDocs) {
+        _outerDocs = outerDocs;
+        _innerDocs = innerDocs;
+
     }
 
-    private static Map<String, Map<String, Document>> getJoinDataStructure(Query query) {
-        Query currentQuery = query;
-        Integer index = 0;
-        Map<String, Map<String, Document>> indexMap = new LinkedHashMap<>();
-        do {
-            indexMap.put(index.toString(), new LinkedHashMap<>());
-            index++;
-        } while (query.getJoin() != null);
+    public void putDocument(Document document, QueryLevel queryLevel) {
 
-        return indexMap;
-    }
+        checkArgument(!_isModified, "Query Index can only be modified once");
 
-    @JsonAnySetter
-    public void setSubQuery(String index, Map<String, Document> results) {
-        int indexAsInt = -1;
-        try {
-            indexAsInt = Integer.parseInt(index);
-        } catch (NumberFormatException e) {
-            Throwables.throwIfUnchecked(new Error("Join query index not valid as it contains non-numeric attributes"));
+        _modifiedDocument = document;
+        _modifiedLevel = queryLevel;
+        _isModified = true;
+
+        if (queryLevel == QueryLevel.OUTER) {
+            _outerDocs.put(document.getKey(), document);
+        } else {
+            _innerDocs.put(document.getKey(), document);
         }
-
-        checkArgument(indexAsInt >= 0, "Join query index not valid as it contains negative attributes");
-        subQueryResults.put(index, results);
     }
 
-    @JsonAnyGetter
-    private Map<String, Map<String, Document>> getFullIndex() {
-        return subQueryResults;
-    }
+    public void deleteDocument(Document document, QueryLevel queryLevel) {
+        checkArgument(!_isModified, "Query Index can only be modified once");
 
-    public Iterator<Document> getDocsAtIndex(Integer index) {
-        Map<String, Document> docs = subQueryResults.get(index.toString());
+        _modifiedDocument = document;
+        _modifiedLevel = queryLevel;
 
-        checkNotNull(docs, "The index {} is not contained in the join index", index);
-
-        Set entrySet = docs.entrySet();
-
-        return Iterators.transform(docs.entrySet().iterator(), Map.Entry::getValue);
-
-    }
-
-    public void putDocument(Integer index, Document document) {
-        Map<String, Document> docs = subQueryResults.get(index);
-
-        if (subQueryResults == null) {
-            Throwables.throwIfUnchecked(new IndexOutOfBoundsException());
+        if (queryLevel == QueryLevel.OUTER) {
+            _outerDocs.remove(document.getKey());
         }
-
-        docs.put(index.toString(), document);
     }
+
+    // TODO: just discovered a possible race condition. If an outer document changes partitions, there is a chance that
+    // its deletion record end up in elasticsearch after its update from a different partition. This could be distastrous,
+    // as it would lead to missing data. This can occur because both the deletion and the insertion affect the same
+    // key in elasticsearch.
+
+    // Maybe the solution is some kind of delete only if the version matches? I believe elasticsearch has this capability
 }

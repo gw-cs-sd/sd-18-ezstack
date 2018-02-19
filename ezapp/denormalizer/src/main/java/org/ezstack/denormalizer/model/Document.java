@@ -60,11 +60,6 @@ public class Document {
         _hasMutated = false;
     }
 
-    // This constructor is used to construct empty documents. These generally signify that the document was deleted.
-    public Document(String table, String key) {
-        this(new Update(table, key,null, Collections.emptyMap(), false));
-    }
-
     /** lastUpdateAt and version are only updated if the document data is actually modified by the update */
     public void addUpdate(Update update) {
         checkArgument(_table.equals(update.getTable()) && _key.equals(update.getKey()),
@@ -195,16 +190,43 @@ public class Document {
 
         for (Map.Entry<String, Object> attribute : data.entrySet()) {
             Object val = data.get(attribute.getKey());
+            switch (DataType.getDataType(val)) {
+                case MAP:
+                    newMap.put(attribute.getKey(), getDataCopy((Map<String, Object>) val));
+                    break;
+                case LIST:
+                    newMap.put(attribute.getKey(), getListCopy((List) val));
+                    break;
+                default:
+                    newMap.put(attribute.getKey(), attribute.getValue());
+                    break;
 
-            if (DataType.getDataType(val) == DataType.JsonTypes.MAP) {
-                newMap.put(attribute.getKey(), getDataCopy((Map<String, Object>) val));
-            } else {
-                // if not a map, we can assign the same reference because all java.lang wrapper
-                // classes are immutable
-                newMap.put(attribute.getKey(), attribute.getValue());
             }
         }
 
         return newMap;
     }
+
+    private static List getListCopy(List list) {
+        List newList = new ArrayList(list.size());
+
+        for (Object val : list) {
+            switch (DataType.getDataType(val)) {
+                case MAP:
+                    list.add(getDataCopy((Map<String, Object>) val));
+                    break;
+                case LIST:
+                    list.add(getListCopy((List) val));
+                    break;
+                default:
+                    list.add(val);
+                    break;
+
+            }
+        }
+
+        return newList;
+    }
+
+
 }
