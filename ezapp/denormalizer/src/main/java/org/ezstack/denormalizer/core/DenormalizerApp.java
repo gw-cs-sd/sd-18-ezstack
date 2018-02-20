@@ -14,6 +14,7 @@ import org.apache.samza.storage.kv.KeyValueStore;
 import org.apache.samza.task.TaskContext;
 import org.ezstack.denormalizer.model.DocumentChangePair;
 import org.ezstack.denormalizer.model.DocumentMessage;
+import org.ezstack.denormalizer.model.WritableResult;
 import org.ezstack.denormalizer.serde.JsonSerdeV3;
 import org.ezstack.denormalizer.model.Document;
 import org.ezstack.ezapp.datastore.api.Query;
@@ -39,7 +40,8 @@ public class DenormalizerApp implements StreamApplication {
 
         ElasticsearchIndexer elasticsearchIndexer = new ElasticsearchIndexer();
 
-//        documents.sink(elasticseachIndexer);
+        documents.map(changePair -> new WritableResult(changePair.getNewDocument(),changePair.getNewDocument().getTable()))
+            .sink(elasticsearchIndexer);
 
         documents.flatMap(new DocumentMessageMapper(queries))
                 .partitionBy(DocumentMessage::getPartitionKey, v -> v, KVSerde.of(new StringSerde(), new JsonSerdeV3<>(DocumentMessage.class)), "partition")
