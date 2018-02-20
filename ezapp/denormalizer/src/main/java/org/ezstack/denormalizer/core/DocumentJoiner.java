@@ -57,6 +57,9 @@ public class DocumentJoiner implements FlatMapFunction<DocumentMessage, Document
                     .collect(Collectors.toSet());
         }
 
+        // TODO: handle aggregations
+
+        // TODO: handle deletes
         return ImmutableSet.of();
     }
 }

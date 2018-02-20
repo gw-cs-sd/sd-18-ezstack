@@ -1,6 +1,5 @@
 package org.ezstack.denormalizer.model;
 
-import com.datastax.driver.core.utils.UUIDs;
 import com.fasterxml.jackson.annotation.*;
 import com.fasterxml.jackson.databind.util.ISO8601Utils;
 import com.google.common.base.Preconditions;
@@ -19,8 +18,8 @@ public class Document {
 
     private String _table;
     private final String _key;
-    private final UUID _firstUpdateAt;
-    private UUID _lastUpdateAt;
+    private final String _firstUpdateAt;
+    private String _lastUpdateAt;
     private Map<String, Object> _data;
     private int _version;
 
@@ -28,7 +27,7 @@ public class Document {
 
     @JsonCreator
     public Document(@JsonProperty("~table") String table, @JsonProperty("~key") String key,
-                    @JsonProperty("~firstUpdateAt") UUID firstUpdateAt, @JsonProperty("~lastUpdateAt") UUID lastUpdateAt,
+                    @JsonProperty("~firstUpdateAt") String firstUpdateAt, @JsonProperty("~lastUpdateAt") String lastUpdateAt,
                     @JsonProperty("~version") int version) {
 
         checkNotNull(table, "table");
@@ -52,8 +51,8 @@ public class Document {
     public Document(Update update) {
         _table = update.getTable();
         _key = update.getKey();
-        _firstUpdateAt = update.getTimestamp();
-        _lastUpdateAt = update.getTimestamp();
+        _firstUpdateAt = asISOTimestamp(update.getTimestamp());
+        _lastUpdateAt = asISOTimestamp(update.getTimestamp());
         _data = update.getData();
         _version = 1;
 
@@ -74,7 +73,7 @@ public class Document {
 
         if(_hasMutated) {
             _version++;
-            _lastUpdateAt = update.getTimestamp();
+            _lastUpdateAt = asISOTimestamp(update.getTimestamp());
             _hasMutated = false;
         }
     }
@@ -112,14 +111,14 @@ public class Document {
         return (uuid.timestamp() - NUM_100NS_INTERVALS_SINCE_UUID_EPOCH) / 10000;
     }
 
-    @JsonIgnore
+    @JsonProperty("~firstUpdateAt")
     public String getFirstUpdateAt() {
-        return asISOTimestamp(_firstUpdateAt);
+        return _firstUpdateAt;
     }
 
-    @JsonIgnore
+    @JsonProperty("~lastUpdateAt")
     public String getLastUpdateAt() {
-        return asISOTimestamp(_lastUpdateAt);
+        return _lastUpdateAt;
     }
 
     @JsonProperty("~table")
@@ -130,16 +129,6 @@ public class Document {
     @JsonProperty("~key")
     public String getKey() {
         return _key;
-    }
-
-    @JsonProperty("~firstUpdateAt")
-    public UUID getFirstUpdateAtUUID() {
-        return _firstUpdateAt;
-    }
-
-    @JsonProperty("~lastUpdateAt")
-    public UUID getLastUpdateAtUUID() {
-        return _lastUpdateAt;
     }
 
     @JsonProperty("~version")

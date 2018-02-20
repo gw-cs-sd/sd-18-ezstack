@@ -7,7 +7,6 @@ import org.junit.Before;
 import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotEquals;
 
 import java.io.IOException;
 import java.util.HashMap;
@@ -16,7 +15,7 @@ import java.util.UUID;
 
 public class DocumentTest {
 
-    private final String jsonDoc = "{\"~table\":\"comment\",\"~key\":\"dsfaf3\",\"~firstUpdateAt\":\"90cec5d0-c8b7-11e7-8a28-ff35eed18bcb\",\"~lastUpdateAt\":\"90cec5d0-c8b7-11e7-8a28-ff35eed18bcb\",\"author\":{\"firstName\":\"Bob\",\"lastName\":\"Johnson\"},\"title\":\"Best Ever!\",\"likes\":50,\"~version\":2}";
+    private final String jsonDoc = "{\"~table\":\"comment\",\"~key\":\"dsfaf3\",\"~firstUpdateAt\":\"2017-11-13T21:13:59.213Z\",\"~lastUpdateAt\":\"2017-11-13T21:13:59.213Z\",\"author\":{\"firstName\":\"Bob\",\"lastName\":\"Johnson\"},\"title\":\"Best Ever!\",\"likes\":50,\"~version\":2}";
     private Document document;
     private ObjectMapper mapper;
 
@@ -31,9 +30,7 @@ public class DocumentTest {
 
         assertEquals("comment", document.getTable());
         assertEquals("dsfaf3", document.getKey());
-        assertEquals(UUID.fromString("90cec5d0-c8b7-11e7-8a28-ff35eed18bcb"), document.getFirstUpdateAtUUID());
         assertEquals("2017-11-13T21:13:59.213Z", document.getFirstUpdateAt());
-        assertEquals(UUID.fromString("90cec5d0-c8b7-11e7-8a28-ff35eed18bcb"), document.getLastUpdateAtUUID());
         assertEquals("2017-11-13T21:13:59.213Z", document.getLastUpdateAt());
         assertEquals(2, document.getVersion());
         assertEquals("{\"author\":{\"firstName\":\"Bob\",\"lastName\":\"Johnson\"},\"title\":\"Best Ever!\",\"likes\":50}", mapper.writeValueAsString(document.getData()));
@@ -51,9 +48,7 @@ public class DocumentTest {
 
         assertEquals("posts", doc.getTable());
         assertEquals("abc123", doc.getKey());
-        assertEquals(UUID.fromString("90cec5d0-c8b7-11e7-8a28-ff35eed18bcb"), document.getFirstUpdateAtUUID());
         assertEquals("2017-11-13T21:13:59.213Z", document.getFirstUpdateAt());
-        assertEquals(timestamp, doc.getLastUpdateAtUUID());
         assertEquals("2017-11-13T21:13:59.213Z", document.getLastUpdateAt());
         assertEquals(1, doc.getVersion());
         assertEquals(data, doc.getData());
@@ -76,9 +71,7 @@ public class DocumentTest {
 
         assertEquals("comment", document.getTable());
         assertEquals("dsfaf3", document.getKey());
-        assertEquals(UUID.fromString("90cec5d0-c8b7-11e7-8a28-ff35eed18bcb"), document.getFirstUpdateAtUUID());
         assertEquals("2017-11-13T21:13:59.213Z", document.getFirstUpdateAt());
-        assertNotEquals(timestamp, document.getLastUpdateAtUUID());
         assertEquals("2017-11-13T21:13:59.213Z", document.getLastUpdateAt());
         assertEquals(2, document.getVersion());
         assertEquals(data, document.getData());
@@ -96,9 +89,7 @@ public class DocumentTest {
 
         assertEquals("comment", document.getTable());
         assertEquals("dsfaf3", document.getKey());
-        assertEquals(UUID.fromString("90cec5d0-c8b7-11e7-8a28-ff35eed18bcb"), document.getFirstUpdateAtUUID());
         assertEquals("2017-11-13T21:13:59.213Z", document.getFirstUpdateAt());
-        assertEquals(timestamp, document.getLastUpdateAtUUID());
         assertEquals("2018-01-26T06:35:33.899Z", document.getLastUpdateAt());
         assertEquals(3, document.getVersion());
         assertEquals(data, document.getData());
@@ -133,9 +124,7 @@ public class DocumentTest {
 
         assertEquals("comment", document.getTable());
         assertEquals("dsfaf3", document.getKey());
-        assertEquals(UUID.fromString("90cec5d0-c8b7-11e7-8a28-ff35eed18bcb"), document.getFirstUpdateAtUUID());
         assertEquals("2017-11-13T21:13:59.213Z", document.getFirstUpdateAt());
-        assertEquals(timestamp, document.getLastUpdateAtUUID());
         assertEquals("2018-01-26T06:35:33.899Z", document.getLastUpdateAt());
         assertEquals(3, document.getVersion());
         assertEquals(expectedDataAfterMerge, document.getData());
@@ -169,9 +158,7 @@ public class DocumentTest {
 
         assertEquals("comment", docCopy.getTable());
         assertEquals("dsfaf3", docCopy.getKey());
-        assertEquals(UUID.fromString("90cec5d0-c8b7-11e7-8a28-ff35eed18bcb"), docCopy.getFirstUpdateAtUUID());
         assertEquals("2017-11-13T21:13:59.213Z", docCopy.getFirstUpdateAt());
-        assertNotEquals(timestamp, docCopy.getLastUpdateAtUUID());
         assertEquals("2017-11-13T21:13:59.213Z", docCopy.getLastUpdateAt());
         assertEquals(2, docCopy.getVersion());
         assertEquals(docCopy.getData(), oldData);
@@ -191,9 +178,7 @@ public class DocumentTest {
 
         assertEquals("comment", document.getTable());
         assertEquals("dsfaf3", document.getKey());
-        assertEquals(UUID.fromString("90cec5d0-c8b7-11e7-8a28-ff35eed18bcb"), document.getFirstUpdateAtUUID());
         assertEquals("2017-11-13T21:13:59.213Z", document.getFirstUpdateAt());
-        assertEquals(timestamp, document.getLastUpdateAtUUID());
         assertEquals("2018-01-26T06:35:33.899Z", document.getLastUpdateAt());
         assertEquals(3, document.getVersion());
         assertEquals(expectedDataAfterMerge, document.getData());

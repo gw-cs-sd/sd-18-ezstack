@@ -17,10 +17,7 @@ public class ElasticsearchIndexer implements SinkFunction<Document> {
     @Override
     public void apply(Document document, MessageCollector messageCollector, TaskCoordinator taskCoordinator) {
 
-        Map<String, Object> docMap = _mapper.convertValue(document, Map.class);
-        docMap.put("~lastUpdateAt", document.getLastUpdateAt());
-        docMap.put("~firstUpdateAt", document.getFirstUpdateAt());
         messageCollector.send(new OutgoingMessageEnvelope(new SystemStream("elasticsearch", document.getTable() + "/" + document.getTable()),
-                document.getKey(), docMap));
+                document.getKey(), _mapper.convertValue(document, Map.class)));
     }
 }
