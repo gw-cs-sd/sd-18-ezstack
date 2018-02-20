@@ -154,6 +154,7 @@ public class Document {
 
     @JsonAnySetter
     public void setDataField(String key, Object value) {
+        checkNotNull(key, "key");
         _data.put(key, value);
     }
 

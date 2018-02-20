@@ -210,6 +210,7 @@ public class Query {
                 .hash();
     }
 
+    @JsonIgnore
     public String getMurmur3HashAsString() {
         return getMurmur3Hash().toString();
     }
@@ -262,7 +263,7 @@ public class Query {
      * @param q2
      * @return
      */
-    public static Query compactQuery(Query q1, Query q2) {
+     public static Query compactQuery(Query q1, Query q2) {
         if (!q1.getCoreQuery().equals(q2.getCoreQuery())) {
             return null; // queries don't share core query
         }

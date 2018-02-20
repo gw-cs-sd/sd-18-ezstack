@@ -74,16 +74,16 @@ public class DocumentMessageMapper implements FlatMapFunction<DocumentChangePair
         for (KeyValue<Query, QueryLevel> queryPair : newApplicableQueries) {
             messages.add(new DocumentMessage(changePair.getNewDocument(),
                     FanoutHashingUtils.getPartitionKey(changePair.getNewDocument(),
-                            queryPair.getValue(), queryPair.getKey().getJoinAttributes()),
-                    queryPair.getValue(), OpCode.UPDATE));
+                            queryPair.getValue(), queryPair.getKey()),
+                    queryPair.getValue(), OpCode.UPDATE, queryPair.getKey()));
         }
 
         // add all the delete messages
         for (KeyValue<Query, QueryLevel> queryPair : queriesForDeletion) {
             messages.add(new DocumentMessage(changePair.getOldDocument(),
                     FanoutHashingUtils.getPartitionKey(changePair.getOldDocument(),
-                            queryPair.getValue(), queryPair.getKey().getJoinAttributes()),
-                    queryPair.getValue(), OpCode.DELETE));
+                            queryPair.getValue(), queryPair.getKey()),
+                    queryPair.getValue(), OpCode.DELETE, queryPair.getKey()));
         }
 
         return messages;

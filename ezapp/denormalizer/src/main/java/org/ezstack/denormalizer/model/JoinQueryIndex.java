@@ -1,10 +1,12 @@
 package org.ezstack.denormalizer.model;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.google.common.collect.ImmutableList;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
+import java.util.stream.Collectors;
 
 import static com.google.common.base.Preconditions.checkArgument;
 
@@ -21,8 +23,9 @@ public class JoinQueryIndex {
     private boolean _isModified;
 
     public JoinQueryIndex() {
-        _outerDocs = new HashMap<>();
-        _innerDocs = new HashMap<>();
+        _outerDocs = new LinkedHashMap<>();
+        _innerDocs = new LinkedHashMap<>();
+        _isModified = false;
 
     }
 
@@ -31,12 +34,13 @@ public class JoinQueryIndex {
                            @JsonProperty("innerDocs") Map<String, Document> innerDocs) {
         _outerDocs = outerDocs;
         _innerDocs = innerDocs;
+        _isModified = false;
 
     }
 
     public void putDocument(Document document, QueryLevel queryLevel) {
 
-        checkArgument(!_isModified, "Query Index can only be modified once");
+//        checkArgument(!_isModified, "Query Index can only be modified once");
 
         _modifiedDocument = document;
         _modifiedLevel = queryLevel;
@@ -50,7 +54,7 @@ public class JoinQueryIndex {
     }
 
     public void deleteDocument(Document document, QueryLevel queryLevel) {
-        checkArgument(!_isModified, "Query Index can only be modified once");
+//        checkArgument(!_isModified, "Query Index can only be modified once");
 
         _modifiedDocument = document;
         _modifiedLevel = queryLevel;
@@ -58,6 +62,39 @@ public class JoinQueryIndex {
         if (queryLevel == QueryLevel.OUTER) {
             _outerDocs.remove(document.getKey());
         }
+    }
+
+    @JsonIgnore
+    public List<Document> getEffectedDocumentsOuter() {
+        if (!_isModified) {
+            return Collections.emptyList();
+        }
+
+        if (_modifiedLevel == QueryLevel.OUTER) {
+            return ImmutableList.of(_modifiedDocument);
+        }
+
+        return _outerDocs.entrySet().parallelStream().map(Map.Entry::getValue).collect(Collectors.toList());
+    }
+
+    @JsonIgnore
+    public List<Document> getEffectedDocumentsInner() {
+        if (!_isModified) {
+            return Collections.emptyList();
+        }
+
+        if (_modifiedLevel == QueryLevel.INNER) {
+            return _innerDocs.entrySet().parallelStream().map(Map.Entry::getValue).collect(Collectors.toList());
+        }
+
+        // same as inner until we consider deletes in the future
+        return _innerDocs.entrySet().parallelStream().map(Map.Entry::getValue).collect(Collectors.toList());
+    }
+
+    public void refresh() {
+        _isModified = false;
+        _modifiedLevel = null;
+        _modifiedDocument = null;
     }
 
     // TODO: just discovered a possible race condition. If an outer document changes partitions, there is a chance that
