@@ -38,7 +38,7 @@ public class ElasticsearchConfig extends MapConfig {
     public static final String CONFIG_KEY_CLIENT_FACTORY = "client.factory";
     public static final String PREFIX_ELASTICSEARCH_SETTINGS = "client.elasticsearch.";
 
-    public static final String CONFIG_KEY_INDEX_REQUEST_FACTORY = "index.request.factory";
+    public static final String CONFIG_KEY_WRITE_REQUEST_FACTORY = "write.request.factory";
 
     public static final String CONFIG_KEY_BULK_FLUSH_MAX_ACTIONS = "bulk.flush.max.actions";
     public static final String CONFIG_KEY_BULK_FLUSH_MAX_SIZE_MB = "bulk.flush.max.size.mb";
@@ -67,10 +67,10 @@ public class ElasticsearchConfig extends MapConfig {
         return subset(PREFIX_ELASTICSEARCH_SETTINGS);
     }
 
-    // Index Request
-    public Optional<String> getIndexRequestFactoryClassName() {
-        if (containsKey(CONFIG_KEY_INDEX_REQUEST_FACTORY)) {
-            return Optional.of(get(CONFIG_KEY_INDEX_REQUEST_FACTORY));
+    // Write Request
+    public Optional<String> getWriteRequestFactoryClassName() {
+        if (containsKey(CONFIG_KEY_WRITE_REQUEST_FACTORY)) {
+            return Optional.of(get(CONFIG_KEY_WRITE_REQUEST_FACTORY));
         } else {
             return Optional.absent();
         }

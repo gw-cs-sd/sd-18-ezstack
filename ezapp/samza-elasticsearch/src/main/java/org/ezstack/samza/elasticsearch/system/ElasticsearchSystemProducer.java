@@ -23,15 +23,15 @@ import org.apache.samza.SamzaException;
 import org.apache.samza.system.OutgoingMessageEnvelope;
 import org.apache.samza.system.SystemProducer;
 import org.elasticsearch.action.ActionResponse;
+import org.elasticsearch.action.DocWriteRequest;
 import org.elasticsearch.action.bulk.BulkItemResponse;
 import org.elasticsearch.action.bulk.BulkProcessor;
 import org.elasticsearch.action.bulk.BulkRequest;
 import org.elasticsearch.action.bulk.BulkResponse;
-import org.elasticsearch.action.index.IndexRequest;
 import org.elasticsearch.action.index.IndexResponse;
 import org.elasticsearch.client.Client;
 import org.elasticsearch.rest.RestStatus;
-import org.ezstack.samza.elasticsearch.system.indexrequest.IndexRequestFactory;
+import org.ezstack.samza.elasticsearch.system.indexrequest.WriteRequestFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -63,20 +63,20 @@ public class ElasticsearchSystemProducer implements SystemProducer {
   private final AtomicBoolean sendFailed = new AtomicBoolean(false);
   private final AtomicReference<Throwable> thrown = new AtomicReference<>();
 
-  private final IndexRequestFactory indexRequestFactory;
+  private final WriteRequestFactory writeRequestFactory;
   private final BulkProcessorFactory bulkProcessorFactory;
   private final ElasticsearchSystemProducerMetrics metrics;
 
   private Client client;
 
   public ElasticsearchSystemProducer(String system, BulkProcessorFactory bulkProcessorFactory,
-                                     Client client, IndexRequestFactory indexRequestFactory,
+                                     Client client, WriteRequestFactory writeRequestFactory,
                                      ElasticsearchSystemProducerMetrics metrics) {
     this.system = system;
     this.sourceBulkProcessor = new HashMap<>();
     this.bulkProcessorFactory = bulkProcessorFactory;
     this.client = client;
-    this.indexRequestFactory = indexRequestFactory;
+    this.writeRequestFactory = writeRequestFactory;
     this.metrics = metrics;
   }
 
@@ -166,8 +166,8 @@ public class ElasticsearchSystemProducer implements SystemProducer {
 
   @Override
   public void send(String source, OutgoingMessageEnvelope envelope) {
-    IndexRequest indexRequest = indexRequestFactory.getIndexRequest(envelope);
-    sourceBulkProcessor.get(source).add(indexRequest);
+    DocWriteRequest writeRequest = writeRequestFactory.getWriteRequest(envelope);
+    sourceBulkProcessor.get(source).add(writeRequest);
   }
 
   @Override
