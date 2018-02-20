@@ -40,7 +40,7 @@ public class JoinQueryIndex {
 
     public void putDocument(Document document, QueryLevel queryLevel) {
 
-//        checkArgument(!_isModified, "Query Index can only be modified once");
+        checkArgument(!_isModified, "Query Index can only be modified once");
 
         _modifiedDocument = document;
         _modifiedLevel = queryLevel;
@@ -54,7 +54,7 @@ public class JoinQueryIndex {
     }
 
     public void deleteDocument(Document document, QueryLevel queryLevel) {
-//        checkArgument(!_isModified, "Query Index can only be modified once");
+        checkArgument(!_isModified, "Query Index can only be modified once");
 
         _modifiedDocument = document;
         _modifiedLevel = queryLevel;
@@ -91,6 +91,8 @@ public class JoinQueryIndex {
         return _innerDocs.entrySet().parallelStream().map(Map.Entry::getValue).collect(Collectors.toList());
     }
 
+    // This is necessary because samza has a deserialized cache, which means that a we need to clear out metadata
+    // after each use
     public void refresh() {
         _isModified = false;
         _modifiedLevel = null;

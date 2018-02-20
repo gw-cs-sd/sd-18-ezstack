@@ -16,8 +16,6 @@ import static org.ezstack.denormalizer.model.DocumentMessage.OpCode;
 
 public class DocumentMessageMapper implements FlatMapFunction<DocumentChangePair, DocumentMessage> {
 
-    private static final HashSet<KeyValue<Query, QueryLevel>> EMPTY_HASH_SET = new HashSet<>();
-
     private static final Logger log = LoggerFactory.getLogger(DocumentMessageMapper.class);
 
     private HashMultimap<String, KeyValue<Query, QueryLevel>> _queryIndex;
@@ -49,7 +47,7 @@ public class DocumentMessageMapper implements FlatMapFunction<DocumentChangePair
         Set<KeyValue<Query, QueryLevel>> queryPairs = _queryIndex.get(document.getTable());
 
         if (queryPairs == null) {
-            return EMPTY_HASH_SET;
+            return Collections.EMPTY_SET;
         }
 
         return Sets.filter(queryPairs, queryPair -> {
