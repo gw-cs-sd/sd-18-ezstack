@@ -210,6 +210,7 @@ public class Query {
                 .hash();
     }
 
+    @JsonIgnore
     public String getMurmur3HashAsString() {
         return getMurmur3Hash().toString();
     }

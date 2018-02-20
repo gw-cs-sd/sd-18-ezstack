@@ -93,13 +93,13 @@
         <dependency>
             <groupId>org.ezstack.ezapp</groupId>
             <artifactId>ezapp-datastore-api</artifactId>
-            <version>0.1-SNAPSHOT</version>
+            <version>${project.version}</version>
         </dependency>
 
         <dependency>
             <groupId>org.ezstack.ezapp</groupId>
             <artifactId>samza-elasticsearch</artifactId>
-            <version>0.1-SNAPSHOT</version>
+            <version>${project.version}</version>
         </dependency>
     </dependencies>
 

@@ -24,6 +24,7 @@ import org.slf4j.LoggerFactory;
 import java.util.Properties;
 import java.util.concurrent.*;
 
+import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 public class KafkaQueryBusPublisherDAO {
@@ -46,6 +47,7 @@ public class KafkaQueryBusPublisherDAO {
         checkNotNull(producer, "producer");
         checkNotNull(queryBusTopic, "queryBusTopic");
         checkNotNull(zookeeperHosts, "zookeeperHosts");
+        checkArgument(queryBusTopicPartitionCount > 0, "Query Bus Partition Count must be > 0");
 
         _producer = producer;
         _queryBusTopic = queryBusTopic;
