@@ -21,10 +21,9 @@ package org.ezstack.samza.elasticsearch.system.indexrequest;
 
 import org.apache.samza.system.OutgoingMessageEnvelope;
 import org.elasticsearch.action.DocWriteRequest;
-import org.elasticsearch.action.index.IndexRequest;
 
 /**
- * A factory that creates Elasticsearch {@link IndexRequest} instances from the Samza
+ * A factory that creates Elasticsearch {@link DocWriteRequest} instances from the Samza
  * {@link OutgoingMessageEnvelope}
  *
  */
