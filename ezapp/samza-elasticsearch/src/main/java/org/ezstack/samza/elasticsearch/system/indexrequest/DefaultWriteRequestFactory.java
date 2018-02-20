@@ -21,7 +21,8 @@ package org.ezstack.samza.elasticsearch.system.indexrequest;
 
 import org.apache.samza.SamzaException;
 import org.apache.samza.system.OutgoingMessageEnvelope;
-import org.elasticsearch.action.index.IndexRequest;
+import org.elasticsearch.action.DocWriteRequest;
+import org.elasticsearch.action.delete.DeleteRequest;
 import org.elasticsearch.client.Requests;
 import com.google.common.base.Optional;
 import org.elasticsearch.index.VersionType;
@@ -29,7 +30,7 @@ import org.elasticsearch.index.VersionType;
 import java.util.Map;
 
 /**
- * The default {@link IndexRequestFactory}.
+ * The default {@link WriteRequestFactory}.
  *
  * <p>Samza concepts are mapped to Elastic search concepts as follows:</p>
  *
@@ -52,53 +53,52 @@ import java.util.Map;
  *   </li>
  * </ul>
  */
-public class DefaultIndexRequestFactory implements IndexRequestFactory {
+public class DefaultWriteRequestFactory implements WriteRequestFactory {
 
   @Override
-  public IndexRequest getIndexRequest(OutgoingMessageEnvelope envelope) {
-    IndexRequest indexRequest = getRequest(envelope);
-
-    Optional<String> id = getId(envelope);
-    if (id.isPresent()) {
-      indexRequest.id(id.get());
-    }
+  public DocWriteRequest getWriteRequest(OutgoingMessageEnvelope envelope) {
+    DocWriteRequest writeRequest = getRequest(envelope);
 
     Optional<String> routingKey = getRoutingKey(envelope);
     if (routingKey.isPresent()) {
-      indexRequest.routing(routingKey.get());
-    }
-
-    Optional<Long> version = getVersion(envelope);
-    if (version.isPresent()) {
-      indexRequest.version(version.get());
+      writeRequest.routing(routingKey.get());
     }
 
     Optional<VersionType> versionType = getVersionType(envelope);
     if (versionType.isPresent()) {
-      indexRequest.versionType(versionType.get());
+      writeRequest.versionType(versionType.get());
     }
 
-    setSource(envelope, indexRequest);
-
-    return indexRequest;
+    return writeRequest;
   }
 
-  protected IndexRequest getRequest(OutgoingMessageEnvelope envelope) {
+  protected DocWriteRequest getRequest(OutgoingMessageEnvelope envelope) {
     String[] parts = envelope.getSystemStream().getStream().split("/");
-    if (parts.length != 2) {
-      throw new SamzaException("Elasticsearch stream name must match pattern {index}/{type}");
+
+    if (parts.length < 2 || parts.length > 4) {
+      throw new SamzaException("Elasticsearch stream name must match pattern {index}/{type} or {index}/{type}/DELETE/{version}");
     }
+
     String index = parts[0];
     String type = parts[1];
-    return Requests.indexRequest(index).type(type);
-  }
 
-  protected Optional<String> getId(OutgoingMessageEnvelope envelope) {
-    Object id = envelope.getKey();
-    if (id == null) {
-      return Optional.absent();
+    if (parts.length == 2) {
+      return Requests.indexRequest(index)
+              .type(type)
+              .id(envelope.getKey().toString())
+              .source(getSource(envelope));
     }
-    return Optional.of(id.toString());
+
+    if (!parts[2].equals("DELETE")) {
+       throw new SamzaException("DELETE is currently the only supported Op Code");
+    }
+
+    DeleteRequest deleteRequest = Requests.deleteRequest(index).type(type).id(envelope.getKey().toString());
+
+    if (parts.length == 4) {
+      deleteRequest.version(Integer.parseInt(parts[4]));
+    }
+    return deleteRequest;
   }
 
   protected Optional<String> getRoutingKey(OutgoingMessageEnvelope envelope) {
@@ -109,20 +109,15 @@ public class DefaultIndexRequestFactory implements IndexRequestFactory {
     return Optional.of(partitionKey.toString());
   }
 
-  protected Optional<Long> getVersion(OutgoingMessageEnvelope envelope) {
-    return Optional.absent();
-  }
 
   protected Optional<VersionType> getVersionType(OutgoingMessageEnvelope envelope) {
     return Optional.absent();
   }
 
-  protected void setSource(OutgoingMessageEnvelope envelope, IndexRequest indexRequest) {
+  protected Map getSource(OutgoingMessageEnvelope envelope) {
     Object message = envelope.getMessage();
-    if (message instanceof byte[]) {
-      indexRequest.source((byte[]) message);
-    } else if (message instanceof Map) {
-      indexRequest.source((Map) message);
+    if (message instanceof Map) {
+      return (Map) message;
     } else {
       throw new SamzaException("Unsupported message type: " + message.getClass().getCanonicalName());
     }

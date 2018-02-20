@@ -26,11 +26,11 @@ import org.apache.samza.system.SystemConsumer;
 import org.apache.samza.system.SystemFactory;
 import org.apache.samza.system.SystemProducer;
 import org.ezstack.samza.elasticsearch.system.client.ClientFactory;
-import org.ezstack.samza.elasticsearch.system.indexrequest.DefaultIndexRequestFactory;
-import org.ezstack.samza.elasticsearch.system.indexrequest.IndexRequestFactory;
+import org.ezstack.samza.elasticsearch.system.indexrequest.DefaultWriteRequestFactory;
 import org.apache.samza.util.Util;
 import org.elasticsearch.client.Client;
 import org.ezstack.samza.elasticsearch.config.ElasticsearchConfig;
+import org.ezstack.samza.elasticsearch.system.indexrequest.WriteRequestFactory;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
@@ -54,7 +54,7 @@ public class ElasticsearchSystemFactory implements SystemFactory {
     return new ElasticsearchSystemProducer(name,
             getBulkProcessorFactory(elasticsearchConfig),
             getClient(elasticsearchConfig),
-            getIndexRequestFactory(elasticsearchConfig),
+            getWriteRequestFactory(elasticsearchConfig),
             new ElasticsearchSystemProducerMetrics(name, metricsRegistry));
   }
 
@@ -80,11 +80,11 @@ public class ElasticsearchSystemFactory implements SystemFactory {
     }
   }
 
-  protected static IndexRequestFactory getIndexRequestFactory(ElasticsearchConfig config) {
-    if (config.getIndexRequestFactoryClassName().isPresent()) {
-      return (IndexRequestFactory) Util.getObj(config.getIndexRequestFactoryClassName().get());
+  protected static WriteRequestFactory getWriteRequestFactory(ElasticsearchConfig config) {
+    if (config.getWriteRequestFactoryClassName().isPresent()) {
+      return (WriteRequestFactory) Util.getObj(config.getWriteRequestFactoryClassName().get());
     } else {
-      return new DefaultIndexRequestFactory();
+      return new DefaultWriteRequestFactory();
     }
   }
 

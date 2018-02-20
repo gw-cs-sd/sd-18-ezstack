@@ -20,6 +20,7 @@
 package org.ezstack.samza.elasticsearch.system.indexrequest;
 
 import org.apache.samza.system.OutgoingMessageEnvelope;
+import org.elasticsearch.action.DocWriteRequest;
 import org.elasticsearch.action.index.IndexRequest;
 
 /**
@@ -27,8 +28,8 @@ import org.elasticsearch.action.index.IndexRequest;
  * {@link OutgoingMessageEnvelope}
  *
  */
-public interface IndexRequestFactory {
+public interface WriteRequestFactory {
 
-  IndexRequest getIndexRequest(OutgoingMessageEnvelope envelope);
+  DocWriteRequest getWriteRequest(OutgoingMessageEnvelope envelope);
 
 }
