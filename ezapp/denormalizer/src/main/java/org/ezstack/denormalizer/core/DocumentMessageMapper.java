@@ -93,7 +93,6 @@ public class DocumentMessageMapper implements FlatMapFunction<DocumentChangePair
 
         // add all the delete messages
         for (KeyValue<Query, QueryLevel> queryPair : queriesForDeletion) {
-            log.info("sending deletion for document with id {}", changePair.getOldDocument().getKey());
             messages.add(new DocumentMessage(changePair.getOldDocument(),
                     FanoutHashingUtils.getPartitionKey(changePair.getOldDocument(),
                             queryPair.getValue(), queryPair.getKey()),

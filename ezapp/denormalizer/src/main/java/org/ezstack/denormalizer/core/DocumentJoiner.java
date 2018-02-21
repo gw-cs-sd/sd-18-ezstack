@@ -36,9 +36,7 @@ public class DocumentJoiner implements FlatMapFunction<DocumentMessage, Writable
         List<Document> outerDocs = joinQueryIndex.getEffectedDocumentsOuter();
         List<Document> innerDocs = joinQueryIndex.getEffectedDocumentsInner();
         joinQueryIndex.refresh();
-
-        log.info("Get Actions for delete");
-
+        
         switch (message.getDocumentLevel()) {
             case OUTER:
                 return outerDocs
