@@ -70,7 +70,6 @@ public class DocumentMessageMapper implements FlatMapFunction<DocumentChangePair
 
 
 
-        // TODO: this must compare the partition keys, not the queries themselves
         Set<KeyValue<Query, QueryLevel>> queriesForDeletion = oldApplicableQueries
                 .parallelStream()
                 .filter(pair -> !newPartitionLocations.contains(new DefaultKeyValue<>(

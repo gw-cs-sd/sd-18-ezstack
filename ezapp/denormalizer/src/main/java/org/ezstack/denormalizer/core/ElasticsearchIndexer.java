@@ -15,14 +15,7 @@ public class ElasticsearchIndexer implements SinkFunction<WritableResult> {
     private static final ObjectMapper _mapper = new ObjectMapper();
 
     private static String getESDeletePath(String index, String type, int version) {
-        return new String()
-                .concat(index)
-                .concat("/")
-                .concat(type)
-                .concat("/")
-                .concat("DELETE")
-                .concat("/")
-                .concat(Integer.toString(version));
+        return String.format("%s/%s/DELETE/%d", index, type, version);
     }
 
     @Override

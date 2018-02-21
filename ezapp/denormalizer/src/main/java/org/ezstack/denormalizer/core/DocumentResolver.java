@@ -1,6 +1,5 @@
 package org.ezstack.denormalizer.core;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.ImmutableSet;
 import org.apache.samza.config.Config;
 import org.apache.samza.operators.functions.FlatMapFunction;
@@ -12,11 +11,8 @@ import org.ezstack.ezapp.datastore.api.KeyBuilder;
 import org.ezstack.ezapp.datastore.api.Update;
 
 import java.util.Collection;
-import java.util.Map;
 
 public class DocumentResolver implements FlatMapFunction<Update, DocumentChangePair> {
-
-    private static final ObjectMapper _mapper = new ObjectMapper();
 
     private final String _storeName;
     private KeyValueStore<String, Document> _store;
