@@ -6,12 +6,6 @@ import org.ezstack.ezapp.datastore.api.Query;
 
 public class DocumentMessage {
 
-    public enum OpCode {
-        UPDATE,
-        DELETE
-    }
-
-
     private final Document _document;
     private final String _partitionKey;
     private final QueryLevel _level;

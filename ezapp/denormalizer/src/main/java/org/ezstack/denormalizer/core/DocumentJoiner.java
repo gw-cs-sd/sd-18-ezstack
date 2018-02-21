@@ -6,10 +6,7 @@ import org.apache.samza.config.Config;
 import org.apache.samza.operators.functions.FlatMapFunction;
 import org.apache.samza.storage.kv.KeyValueStore;
 import org.apache.samza.task.TaskContext;
-import org.ezstack.denormalizer.model.Document;
-import org.ezstack.denormalizer.model.DocumentMessage;
-import org.ezstack.denormalizer.model.JoinQueryIndex;
-import org.ezstack.denormalizer.model.WritableResult;
+import org.ezstack.denormalizer.model.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -33,34 +30,67 @@ public class DocumentJoiner implements FlatMapFunction<DocumentMessage, Writable
         _store = (KeyValueStore<String, JoinQueryIndex>) context.getStore(_storeName);
     }
 
-    @Override
-    public Collection<WritableResult> apply(DocumentMessage message) {
+    private Collection<WritableResult> getActionsForDelete(JoinQueryIndex joinQueryIndex, DocumentMessage message) {
+        joinQueryIndex.deleteDocument(message.getDocument(), message.getDocumentLevel());
 
-        JoinQueryIndex joinQueryIndex = MoreObjects.firstNonNull(_store.get(message.getPartitionKey()), new JoinQueryIndex());
+        List<Document> outerDocs = joinQueryIndex.getEffectedDocumentsOuter();
+        List<Document> innerDocs = joinQueryIndex.getEffectedDocumentsInner();
+        joinQueryIndex.refresh();
 
-        if (message.getOpCode() == DocumentMessage.OpCode.UPDATE) {
-            joinQueryIndex.putDocument(message.getDocument(), message.getDocumentLevel());
+        log.info("Get Actions for delete");
 
-            List<Document> outerDocs = joinQueryIndex.getEffectedDocumentsOuter();
-            List<Document> innerDocs = joinQueryIndex.getEffectedDocumentsInner();
-            joinQueryIndex.refresh();
-
-            _store.put(message.getPartitionKey(), joinQueryIndex);
-
-            return outerDocs
+        switch (message.getDocumentLevel()) {
+            case OUTER:
+                return outerDocs
+                        .parallelStream()
+                        .map(docToDelete -> new WritableResult(docToDelete, message.getQuery().getMurmur3HashAsString(),
+                                OpCode.DELETE))
+                        .collect(Collectors.toSet());
+            case INNER:
+                return outerDocs
                     .parallelStream()
                     .map(outerDoc -> {
                         outerDoc = outerDoc.clone();
                         outerDoc.setDataField(message.getQuery().getJoinAttributeName(), innerDocs);
                         return outerDoc;
                     })
-                    .map(denormDoc -> new WritableResult(denormDoc, message.getQuery().getMurmur3HashAsString()))
+                    .map(denormDoc -> new WritableResult(denormDoc, message.getQuery().getMurmur3HashAsString(), OpCode.UPDATE))
                     .collect(Collectors.toSet());
         }
 
+        return ImmutableSet.of();
+    }
+
+    private Collection<WritableResult> getActionsForUpdate(JoinQueryIndex joinQueryIndex, DocumentMessage message) {
+        joinQueryIndex.putDocument(message.getDocument(), message.getDocumentLevel());
+
+        List<Document> outerDocs = joinQueryIndex.getEffectedDocumentsOuter();
+        List<Document> innerDocs = joinQueryIndex.getEffectedDocumentsInner();
+        joinQueryIndex.refresh();
+
+        return outerDocs
+                .parallelStream()
+                .map(outerDoc -> {
+                    outerDoc = outerDoc.clone();
+                    outerDoc.setDataField(message.getQuery().getJoinAttributeName(), innerDocs);
+                    return outerDoc;
+                })
+                .map(denormDoc -> new WritableResult(denormDoc, message.getQuery().getMurmur3HashAsString(), OpCode.UPDATE))
+                .collect(Collectors.toSet());
+    }
+
+    @Override
+    public Collection<WritableResult> apply(DocumentMessage message) {
+
+        JoinQueryIndex joinQueryIndex = MoreObjects.firstNonNull(_store.get(message.getPartitionKey()), new JoinQueryIndex());
+        Collection<WritableResult> writableResults = message.getOpCode() == OpCode.UPDATE ?
+                getActionsForUpdate(joinQueryIndex, message) : getActionsForDelete(joinQueryIndex, message);
+
+        joinQueryIndex.refresh();
+        _store.put(message.getPartitionKey(), joinQueryIndex);
+        return writableResults;
+
         // TODO: handle aggregations
 
-        // TODO: handle deletes
-        return ImmutableSet.of();
     }
 }

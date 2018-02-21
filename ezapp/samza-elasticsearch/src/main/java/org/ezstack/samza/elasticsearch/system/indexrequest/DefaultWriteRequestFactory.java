@@ -96,7 +96,7 @@ public class DefaultWriteRequestFactory implements WriteRequestFactory {
     DeleteRequest deleteRequest = Requests.deleteRequest(index).type(type).id(envelope.getKey().toString());
 
     if (parts.length == 4) {
-      deleteRequest.version(Integer.parseInt(parts[4]));
+      deleteRequest.version(Integer.parseInt(parts[3]));
     }
     return deleteRequest;
   }

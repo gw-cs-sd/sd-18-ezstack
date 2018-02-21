@@ -58,9 +58,12 @@ public class JoinQueryIndex {
 
         _modifiedDocument = document;
         _modifiedLevel = queryLevel;
+        _isModified = true;
 
         if (queryLevel == QueryLevel.OUTER) {
             _outerDocs.remove(document.getKey());
+        } else {
+            _innerDocs.remove(document.getKey());
         }
     }
 
@@ -83,11 +86,6 @@ public class JoinQueryIndex {
             return Collections.emptyList();
         }
 
-        if (_modifiedLevel == QueryLevel.INNER) {
-            return _innerDocs.entrySet().parallelStream().map(Map.Entry::getValue).collect(Collectors.toList());
-        }
-
-        // same as inner until we consider deletes in the future
         return _innerDocs.entrySet().parallelStream().map(Map.Entry::getValue).collect(Collectors.toList());
     }
 
