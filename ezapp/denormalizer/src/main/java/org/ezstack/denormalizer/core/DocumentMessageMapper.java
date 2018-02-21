@@ -78,9 +78,6 @@ public class DocumentMessageMapper implements FlatMapFunction<DocumentChangePair
                                 pair.getValue(), pair.getKey()), pair.getValue())))
                 .collect(Collectors.toSet());
 
-//                Sets.filter(oldApplicableQueries,
-//                queryPair -> !newApplicableQueries.contains(queryPair));
-
         Collection<DocumentMessage> messages = new LinkedList<>();
 
         // add all the update messages
