@@ -35,6 +35,8 @@ public class ElasticsearchIndexer implements SinkFunction<WritableResult> {
                         resultMsg.getDocument().getKey(), _mapper.convertValue(resultMsg.getDocument(), Map.class)));
                 break;
             case DELETE:
+                // Deletes must specify a version number to prevent the race condition where it accidentally deletes
+                // an already updated document from a different container
                 messageCollector.send(new OutgoingMessageEnvelope(
                         new SystemStream("elasticsearch",
                                 getESDeletePath(resultMsg.getTable(), resultMsg.getTable(), resultMsg.getDocument().getVersion())),

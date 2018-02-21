@@ -96,11 +96,4 @@ public class JoinQueryIndex {
         _modifiedLevel = null;
         _modifiedDocument = null;
     }
-
-    // TODO: just discovered a possible race condition. If an outer document changes partitions, there is a chance that
-    // its deletion record end up in elasticsearch after its update from a different partition. This could be distastrous,
-    // as it would lead to missing data. This can occur because both the deletion and the insertion affect the same
-    // key in elasticsearch.
-
-    // Maybe the solution is some kind of delete only if the version matches? I believe elasticsearch has this capability
 }
