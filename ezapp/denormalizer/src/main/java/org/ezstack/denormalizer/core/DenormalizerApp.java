@@ -12,11 +12,8 @@ import org.apache.samza.serializers.KVSerde;
 import org.apache.samza.serializers.StringSerde;
 import org.apache.samza.storage.kv.KeyValueStore;
 import org.apache.samza.task.TaskContext;
-import org.ezstack.denormalizer.model.DocumentChangePair;
-import org.ezstack.denormalizer.model.DocumentMessage;
-import org.ezstack.denormalizer.model.WritableResult;
+import org.ezstack.denormalizer.model.*;
 import org.ezstack.denormalizer.serde.JsonSerdeV3;
-import org.ezstack.denormalizer.model.Document;
 import org.ezstack.ezapp.datastore.api.Query;
 import org.ezstack.ezapp.datastore.api.Update;
 import org.slf4j.Logger;
@@ -40,7 +37,8 @@ public class DenormalizerApp implements StreamApplication {
 
         ElasticsearchIndexer elasticsearchIndexer = new ElasticsearchIndexer();
 
-        documents.map(changePair -> new WritableResult(changePair.getNewDocument(),changePair.getNewDocument().getTable()))
+        documents.map(changePair -> new WritableResult(changePair.getNewDocument(),
+                changePair.getNewDocument().getTable(), OpCode.UPDATE))
             .sink(elasticsearchIndexer);
 
         documents.flatMap(new DocumentMessageMapper(queries))

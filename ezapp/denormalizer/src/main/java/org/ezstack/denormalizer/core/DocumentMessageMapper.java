@@ -1,6 +1,5 @@
 package org.ezstack.denormalizer.core;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.*;
 import org.apache.commons.collections4.KeyValue;
 import org.apache.commons.collections4.keyvalue.DefaultKeyValue;
@@ -11,8 +10,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.*;
-
-import static org.ezstack.denormalizer.model.DocumentMessage.OpCode;
+import java.util.stream.Collectors;
 
 public class DocumentMessageMapper implements FlatMapFunction<DocumentChangePair, DocumentMessage> {
 
@@ -47,7 +45,7 @@ public class DocumentMessageMapper implements FlatMapFunction<DocumentChangePair
         Set<KeyValue<Query, QueryLevel>> queryPairs = _queryIndex.get(document.getTable());
 
         if (queryPairs == null) {
-            return Collections.EMPTY_SET;
+            return ImmutableSet.of();
         }
 
         return Sets.filter(queryPairs, queryPair -> {
@@ -63,8 +61,21 @@ public class DocumentMessageMapper implements FlatMapFunction<DocumentChangePair
         Set<KeyValue<Query, QueryLevel>> oldApplicableQueries = getApplicableQueries(changePair.getOldDocument());
         Set<KeyValue<Query, QueryLevel>> newApplicableQueries = getApplicableQueries(changePair.getNewDocument());
 
-        Set<KeyValue<Query, QueryLevel>> queriesForDeletion = Sets.filter(oldApplicableQueries,
-                queryPair -> !newApplicableQueries.contains(queryPair));
+
+        Set<KeyValue<String, QueryLevel>> newPartitionLocations = newApplicableQueries
+                .parallelStream()
+                .map(pair -> new DefaultKeyValue<>(FanoutHashingUtils.getPartitionKey(changePair.getNewDocument(),
+                        pair.getValue(), pair.getKey()), pair.getValue()))
+                .collect(Collectors.toSet());
+
+
+
+        Set<KeyValue<Query, QueryLevel>> queriesForDeletion = oldApplicableQueries
+                .parallelStream()
+                .filter(pair -> !newPartitionLocations.contains(new DefaultKeyValue<>(
+                        FanoutHashingUtils.getPartitionKey(changePair.getOldDocument(),
+                                pair.getValue(), pair.getKey()), pair.getValue())))
+                .collect(Collectors.toSet());
 
         Collection<DocumentMessage> messages = new LinkedList<>();
 

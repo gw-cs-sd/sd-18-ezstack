@@ -7,12 +7,15 @@ public class WritableResult {
 
     private final Document _document;
     private final String _table;
+    private final OpCode _opCode;
 
     @JsonCreator
     public WritableResult(@JsonProperty("document") Document document,
-                          @JsonProperty("table") String table) {
+                          @JsonProperty("table") String table,
+                          @JsonProperty("opCode") OpCode opCode) {
         _document = document;
         _table = table;
+        _opCode = opCode;
     }
 
     public Document getDocument() {
@@ -21,5 +24,9 @@ public class WritableResult {
 
     public String getTable() {
         return _table;
+    }
+
+    public OpCode getOpCode() {
+        return _opCode;
     }
 }
