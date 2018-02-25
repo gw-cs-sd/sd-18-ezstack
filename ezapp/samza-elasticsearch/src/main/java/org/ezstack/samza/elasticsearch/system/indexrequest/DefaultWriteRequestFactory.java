@@ -64,19 +64,14 @@ public class DefaultWriteRequestFactory implements WriteRequestFactory {
       writeRequest.routing(routingKey.get());
     }
 
-    Optional<VersionType> versionType = getVersionType(envelope);
-    if (versionType.isPresent()) {
-      writeRequest.versionType(versionType.get());
-    }
-
     return writeRequest;
   }
 
-  protected DocWriteRequest getRequest(OutgoingMessageEnvelope envelope) {
+  private DocWriteRequest getRequest(OutgoingMessageEnvelope envelope) {
     String[] parts = envelope.getSystemStream().getStream().split("/");
 
-    if (parts.length < 2 || parts.length > 4) {
-      throw new SamzaException("Elasticsearch stream name must match pattern {index}/{type} or {index}/{type}/DELETE/{version}");
+    if (parts.length < 2 || parts.length > 5) {
+      throw new SamzaException("Elasticsearch stream name must match pattern {index}/{type} or {index}/{type}/{opCode}/{versionType}/{version}");
     }
 
     String index = parts[0];
@@ -89,19 +84,58 @@ public class DefaultWriteRequestFactory implements WriteRequestFactory {
               .source(getSource(envelope));
     }
 
-    if (!parts[2].equals("DELETE")) {
-       throw new SamzaException("DELETE is currently the only supported Op Code");
+    DocWriteRequest request;
+
+    switch (parts[2].toLowerCase()) {
+      case "delete":
+        request = Requests.deleteRequest(index)
+                .type(type)
+                .id(envelope.getKey().toString());
+        break;
+      case "index":
+        request = Requests.indexRequest(index)
+                .type(type)
+                .id(envelope.getKey().toString())
+                .source(getSource(envelope));
+        break;
+      default:
+        throw new SamzaException("Invalid Op Code, must be 'delete' or 'index'");
     }
 
-    DeleteRequest deleteRequest = Requests.deleteRequest(index).type(type).id(envelope.getKey().toString());
+    if (parts.length == 3) {
+      return request;
+    }
+
+    switch (parts[3].toLowerCase()) {
+      case "external":
+        request.versionType(VersionType.EXTERNAL);
+        break;
+      case "external_gte":
+        request.versionType(VersionType.EXTERNAL_GTE);
+        break;
+      case "internal":
+        request.versionType(VersionType.INTERNAL);
+        break;
+      default:
+        throw new SamzaException("Invalid version type");
+
+    }
 
     if (parts.length == 4) {
-      deleteRequest.version(Integer.parseInt(parts[3]));
+      if (request.versionType() == VersionType.INTERNAL) {
+        return request;
+      }
+      throw new SamzaException("A version must be provided when version type is external or external_gte");
     }
-    return deleteRequest;
+
+    request.version(Long.parseLong(parts[4]));
+
+    return request;
+
+
   }
 
-  protected Optional<String> getRoutingKey(OutgoingMessageEnvelope envelope) {
+  private Optional<String> getRoutingKey(OutgoingMessageEnvelope envelope) {
     Object partitionKey = envelope.getPartitionKey();
     if (partitionKey == null) {
       return Optional.absent();
@@ -109,12 +143,7 @@ public class DefaultWriteRequestFactory implements WriteRequestFactory {
     return Optional.of(partitionKey.toString());
   }
 
-
-  protected Optional<VersionType> getVersionType(OutgoingMessageEnvelope envelope) {
-    return Optional.absent();
-  }
-
-  protected Map getSource(OutgoingMessageEnvelope envelope) {
+  private Map getSource(OutgoingMessageEnvelope envelope) {
     Object message = envelope.getMessage();
     if (message instanceof Map) {
       return (Map) message;
