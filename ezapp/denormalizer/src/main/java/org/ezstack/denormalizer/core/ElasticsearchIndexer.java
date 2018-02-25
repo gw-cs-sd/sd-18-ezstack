@@ -14,8 +14,12 @@ public class ElasticsearchIndexer implements SinkFunction<WritableResult> {
 
     private static final ObjectMapper _mapper = new ObjectMapper();
 
-    private static String getESDeletePath(String index, String type, int version) {
-        return String.format("%s/%s/DELETE/%d", index, type, version);
+    private String getESDeletePath(String index, String type, int version) {
+        return String.format("%s/%s/delete/internal/%d", index, type, version);
+    }
+
+    private String getESUpdatePath(String index, String type, int version) {
+        return String.format("%s/%s/index/external_gte/%d", index, type, version);
     }
 
     @Override
@@ -24,7 +28,8 @@ public class ElasticsearchIndexer implements SinkFunction<WritableResult> {
         switch (resultMsg.getOpCode()) {
             case UPDATE:
                 messageCollector.send(new OutgoingMessageEnvelope(
-                        new SystemStream("elasticsearch", resultMsg.getTable() + "/" + resultMsg.getTable()),
+                        new SystemStream("elasticsearch",
+                                getESUpdatePath(resultMsg.getTable(), resultMsg.getTable(), resultMsg.getDocument().getVersion())),
                         resultMsg.getDocument().getKey(), _mapper.convertValue(resultMsg.getDocument(), Map.class)));
                 break;
             case DELETE:
