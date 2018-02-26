@@ -58,7 +58,6 @@ public class DenormalizationDeityApp implements StreamApplication {
         reporter.start(10, TimeUnit.SECONDS);
     }
 
-
     private QueryMetadata processQueryMetadata(QueryMetadata queryMetadata) {
         String strippedQuery = queryMetadata.toString();
 
@@ -99,8 +98,7 @@ public class DenormalizationDeityApp implements StreamApplication {
         else {
             priority = median + meanAbsoluteDeviation;
         }
-
-
+        
         long stamp = _timestamp.getTime();
 
         QueryObject queryObject;
@@ -130,7 +128,7 @@ public class DenormalizationDeityApp implements StreamApplication {
             histogram.update(value.getPriority());
         }
 
-        return (long)snap.getMean();
+        return (long)snap.get75thPercentile();
     }
 
     private void addRules(long threshold) {
