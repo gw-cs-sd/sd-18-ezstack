@@ -5,7 +5,7 @@ import org.apache.samza.config.Config;
 import org.apache.samza.operators.functions.FlatMapFunction;
 import org.apache.samza.storage.kv.KeyValueStore;
 import org.apache.samza.task.TaskContext;
-import org.ezstack.denormalizer.model.Document;
+import org.ezstack.ezapp.datastore.api.Document;
 import org.ezstack.denormalizer.model.DocumentChangePair;
 import org.ezstack.ezapp.datastore.api.KeyBuilder;
 import org.ezstack.ezapp.datastore.api.Update;

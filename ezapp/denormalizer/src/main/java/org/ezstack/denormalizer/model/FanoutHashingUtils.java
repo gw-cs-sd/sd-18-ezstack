@@ -4,12 +4,12 @@ import com.google.common.base.Charsets;
 import com.google.common.collect.Lists;
 import com.google.common.hash.Hasher;
 import com.google.common.hash.Hashing;
+import org.ezstack.ezapp.datastore.api.Document;
 import org.ezstack.ezapp.datastore.api.JoinAttribute;
 import org.ezstack.ezapp.datastore.api.Query;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.nio.charset.Charset;
 import java.util.List;
 
 
