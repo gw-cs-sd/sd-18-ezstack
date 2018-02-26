@@ -7,6 +7,7 @@ import org.apache.samza.operators.functions.FlatMapFunction;
 import org.apache.samza.storage.kv.KeyValueStore;
 import org.apache.samza.task.TaskContext;
 import org.ezstack.denormalizer.model.*;
+import org.ezstack.ezapp.datastore.api.Document;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

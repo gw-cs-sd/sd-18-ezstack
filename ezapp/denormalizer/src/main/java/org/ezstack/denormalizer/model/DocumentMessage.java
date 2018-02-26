@@ -2,6 +2,7 @@ package org.ezstack.denormalizer.model;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import org.ezstack.ezapp.datastore.api.Document;
 import org.ezstack.ezapp.datastore.api.Query;
 
 public class DocumentMessage {

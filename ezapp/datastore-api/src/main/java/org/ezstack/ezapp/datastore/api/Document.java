@@ -1,11 +1,8 @@
-package org.ezstack.denormalizer.model;
+package org.ezstack.ezapp.datastore.api;
 
 import com.fasterxml.jackson.annotation.*;
 import com.fasterxml.jackson.databind.util.ISO8601Utils;
 import com.google.common.base.Preconditions;
-import org.ezstack.ezapp.datastore.api.DataType;
-import org.ezstack.ezapp.datastore.api.Names;
-import org.ezstack.ezapp.datastore.api.Update;
 
 import java.util.*;
 

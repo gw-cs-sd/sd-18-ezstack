@@ -1,5 +1,7 @@
 package org.ezstack.denormalizer.model;
 
+import org.ezstack.ezapp.datastore.api.Document;
+
 public class DocumentChangePair {
 
     private final Document _oldDocument;

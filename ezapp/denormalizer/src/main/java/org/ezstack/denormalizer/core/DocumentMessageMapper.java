@@ -5,6 +5,7 @@ import org.apache.commons.collections4.KeyValue;
 import org.apache.commons.collections4.keyvalue.DefaultKeyValue;
 import org.apache.samza.operators.functions.FlatMapFunction;
 import org.ezstack.denormalizer.model.*;
+import org.ezstack.ezapp.datastore.api.Document;
 import org.ezstack.ezapp.datastore.api.Query;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
