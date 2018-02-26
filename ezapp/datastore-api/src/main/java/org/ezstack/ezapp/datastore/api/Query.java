@@ -215,19 +215,6 @@ public class Query {
         return getMurmur3Hash().toString();
     }
 
-    /**
-     * Returns True if the following set of items match:
-     * Same SearchTypes (order does not matter)
-     * Same Table Name
-     * Same Filters (order does not matter)
-     * Same join query if it exists
-     * Same exclude attributes (order does not matter)
-     * Same include attributes (order does not matter)
-     *
-     * --- note that we never compare joinAttributeName because it has no impact on the query result ---
-     * @param o
-     * @return
-     */
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -237,6 +224,7 @@ public class Query {
 
         if (!getSearchTypesAsSet().equals(query.getSearchTypesAsSet())) return false;
         if (_table != null ? !_table.equals(query._table) : query._table != null) return false;
+        if (_joinAttributeName != null ? !_joinAttributeName.equals(query._joinAttributeName) : query._joinAttributeName != null) return false;
         if (!getFiltersAsSet().equals(query.getFiltersAsSet())) return false;
         if (_join != null ? !_join.equals(query._join) : query._join != null) return false;
         if (!getJoinAttributesAsSet().equals(query.getJoinAttributesAsSet())) return false;
@@ -250,6 +238,7 @@ public class Query {
         result = 31 * result + (_table != null ? _table.hashCode() : 0);
         result = 31 * result + getFiltersAsSet().hashCode();
         result = 31 * result + (_join != null ? _join.hashCode() : 0);
+        result = 31 * result + (_joinAttributeName != null ? _joinAttributeName.hashCode() : 0);
         result = 31 * result + getJoinAttributesAsSet().hashCode();
         result = 31 * result + getExcludeAttributesAsSet().hashCode();
         result = 31 * result + getIncludeAttributesAsSet().hashCode();

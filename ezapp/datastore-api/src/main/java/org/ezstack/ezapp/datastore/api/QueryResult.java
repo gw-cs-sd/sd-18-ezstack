@@ -1,10 +1,11 @@
 package org.ezstack.ezapp.datastore.api;
 
+import com.fasterxml.jackson.annotation.JsonAnyGetter;
+import com.fasterxml.jackson.annotation.JsonAnySetter;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonUnwrapped;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.List;
+import java.util.*;
 
 public class QueryResult {
     private Map<String, Object> _queryResults;
@@ -13,11 +14,17 @@ public class QueryResult {
         _queryResults = new HashMap<>();
     }
 
-    @JsonUnwrapped
+    @JsonAnyGetter
     public Map<String, Object> getQueryResults() {
         return _queryResults;
     }
 
+    @JsonAnySetter
+    private void setData(String key, Object o) {
+        _queryResults.put(key, o);
+    }
+
+    @JsonIgnore
     public boolean addAggregation(SearchType type, Object value) {
         if (SearchTypeAggregationHelper.isValidAggregation(value) == null || type.getType() == SearchType.Type.SEARCH) {
             return false;
@@ -27,6 +34,7 @@ public class QueryResult {
         return true;
     }
 
+    @JsonIgnore
     public boolean addAggregation(SearchTypeAggregationHelper searchTypeAggregationHelper) {
         if (searchTypeAggregationHelper.getSearchType().getType() == SearchType.Type.SEARCH) {
             return false;
@@ -47,5 +55,8 @@ public class QueryResult {
         _queryResults.put("_documents", docs);
     }
 
-
+    public void addDocument(Map<String, Object> doc) {
+        List<Map<String, Object>> docs = (List)_queryResults.getOrDefault("_documents", new LinkedList<Map<String, Object>>());
+        docs.add(doc);
+    }
 }

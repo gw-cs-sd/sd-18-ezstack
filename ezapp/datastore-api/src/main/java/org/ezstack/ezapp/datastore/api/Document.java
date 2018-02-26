@@ -13,6 +13,12 @@ public class Document {
 
     private static final long NUM_100NS_INTERVALS_SINCE_UUID_EPOCH = 0x01b21dd213814000L;
 
+    private static final String TABLE = "~table";
+    private static final String KEY = "~key";
+    private static final String FIRST_UPDATE_AT = "~firstUpdateAt";
+    private static final String LAST_UPDATE_AT = "~lastUpdateAt";
+    private static final String VERSION = "~version";
+
     private String _table;
     private final String _key;
     private final String _firstUpdateAt;
@@ -23,16 +29,16 @@ public class Document {
     private boolean _hasMutated;
 
     @JsonCreator
-    public Document(@JsonProperty("~table") String table, @JsonProperty("~key") String key,
-                    @JsonProperty("~firstUpdateAt") String firstUpdateAt, @JsonProperty("~lastUpdateAt") String lastUpdateAt,
-                    @JsonProperty("~version") int version) {
+    public Document(@JsonProperty(TABLE) String table, @JsonProperty(KEY) String key,
+                    @JsonProperty(FIRST_UPDATE_AT) String firstUpdateAt, @JsonProperty(LAST_UPDATE_AT) String lastUpdateAt,
+                    @JsonProperty(VERSION) int version) {
 
         checkNotNull(table, "table");
         checkNotNull(key, "key");
         checkNotNull(firstUpdateAt, "firstUpdateAt");
         checkNotNull(lastUpdateAt, "lastUpdateAt");
-        Preconditions.checkArgument(Names.isLegalTableName(table), "Invalid Table Name");
-        checkArgument(Names.isLegalKey("Invalid key"));
+        checkArgument(Names.isLegalTableName(table), "Invalid Table Name");
+        checkArgument(Names.isLegalKey(key), "Invalid key");
 
         _table = table;
         _key = key;
@@ -52,6 +58,20 @@ public class Document {
         _lastUpdateAt = asISOTimestamp(update.getTimestamp());
         _data = update.getData();
         _version = 1;
+
+        _hasMutated = false;
+    }
+
+    public Document(Map<String, Object> data) {
+        checkNotNull(_table = (String) data.remove(TABLE), "table");
+        checkNotNull(_key = (String) data.remove(KEY), "key");
+        checkNotNull(_firstUpdateAt = (String) data.remove(FIRST_UPDATE_AT), "firstUpdateAt");
+        checkNotNull(_lastUpdateAt = (String) data.remove(LAST_UPDATE_AT), "lastUpdateAt");
+        checkArgument(Names.isLegalTableName(_table), "Invalid Table Name");
+        checkArgument(Names.isLegalTableName(_key), "Invalid Key");
+
+        _data = data;
+        _version = (int) data.remove(VERSION);
 
         _hasMutated = false;
     }

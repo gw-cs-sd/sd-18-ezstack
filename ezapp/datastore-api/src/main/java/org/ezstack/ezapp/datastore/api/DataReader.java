@@ -14,5 +14,5 @@ public interface DataReader {
      * @return
      *
      */
-    Map<String, Object> getDocuments(long retentionTimeInMillis, int batchSize, Query query);
+    QueryResult getDocuments(long retentionTimeInMillis, int batchSize, Query query);
 }
