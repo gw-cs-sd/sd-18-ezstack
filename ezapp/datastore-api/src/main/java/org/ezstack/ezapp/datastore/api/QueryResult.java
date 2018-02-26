@@ -1,5 +1,7 @@
 package org.ezstack.ezapp.datastore.api;
 
+import com.fasterxml.jackson.annotation.JsonAnyGetter;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonUnwrapped;
 
 import java.util.HashMap;
@@ -13,11 +15,12 @@ public class QueryResult {
         _queryResults = new HashMap<>();
     }
 
-    @JsonUnwrapped
+    @JsonAnyGetter
     public Map<String, Object> getQueryResults() {
         return _queryResults;
     }
 
+    @JsonIgnore
     public boolean addAggregation(SearchType type, Object value) {
         if (SearchTypeAggregationHelper.isValidAggregation(value) == null || type.getType() == SearchType.Type.SEARCH) {
             return false;
@@ -27,6 +30,7 @@ public class QueryResult {
         return true;
     }
 
+    @JsonIgnore
     public boolean addAggregation(SearchTypeAggregationHelper searchTypeAggregationHelper) {
         if (searchTypeAggregationHelper.getSearchType().getType() == SearchType.Type.SEARCH) {
             return false;

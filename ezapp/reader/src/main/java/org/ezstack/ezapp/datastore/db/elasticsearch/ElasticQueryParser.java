@@ -24,13 +24,13 @@ public class ElasticQueryParser {
         _client = client;
     }
 
-    Map<String, Object> getDocuments() {
+    QueryResult getDocuments() {
         return exec(_query);
     }
 
-    private Map<String, Object> exec(Query q) {
+    private QueryResult exec(Query q) {
         if (q == null) {
-            return Collections.emptyMap();
+            return new QueryResult();
         }
 
         List<Map<String, Object>> results = new LinkedList<>();
@@ -45,7 +45,7 @@ public class ElasticQueryParser {
                     .setQuery(boolQuery)
                     .get();
         } catch (IndexNotFoundException e) {
-            return Collections.emptyMap();
+            return new QueryResult();
         }
 
         SearchHitIterator iter = new SearchHitIterator(_client, response);
@@ -91,7 +91,7 @@ public class ElasticQueryParser {
             queryResult.addDocuments(results);
         }
 
-        return queryResult.getQueryResults();
+        return queryResult;
     }
 
     private BoolQueryBuilder getFilterBoolQueryBuilder(List<Filter> filters) {
