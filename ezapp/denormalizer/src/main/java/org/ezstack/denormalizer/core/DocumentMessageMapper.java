@@ -44,7 +44,7 @@ public class DocumentMessageMapper implements FlatMapFunction<DocumentChangePair
         return QueryHelper.meetsFilters(q.getFilters(), doc);
     }
 
-    private boolean hasJoinAttributes(QueryPair queryPair, Document doc) {
+    private boolean documentHasJoinAttributeValues(QueryPair queryPair, Document doc) {
         if (queryPair.getQuery().getJoinAttributes() == null) {
             return true;
         }
@@ -68,7 +68,7 @@ public class DocumentMessageMapper implements FlatMapFunction<DocumentChangePair
 
         return queryPairs
                 .stream()
-                .filter(pair -> hasJoinAttributes(pair, document))
+                .filter(pair -> documentHasJoinAttributeValues(pair, document))
                 .filter(pair -> doesMatchQuery(pair, document))
                 .collect(Collectors.toSet());
     }
