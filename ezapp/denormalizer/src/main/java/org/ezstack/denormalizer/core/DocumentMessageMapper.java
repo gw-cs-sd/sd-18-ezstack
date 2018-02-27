@@ -125,7 +125,7 @@ public class DocumentMessageMapper implements FlatMapFunction<DocumentChangePair
             if (this == o) return true;
             if (!(o instanceof QueryPair)) return false;
             QueryPair queryPair = (QueryPair) o;
-            return Objects.equals(_query, queryPair.getQuery()) &&
+            return _query.equals(queryPair.getQuery()) &&
                     _queryLevel == queryPair.getLevel();
         }
     }
