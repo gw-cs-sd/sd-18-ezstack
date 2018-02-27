@@ -65,6 +65,12 @@ public class DenormalizerApp implements StreamApplication {
         String jsonObject1 = "{\n" +
                 "  \"searchTypes\" : [],\n" +
                 "  \"table\" : \"student\",\n" +
+                "\"filter\": [\n" +
+                "{\n" +
+                "\"attribute\": \"id\", \n" +
+                "\"opt\": \"lte\", \n" +
+                "\"value\": 1000\n" +
+                "}]," +
                 "  \"join\" : {\n" +
                 "    \"table\": \"teacher\"\n" +
                 "  },\n" +

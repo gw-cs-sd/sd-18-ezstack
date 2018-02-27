@@ -24,10 +24,12 @@ import org.apache.samza.system.OutgoingMessageEnvelope;
 import org.apache.samza.system.SystemProducer;
 import org.elasticsearch.action.ActionResponse;
 import org.elasticsearch.action.DocWriteRequest;
+import org.elasticsearch.action.DocWriteResponse;
 import org.elasticsearch.action.bulk.BulkItemResponse;
 import org.elasticsearch.action.bulk.BulkProcessor;
 import org.elasticsearch.action.bulk.BulkRequest;
 import org.elasticsearch.action.bulk.BulkResponse;
+import org.elasticsearch.action.delete.DeleteResponse;
 import org.elasticsearch.action.index.IndexResponse;
 import org.elasticsearch.client.Client;
 import org.elasticsearch.rest.RestStatus;
@@ -136,7 +138,7 @@ public class ElasticsearchSystemProducer implements SystemProducer {
 
       private void updateSuccessMetrics(BulkResponse response) {
         metrics.bulkSendSuccess.inc();
-        int writes = 0;
+        int sent = 0;
         for (BulkItemResponse itemResp: response.getItems()) {
           if (itemResp.isFailed()) {
             if (itemResp.getFailure().getStatus().equals(RestStatus.CONFLICT)) {
@@ -145,19 +147,24 @@ public class ElasticsearchSystemProducer implements SystemProducer {
           } else {
             ActionResponse resp = itemResp.getResponse();
             if (resp instanceof IndexResponse) {
-              writes += 1;
+              sent += 1;
               if (((IndexResponse) resp).status() == RestStatus.CREATED) {
                 metrics.inserts.inc();
               } else {
                 metrics.updates.inc();
+              }
+            } else if (resp instanceof DeleteResponse) {
+              sent += 1;
+              if (((DeleteResponse) resp).status() == RestStatus.OK) {
+                metrics.deletes.inc();
               }
             } else {
               LOGGER.error("Unexpected Elasticsearch action response type: " + resp.getClass().getSimpleName());
             }
           }
         }
-        LOGGER.info(String.format("Wrote %s messages from %s to %s.",
-                writes, source, system));
+        LOGGER.info(String.format("Sent %s messages from %s to %s.",
+                sent, source, system));
       }
     };
 
