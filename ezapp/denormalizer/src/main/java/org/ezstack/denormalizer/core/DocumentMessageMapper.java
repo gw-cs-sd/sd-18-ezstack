@@ -45,6 +45,9 @@ public class DocumentMessageMapper implements FlatMapFunction<DocumentChangePair
     }
 
     private boolean hasJoinAttributes(QueryPair queryPair, Document doc) {
+        if (queryPair.getQuery().getJoinAttributes() == null) {
+            return true;
+        }
         return queryPair.getQuery().getJoinAttributes()
                 .stream()
                 .map(att -> queryPair.getLevel() == QueryLevel.OUTER ? att.getOuterAttribute() : att.getInnerAttribute())

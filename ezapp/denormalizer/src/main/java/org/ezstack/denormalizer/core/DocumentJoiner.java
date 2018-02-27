@@ -52,8 +52,10 @@ public class DocumentJoiner implements FlatMapFunction<DocumentMessage, Writable
                 return outerDocs
                     .stream()
                     .map(outerDoc -> {
-                        outerDoc = outerDoc.clone();
-                        outerDoc.setDataField(message.getQuery().getJoinAttributeName(), innerDocs);
+                        if (message.getQuery() != null) {
+                            outerDoc = outerDoc.clone();
+                            outerDoc.setDataField(message.getQuery().getJoinAttributeName(), innerDocs);
+                        }
                         return outerDoc;
                     })
                     .map(denormDoc -> new WritableResult(denormDoc, message.getQuery().getMurmur3HashAsString(),
@@ -74,8 +76,10 @@ public class DocumentJoiner implements FlatMapFunction<DocumentMessage, Writable
         return outerDocs
                 .stream()
                 .map(outerDoc -> {
-                    outerDoc = outerDoc.clone();
-                    outerDoc.setDataField(message.getQuery().getJoinAttributeName(), innerDocs);
+                    if (message.getQuery().getJoin() != null) {
+                        outerDoc = outerDoc.clone();
+                        outerDoc.setDataField(message.getQuery().getJoinAttributeName(), innerDocs);
+                    }
                     return outerDoc;
                 })
                 .map(denormDoc -> new WritableResult(denormDoc, message.getQuery().getMurmur3HashAsString(),
