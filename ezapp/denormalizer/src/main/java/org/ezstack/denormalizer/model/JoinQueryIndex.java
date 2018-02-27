@@ -78,7 +78,7 @@ public class JoinQueryIndex {
             return ImmutableList.of(_modifiedDocument);
         }
 
-        return _outerDocs.entrySet().parallelStream().map(Map.Entry::getValue).collect(Collectors.toList());
+        return _outerDocs.entrySet().stream().map(Map.Entry::getValue).collect(Collectors.toList());
     }
 
     @JsonIgnore
@@ -87,7 +87,7 @@ public class JoinQueryIndex {
             return Collections.emptyList();
         }
 
-        return _innerDocs.entrySet().parallelStream().map(Map.Entry::getValue).collect(Collectors.toList());
+        return _innerDocs.entrySet().stream().map(Map.Entry::getValue).collect(Collectors.toList());
     }
 
     // This is necessary because samza has a deserialized cache, which means that a we need to clear out metadata

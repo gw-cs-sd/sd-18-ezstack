@@ -2,5 +2,6 @@ package org.ezstack.denormalizer.model;
 
 public enum OpCode {
     UPDATE,
-    DELETE
+    REMOVE,
+    REMOVE_AND_DELETE
 }

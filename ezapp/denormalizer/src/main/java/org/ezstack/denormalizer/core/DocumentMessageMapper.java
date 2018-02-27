@@ -17,33 +17,33 @@ public class DocumentMessageMapper implements FlatMapFunction<DocumentChangePair
 
     private static final Logger log = LoggerFactory.getLogger(DocumentMessageMapper.class);
 
-    private HashMultimap<String, KeyValue<Query, QueryLevel>> _queryIndex;
+    private HashMultimap<String, QueryPair> _queryIndex;
 
     public DocumentMessageMapper(Collection<Query> queries) {
         _queryIndex = getQueryIndex(queries);
     }
 
-    private HashMultimap<String, KeyValue<Query, QueryLevel>> getQueryIndex(Collection<Query> queries) {
-        HashMultimap<String, KeyValue<Query, QueryLevel>> index = HashMultimap.create();
+    private HashMultimap<String, QueryPair> getQueryIndex(Collection<Query> queries) {
+        HashMultimap<String, QueryPair> index = HashMultimap.create();
 
         for (Query query : queries) {
-            index.put(query.getTable(), new DefaultKeyValue<>(query, QueryLevel.OUTER));
+            index.put(query.getTable(), new QueryPair(query, QueryLevel.OUTER));
 
             if (query.getJoin() != null) {
-                index.put(query.getJoin().getTable(), new DefaultKeyValue<>(query, QueryLevel.INNER));
+                index.put(query.getJoin().getTable(), new QueryPair(query, QueryLevel.INNER));
             }
         }
 
         return index;
     }
 
-    private Set<KeyValue<Query, QueryLevel>> getApplicableQueries(Document document) {
+    private Set<QueryPair> getApplicableQueries(Document document) {
 
         if (document == null) {
             return ImmutableSet.of();
         }
 
-        Set<KeyValue<Query, QueryLevel>> queryPairs = _queryIndex.get(document.getTable());
+        Set<QueryPair> queryPairs = _queryIndex.get(document.getTable());
 
         if (queryPairs == null) {
             return ImmutableSet.of();
@@ -59,43 +59,74 @@ public class DocumentMessageMapper implements FlatMapFunction<DocumentChangePair
 
     @Override
     public Collection<DocumentMessage> apply(DocumentChangePair changePair) {
-        Set<KeyValue<Query, QueryLevel>> oldApplicableQueries = getApplicableQueries(changePair.getOldDocument());
-        Set<KeyValue<Query, QueryLevel>> newApplicableQueries = getApplicableQueries(changePair.getNewDocument());
-
+        Set<QueryPair> oldApplicableQueries = getApplicableQueries(changePair.getOldDocument());
+        Set<QueryPair> newApplicableQueries = getApplicableQueries(changePair.getNewDocument());
 
         Set<KeyValue<String, QueryLevel>> newPartitionLocations = newApplicableQueries
-                .parallelStream()
+                .stream()
                 .map(pair -> new DefaultKeyValue<>(FanoutHashingUtils.getPartitionKey(changePair.getNewDocument(),
-                        pair.getValue(), pair.getKey()), pair.getValue()))
+                        pair.getLevel(), pair.getQuery()), pair.getLevel()))
                 .collect(Collectors.toSet());
 
-
-
-        Set<KeyValue<Query, QueryLevel>> queriesForDeletion = oldApplicableQueries
-                .parallelStream()
+        Set<QueryPair> queriesForDeletion = oldApplicableQueries
+                .stream()
                 .filter(pair -> !newPartitionLocations.contains(new DefaultKeyValue<>(
                         FanoutHashingUtils.getPartitionKey(changePair.getOldDocument(),
-                                pair.getValue(), pair.getKey()), pair.getValue())))
+                                pair.getLevel(), pair.getQuery()), pair.getLevel())))
                 .collect(Collectors.toSet());
 
         Collection<DocumentMessage> messages = new LinkedList<>();
 
         // add all the update messages
-        for (KeyValue<Query, QueryLevel> queryPair : newApplicableQueries) {
+        for (QueryPair queryPair : newApplicableQueries) {
             messages.add(new DocumentMessage(changePair.getNewDocument(),
                     FanoutHashingUtils.getPartitionKey(changePair.getNewDocument(),
-                            queryPair.getValue(), queryPair.getKey()),
-                    queryPair.getValue(), OpCode.UPDATE, queryPair.getKey()));
+                            queryPair.getLevel(), queryPair.getQuery()),
+                    queryPair.getLevel(), OpCode.UPDATE, queryPair.getQuery()));
         }
 
         // add all the delete messages
-        for (KeyValue<Query, QueryLevel> queryPair : queriesForDeletion) {
-            messages.add(new DocumentMessage(changePair.getOldDocument(),
-                    FanoutHashingUtils.getPartitionKey(changePair.getOldDocument(),
-                            queryPair.getValue(), queryPair.getKey()),
-                    queryPair.getValue(), OpCode.DELETE, queryPair.getKey()));
+        for (QueryPair queryPair : queriesForDeletion) {
+            if (!newApplicableQueries.contains(queryPair) && queryPair.getLevel() == QueryLevel.OUTER) {
+                messages.add(new DocumentMessage(changePair.getOldDocument(),
+                        FanoutHashingUtils.getPartitionKey(changePair.getOldDocument(),
+                                queryPair.getLevel(), queryPair.getQuery()),
+                        queryPair.getLevel(), OpCode.REMOVE_AND_DELETE, queryPair.getQuery()));
+            } else {
+                messages.add(new DocumentMessage(changePair.getOldDocument(),
+                        FanoutHashingUtils.getPartitionKey(changePair.getOldDocument(),
+                                queryPair.getLevel(), queryPair.getQuery()),
+                        queryPair.getLevel(), OpCode.REMOVE, queryPair.getQuery()));
+            }
         }
 
         return messages;
+    }
+
+    private class QueryPair {
+        private final Query _query;
+        private final QueryLevel _queryLevel;
+
+        public QueryPair(Query query, QueryLevel queryLevel) {
+            this._query = query;
+            this._queryLevel = queryLevel;
+        }
+
+        public Query getQuery() {
+            return _query;
+        }
+
+        public QueryLevel getLevel() {
+            return _queryLevel;
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (!(o instanceof QueryPair)) return false;
+            QueryPair queryPair = (QueryPair) o;
+            return Objects.equals(_query, queryPair.getQuery()) &&
+                    _queryLevel == queryPair.getLevel();
+        }
     }
 }

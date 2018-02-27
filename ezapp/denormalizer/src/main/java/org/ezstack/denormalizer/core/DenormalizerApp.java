@@ -38,7 +38,7 @@ public class DenormalizerApp implements StreamApplication {
         ElasticsearchIndexer elasticsearchIndexer = new ElasticsearchIndexer();
 
         documents.map(changePair -> new WritableResult(changePair.getNewDocument(),
-                changePair.getNewDocument().getTable(), OpCode.UPDATE))
+                changePair.getNewDocument().getTable(), WritableResult.Action.INDEX))
             .sink(elasticsearchIndexer);
 
         documents.flatMap(new DocumentMessageMapper(queries))
