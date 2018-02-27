@@ -49,7 +49,7 @@ public class QueryHelper {
      * @param doc
      * @return true if document passes all filters, otherwise false
      */
-    public static boolean meetsFilters(List<Filter> filters, Map<String, Object> doc) {
+    public static boolean meetsFilters(List<Filter> filters, Document doc) {
         filters = safe(filters);
         for (Filter f: filters) {
             if (!meetsFilter(f, doc)) return false;
@@ -57,8 +57,8 @@ public class QueryHelper {
         return true;
     }
 
-    public static boolean meetsFilter(Filter f, Map<String, Object> doc) {
-        Object val = doc.get(f.getAttribute());
+    public static boolean meetsFilter(Filter f, Document doc) {
+        Object val = doc.getValue(f.getAttribute());
         if (val == null) {
             return false;
         }

@@ -27,6 +27,7 @@ public class ElasticsearchSystemProducerMetrics extends MetricsBase {
     public final Counter inserts;
     public final Counter updates;
     public final Counter conflicts;
+    public final Counter deletes;
 
     public ElasticsearchSystemProducerMetrics(String systemName, MetricsRegistry registry) {
         super(systemName + "-", registry);
@@ -35,5 +36,6 @@ public class ElasticsearchSystemProducerMetrics extends MetricsBase {
         inserts = newCounter("docs-inserted");
         updates = newCounter("docs-updated");
         conflicts = newCounter("version-conflicts");
+        deletes = newCounter("docs-deleted");
     }
 }
