@@ -44,6 +44,9 @@ public class DocumentMessageMapper implements FlatMapFunction<DocumentChangePair
         return QueryHelper.meetsFilters(q.getFilters(), doc);
     }
 
+    // determines if a document has the requisite join attribute values to
+    // perform the join and fulfill the query. If the query does not have join attributes values, then the
+    // method should succeed because we know that the document has the requisite attributes (because they aren't any)
     private boolean documentHasJoinAttributeValues(QueryPair queryPair, Document doc) {
         if (queryPair.getQuery().getJoinAttributes() == null) {
             return true;
