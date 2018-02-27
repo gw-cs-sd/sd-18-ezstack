@@ -26,7 +26,7 @@ public class ElasticsearchIndexer implements SinkFunction<WritableResult> {
     public void apply(WritableResult resultMsg, MessageCollector messageCollector, TaskCoordinator taskCoordinator) {
 
         switch (resultMsg.getOpCode()) {
-            case UPDATE:
+            case INDEX:
                 messageCollector.send(new OutgoingMessageEnvelope(
                         new SystemStream("elasticsearch",
                                 getESUpdatePath(resultMsg.getTable(), resultMsg.getTable(), resultMsg.getDocument().getVersion())),

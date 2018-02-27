@@ -6,14 +6,19 @@ import org.ezstack.ezapp.datastore.api.Document;
 
 public class WritableResult {
 
+    public enum Action {
+        INDEX,
+        DELETE
+    }
+
     private final Document _document;
     private final String _table;
-    private final OpCode _opCode;
+    private final Action _opCode;
 
     @JsonCreator
     public WritableResult(@JsonProperty("document") Document document,
                           @JsonProperty("table") String table,
-                          @JsonProperty("opCode") OpCode opCode) {
+                          @JsonProperty("opCode") Action opCode) {
         _document = document;
         _table = table;
         _opCode = opCode;
@@ -27,7 +32,7 @@ public class WritableResult {
         return _table;
     }
 
-    public OpCode getOpCode() {
+    public Action getOpCode() {
         return _opCode;
     }
 }

@@ -31,7 +31,7 @@ public class DocumentJoiner implements FlatMapFunction<DocumentMessage, Writable
         _store = (KeyValueStore<String, JoinQueryIndex>) context.getStore(_storeName);
     }
 
-    private Collection<WritableResult> getActionsForDelete(JoinQueryIndex joinQueryIndex, DocumentMessage message) {
+    private Collection<WritableResult> getActionsForRemove(JoinQueryIndex joinQueryIndex, DocumentMessage message) {
         joinQueryIndex.deleteDocument(message.getDocument(), message.getDocumentLevel());
 
         List<Document> outerDocs = joinQueryIndex.getEffectedDocumentsOuter();
@@ -40,20 +40,24 @@ public class DocumentJoiner implements FlatMapFunction<DocumentMessage, Writable
         
         switch (message.getDocumentLevel()) {
             case OUTER:
+                if (message.getOpCode() == OpCode.REMOVE) {
+                    return ImmutableSet.of();
+                }
                 return outerDocs
-                        .parallelStream()
+                        .stream()
                         .map(docToDelete -> new WritableResult(docToDelete, message.getQuery().getMurmur3HashAsString(),
-                                OpCode.DELETE))
+                                WritableResult.Action.DELETE))
                         .collect(Collectors.toSet());
             case INNER:
                 return outerDocs
-                    .parallelStream()
+                    .stream()
                     .map(outerDoc -> {
                         outerDoc = outerDoc.clone();
                         outerDoc.setDataField(message.getQuery().getJoinAttributeName(), innerDocs);
                         return outerDoc;
                     })
-                    .map(denormDoc -> new WritableResult(denormDoc, message.getQuery().getMurmur3HashAsString(), OpCode.UPDATE))
+                    .map(denormDoc -> new WritableResult(denormDoc, message.getQuery().getMurmur3HashAsString(),
+                            WritableResult.Action.INDEX))
                     .collect(Collectors.toSet());
         }
 
@@ -68,13 +72,14 @@ public class DocumentJoiner implements FlatMapFunction<DocumentMessage, Writable
         joinQueryIndex.refresh();
 
         return outerDocs
-                .parallelStream()
+                .stream()
                 .map(outerDoc -> {
                     outerDoc = outerDoc.clone();
                     outerDoc.setDataField(message.getQuery().getJoinAttributeName(), innerDocs);
                     return outerDoc;
                 })
-                .map(denormDoc -> new WritableResult(denormDoc, message.getQuery().getMurmur3HashAsString(), OpCode.UPDATE))
+                .map(denormDoc -> new WritableResult(denormDoc, message.getQuery().getMurmur3HashAsString(),
+                        WritableResult.Action.INDEX))
                 .collect(Collectors.toSet());
     }
 
@@ -83,7 +88,7 @@ public class DocumentJoiner implements FlatMapFunction<DocumentMessage, Writable
 
         JoinQueryIndex joinQueryIndex = MoreObjects.firstNonNull(_store.get(message.getPartitionKey()), new JoinQueryIndex());
         Collection<WritableResult> writableResults = message.getOpCode() == OpCode.UPDATE ?
-                getActionsForUpdate(joinQueryIndex, message) : getActionsForDelete(joinQueryIndex, message);
+                getActionsForUpdate(joinQueryIndex, message) : getActionsForRemove(joinQueryIndex, message);
 
         joinQueryIndex.refresh();
         _store.put(message.getPartitionKey(), joinQueryIndex);
