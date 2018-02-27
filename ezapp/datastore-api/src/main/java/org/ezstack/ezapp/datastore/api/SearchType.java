@@ -9,7 +9,7 @@ import com.google.common.hash.Hashing;
 
 public class SearchType {
     public enum Type {
-        COUNT, MAX, MIN, SUM, AVG, SEARCH, UNKOWN;
+        COUNT, MAX, MIN, SUM, AVG, SEARCH;
 
         @Override
         public String toString() {
@@ -27,15 +27,15 @@ public class SearchType {
                 case SEARCH:
                     return "search";
                 default:
-                    return "unkown";
+                    return "unknown";
             }
         }
     }
-    private String _type;
+    private Type _type;
     private String _attributeOn;
 
     @JsonCreator
-    public SearchType(@JsonProperty("type") String type,
+    public SearchType(@JsonProperty("type") Type type,
                       @JsonProperty("attributeOn") String attributeOn) {
         _type = type;
         _attributeOn = attributeOn;
@@ -46,22 +46,7 @@ public class SearchType {
     }
 
     public Type getType() {
-        switch (_type) {
-            case "count":
-                return Type.COUNT;
-            case "max":
-                return Type.MAX;
-            case "min":
-                return Type.MIN;
-            case "sum":
-                return Type.SUM;
-            case "avg":
-                return Type.AVG;
-            case "search":
-                return Type.SEARCH;
-            default:
-                return Type.UNKOWN;
-        }
+        return _type;
     }
 
     @Override

@@ -51,8 +51,8 @@ public class ElasticQueryParser {
         SearchHitIterator iter = new SearchHitIterator(_client, response);
         List<SearchTypeAggregationHelper> helpers = QueryHelper.createAggHelpers(q.getSearchTypes());
         // if search types is empty then defaults to getting documents
-        boolean userWantsDocuments = q.getSearchTypes() == null || q.getSearchTypes().isEmpty() ?
-                true : QueryHelper.hasSearchRequest(q.getSearchTypes());
+        boolean userWantsDocuments = q.getSearchTypes() == null || q.getSearchTypes().isEmpty()
+                || QueryHelper.hasSearchRequest(q.getSearchTypes());
 
         while (iter.hasNext()) {
             SearchHit searchHit = iter.next();
