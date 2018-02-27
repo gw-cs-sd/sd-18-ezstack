@@ -21,19 +21,23 @@ public class FanoutHashingUtils {
     public static String getPartitionKey(Document document, QueryLevel queryLevel,
                                          Query query) {
 
-        List<JoinAttribute> joinAtts = query.getJoinAttributes();
-
-        List<String> atts = Lists.transform(joinAtts,
-                queryLevel == QueryLevel.OUTER ? JoinAttribute::getOuterAttribute : JoinAttribute::getInnerAttribute);
-
-        // TODO: make this hash better
-
         Hasher hasher = Hashing.murmur3_128().newHasher();
 
         hasher.putString(query.getMurmur3HashAsString(), Charsets.UTF_8);
-        for (String att : atts) {
+
+        if (query.getJoin() == null) {
             hasher.putString("|", Charsets.UTF_8);
-            hasher.putString(document.getValue(att).toString(), Charsets.UTF_8);
+            hasher.putString(document.getKey(), Charsets.UTF_8);
+        } else {
+            List<JoinAttribute> joinAtts = query.getJoinAttributes();
+
+            List<String> atts = Lists.transform(joinAtts,
+                    queryLevel == QueryLevel.OUTER ? JoinAttribute::getOuterAttribute : JoinAttribute::getInnerAttribute);
+
+            for (String att : atts) {
+                hasher.putString("|", Charsets.UTF_8);
+                hasher.putString(document.getValue(att).toString(), Charsets.UTF_8);
+            }
         }
 
         return hasher.hash().toString();
