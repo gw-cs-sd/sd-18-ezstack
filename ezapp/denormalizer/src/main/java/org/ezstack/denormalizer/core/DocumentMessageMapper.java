@@ -7,6 +7,7 @@ import org.apache.samza.operators.functions.FlatMapFunction;
 import org.ezstack.denormalizer.model.*;
 import org.ezstack.ezapp.datastore.api.Document;
 import org.ezstack.ezapp.datastore.api.Query;
+import org.ezstack.ezapp.datastore.api.QueryHelper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -37,6 +38,19 @@ public class DocumentMessageMapper implements FlatMapFunction<DocumentChangePair
         return index;
     }
 
+    private boolean doesMatchQuery(QueryPair queryPair, Document doc) {
+        Query q = queryPair.getLevel() == QueryLevel.OUTER ? queryPair.getQuery() : queryPair.getQuery().getJoin();
+
+        return QueryHelper.meetsFilters(q.getFilters(), doc);
+    }
+
+    private boolean hasJoinAttributes(QueryPair queryPair, Document doc) {
+        return queryPair.getQuery().getJoinAttributes()
+                .stream()
+                .map(att -> queryPair.getLevel() == QueryLevel.OUTER ? att.getOuterAttribute() : att.getInnerAttribute())
+                .allMatch(att ->  doc.getValue(att) != null);
+    }
+
     private Set<QueryPair> getApplicableQueries(Document document) {
 
         if (document == null) {
@@ -49,12 +63,11 @@ public class DocumentMessageMapper implements FlatMapFunction<DocumentChangePair
             return ImmutableSet.of();
         }
 
-        return Sets.filter(queryPairs, queryPair -> {
-            // TODO ensure document has the requisite join attributes, else return false
-
-            // TODO apply filter here, approve all for now
-            return true;
-        });
+        return queryPairs
+                .stream()
+                .filter(pair -> hasJoinAttributes(pair, document))
+                .filter(pair -> doesMatchQuery(pair, document))
+                .collect(Collectors.toSet());
     }
 
     @Override
