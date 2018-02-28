@@ -1,6 +1,5 @@
 package org.ezstack.ezapp.datastore.api;
 
-import java.util.Map;
 
 public class SearchTypeAggregationHelper {
     private SearchType _searchType;
@@ -17,7 +16,7 @@ public class SearchTypeAggregationHelper {
         _jsonType = DataType.JsonTypes.UNKNOWN;
     }
 
-    public void computeDocument(Map<String, Object> doc) {
+    public void computeDocument(Document doc) {
         switch (_searchType.getType()) {
             case COUNT:
                 count(doc);
@@ -67,14 +66,14 @@ public class SearchTypeAggregationHelper {
         return 0; // unrecognized
     }
 
-    private void count(Map<String, Object> doc) {
+    private void count(Document doc) {
         if (doc.containsKey(_searchType.getAttributeOn())) {
             _documentCount++;
         }
     }
 
-    private void max(Map<String, Object> doc) {
-        Object value = doc.get(_searchType.getAttributeOn());
+    private void max(Document doc) {
+        Object value = doc.getValue(_searchType.getAttributeOn());
         if (isValidAggregation(value) == null) {
             return;
         }
@@ -100,8 +99,8 @@ public class SearchTypeAggregationHelper {
         }
     }
 
-    private void min(Map<String, Object> doc) {
-        Object value = doc.get(_searchType.getAttributeOn());
+    private void min(Document doc) {
+        Object value = doc.getValue(_searchType.getAttributeOn());
         if (isValidAggregation(value) == null) {
             return;
         }
@@ -127,8 +126,8 @@ public class SearchTypeAggregationHelper {
         }
     }
 
-    private void sum(Map<String, Object> doc) {
-        Object value = doc.get(_searchType.getAttributeOn());
+    private void sum(Document doc) {
+        Object value = doc.getValue(_searchType.getAttributeOn());
         if (isValidAggregation(value) == null) {
             return;
         }

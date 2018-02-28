@@ -7,6 +7,8 @@ import com.google.common.base.Charsets;
 import com.google.common.hash.HashCode;
 import com.google.common.hash.Hashing;
 
+import static com.google.common.base.Preconditions.checkNotNull;
+
 public class SearchType {
     public enum Type {
         COUNT, MAX, MIN, SUM, AVG, SEARCH;
@@ -31,13 +33,40 @@ public class SearchType {
             }
         }
     }
-    private Type _type;
-    private String _attributeOn;
+    
+    private final Type _type;
+    private final String _attributeOn;
 
     @JsonCreator
-    public SearchType(@JsonProperty("type") Type type,
+    public SearchType(@JsonProperty("type") String type,
                       @JsonProperty("attributeOn") String attributeOn) {
-        _type = type;
+
+        switch (type.toLowerCase()) {
+            case "count":
+                _type = Type.COUNT;
+                break;
+            case "max":
+                _type = Type.MAX;
+                break;
+            case "min":
+                _type = Type.MIN;
+                break;
+            case "sum":
+                _type = Type.SUM;
+                break;
+            case "avg":
+                _type = Type.AVG;
+                break;
+            case "search":
+                _type = Type.SEARCH;
+                break;
+            default:
+                _type = null;
+                break;
+        }
+
+        checkNotNull(_type);
+
         _attributeOn = attributeOn;
     }
 

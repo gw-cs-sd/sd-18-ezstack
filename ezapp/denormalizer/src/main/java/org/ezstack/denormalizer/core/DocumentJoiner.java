@@ -1,7 +1,5 @@
 package org.ezstack.denormalizer.core;
 
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.base.MoreObjects;
 import com.google.common.collect.ImmutableSet;
 import org.apache.samza.config.Config;
@@ -15,7 +13,6 @@ import org.slf4j.LoggerFactory;
 
 import java.util.Collection;
 import java.util.List;
-import java.util.Map;
 import java.util.stream.Collectors;
 
 import static com.google.common.base.Preconditions.checkNotNull;
@@ -27,8 +24,6 @@ public class DocumentJoiner implements FlatMapFunction<DocumentMessage, Writable
     private final String _storeName;
     private KeyValueStore<String, JoinQueryIndex> _store;
 
-    // TODO: this should be temporary. The query helper should be able to process document objects
-    private final ObjectMapper _mapper = new ObjectMapper();
 
     public DocumentJoiner(String storeName) {
         _storeName = storeName;
@@ -53,16 +48,11 @@ public class DocumentJoiner implements FlatMapFunction<DocumentMessage, Writable
                 || QueryHelper.hasSearchRequest(searchTypes);
 
         if (userWantsDocuments) {
-            queryResult.addDocuments(innerDocs
-                    .stream()
-                    .map(doc -> (Map<String, Object>) _mapper.convertValue(doc, new TypeReference<Map<String, Object>>() {}))
-                    .collect(Collectors.toList()));
+            queryResult.addDocuments(innerDocs);
         }
 
-
-        // TODO: query helper should be refactored to accept document objects
         List<SearchTypeAggregationHelper> helpers = QueryHelper.createAggHelpers(searchTypes);
-        innerDocs.forEach(doc -> QueryHelper.updateAggHelpers(helpers, _mapper.convertValue(doc, Map.class)));
+        innerDocs.forEach(doc -> QueryHelper.updateAggHelpers(helpers, doc));
 
 
         queryResult.addAggregations(helpers);
