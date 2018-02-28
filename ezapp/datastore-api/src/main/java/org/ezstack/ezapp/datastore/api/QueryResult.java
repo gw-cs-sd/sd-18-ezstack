@@ -51,12 +51,13 @@ public class QueryResult {
         }
     }
 
-    public void addDocuments(List<Map<String, Object>> docs) {
+    public void addDocuments(List<Document> docs) {
         _queryResults.put("_documents", docs);
     }
 
-    public void addDocument(Map<String, Object> doc) {
-        List<Map<String, Object>> docs = (List)_queryResults.getOrDefault("_documents", new LinkedList<Map<String, Object>>());
+    // TODO: I'm pretty sure this method is incomplete
+    public void addDocument(Document doc) {
+        List<Document> docs = (List)_queryResults.getOrDefault("_documents", new LinkedList<Document>());
         docs.add(doc);
     }
 }

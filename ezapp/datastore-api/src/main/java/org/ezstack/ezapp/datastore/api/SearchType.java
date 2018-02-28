@@ -7,9 +7,11 @@ import com.google.common.base.Charsets;
 import com.google.common.hash.HashCode;
 import com.google.common.hash.Hashing;
 
+import static com.google.common.base.Preconditions.checkNotNull;
+
 public class SearchType {
     public enum Type {
-        COUNT, MAX, MIN, SUM, AVG, SEARCH, UNKOWN;
+        COUNT, MAX, MIN, SUM, AVG, SEARCH;
 
         @Override
         public String toString() {
@@ -27,17 +29,44 @@ public class SearchType {
                 case SEARCH:
                     return "search";
                 default:
-                    return "unkown";
+                    return "unknown";
             }
         }
     }
-    private String _type;
-    private String _attributeOn;
+
+    private final Type _type;
+    private final String _attributeOn;
 
     @JsonCreator
     public SearchType(@JsonProperty("type") String type,
                       @JsonProperty("attributeOn") String attributeOn) {
-        _type = type;
+
+        switch (type.toLowerCase()) {
+            case "count":
+                _type = Type.COUNT;
+                break;
+            case "max":
+                _type = Type.MAX;
+                break;
+            case "min":
+                _type = Type.MIN;
+                break;
+            case "sum":
+                _type = Type.SUM;
+                break;
+            case "avg":
+                _type = Type.AVG;
+                break;
+            case "search":
+                _type = Type.SEARCH;
+                break;
+            default:
+                _type = null;
+                break;
+        }
+
+        checkNotNull(_type);
+
         _attributeOn = attributeOn;
     }
 
@@ -46,22 +75,7 @@ public class SearchType {
     }
 
     public Type getType() {
-        switch (_type) {
-            case "count":
-                return Type.COUNT;
-            case "max":
-                return Type.MAX;
-            case "min":
-                return Type.MIN;
-            case "sum":
-                return Type.SUM;
-            case "avg":
-                return Type.AVG;
-            case "search":
-                return Type.SEARCH;
-            default:
-                return Type.UNKOWN;
-        }
+        return _type;
     }
 
     @Override

@@ -3,6 +3,7 @@ package org.ezstack.ezapp.datastore.api;
 import com.fasterxml.jackson.annotation.*;
 import com.fasterxml.jackson.databind.util.ISO8601Utils;
 import com.google.common.base.Preconditions;
+import com.google.common.collect.ImmutableSet;
 
 import java.util.*;
 
@@ -18,6 +19,7 @@ public class Document {
     private static final String FIRST_UPDATE_AT = "~firstUpdateAt";
     private static final String LAST_UPDATE_AT = "~lastUpdateAt";
     private static final String VERSION = "~version";
+    private static final Set<String> INTRINSIC_ATTRIBUTES = ImmutableSet.of(TABLE, KEY, FIRST_UPDATE_AT, LAST_UPDATE_AT, VERSION);
 
     private String _table;
     private final String _key;
@@ -67,11 +69,14 @@ public class Document {
         checkNotNull(_key = (String) data.remove(KEY), "key");
         checkNotNull(_firstUpdateAt = (String) data.remove(FIRST_UPDATE_AT), "firstUpdateAt");
         checkNotNull(_lastUpdateAt = (String) data.remove(LAST_UPDATE_AT), "lastUpdateAt");
+        checkArgument(data.containsKey(VERSION), "version");
+
+        _version = (int) data.remove(VERSION);
+
         checkArgument(Names.isLegalTableName(_table), "Invalid Table Name");
         checkArgument(Names.isLegalTableName(_key), "Invalid Key");
 
         _data = data;
-        _version = (int) data.remove(VERSION);
 
         _hasMutated = false;
     }
@@ -128,27 +133,27 @@ public class Document {
         return (uuid.timestamp() - NUM_100NS_INTERVALS_SINCE_UUID_EPOCH) / 10000;
     }
 
-    @JsonProperty("~firstUpdateAt")
+    @JsonProperty(FIRST_UPDATE_AT)
     public String getFirstUpdateAt() {
         return _firstUpdateAt;
     }
 
-    @JsonProperty("~lastUpdateAt")
+    @JsonProperty(LAST_UPDATE_AT)
     public String getLastUpdateAt() {
         return _lastUpdateAt;
     }
 
-    @JsonProperty("~table")
+    @JsonProperty(TABLE)
     public String getTable() {
         return _table;
     }
 
-    @JsonProperty("~key")
+    @JsonProperty(KEY)
     public String getKey() {
         return _key;
     }
 
-    @JsonProperty("~version")
+    @JsonProperty(VERSION)
     public int getVersion() {
         return _version;
     }
@@ -156,6 +161,17 @@ public class Document {
     @JsonAnyGetter
     public Map<String, Object> getData() {
         return _data;
+    }
+
+    public boolean containsKey(String key) {
+        return getValue(key) != null;
+    }
+
+    // removes key from the document as long as it is not an instric
+    public void remove(String key) {
+        if (!INTRINSIC_ATTRIBUTES.contains(key)) {
+            _data.remove(key);
+        }
     }
 
     @JsonAnySetter
@@ -166,15 +182,15 @@ public class Document {
 
     public Object getValue(String key) {
         switch (key) {
-            case "~key":
+            case KEY:
                 return getKey();
-            case "~table":
+            case TABLE:
                 return getTable();
-            case "~firstUpdateAt":
+            case FIRST_UPDATE_AT:
                 return getFirstUpdateAt();
-            case "~lastUpdateAt":
+            case LAST_UPDATE_AT:
                 return getLastUpdateAt();
-            case "~version":
+            case VERSION:
                 return getVersion();
             default:
                 return _data.get(key);

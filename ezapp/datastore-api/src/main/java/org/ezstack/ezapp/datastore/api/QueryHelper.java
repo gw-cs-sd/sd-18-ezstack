@@ -4,9 +4,9 @@ import java.util.*;
 
 public class QueryHelper {
 
-    public static Map<String, Object> filterAttributes(List<String> excludeAttributes,
+    public static Document filterAttributes(List<String> excludeAttributes,
                                                        List<String> includeAttributes,
-                                                       Map<String, Object> doc) {
+                                                       Document doc) {
         return includeAttributes == null ?
                 excludeAttributes(excludeAttributes, doc) : includeAttributes(includeAttributes, doc);
     }
@@ -24,7 +24,7 @@ public class QueryHelper {
         return ret;
     }
 
-    public static void updateAggHelpers(List<SearchTypeAggregationHelper> aggregationHelpers, Map<String, Object> doc) {
+    public static void updateAggHelpers(List<SearchTypeAggregationHelper> aggregationHelpers, Document doc) {
         aggregationHelpers = safe(aggregationHelpers);
 
         for (SearchTypeAggregationHelper helper: aggregationHelpers) {
@@ -164,11 +164,11 @@ public class QueryHelper {
         return false;
     }
 
-    public static List safe(List l) {
+    public static <T> List<T> safe(List<T> l) {
         return l == null ? Collections.emptyList() : l;
     }
 
-    private static Map<String, Object> excludeAttributes(List<String> excludeAttributes, Map<String, Object> doc) {
+    private static Document excludeAttributes(List<String> excludeAttributes, Document doc) {
         if (excludeAttributes == null || excludeAttributes.size() == 0) {
             return doc;
         }
@@ -179,16 +179,17 @@ public class QueryHelper {
         return doc;
     }
 
-    private static Map<String, Object> includeAttributes(List<String> includeAttributes, Map<String, Object> doc) {
+    private static Document includeAttributes(List<String> includeAttributes, Document doc) {
         if (includeAttributes == null || includeAttributes.size() == 0) {
             return doc;
         }
 
-        Map<String, Object> newDoc = new HashMap<>();
+        Document newDoc = new Document(doc.getTable(), doc.getKey(), doc.getFirstUpdateAt(), doc.getLastUpdateAt(),
+                doc.getVersion());
         for (String attribute: includeAttributes) {
-            Object value = doc.get(attribute);
+            Object value = doc.getValue(attribute);
             if (value != null) {
-                newDoc.put(attribute, value);
+                newDoc.setDataField(attribute, value);
             }
         }
         return newDoc;

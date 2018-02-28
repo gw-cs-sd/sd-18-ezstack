@@ -33,7 +33,7 @@ public class ElasticQueryParser {
             return new QueryResult();
         }
 
-        List<Map<String, Object>> results = new LinkedList<>();
+        List<Document> results = new LinkedList<>();
         BoolQueryBuilder boolQuery = getFilterBoolQueryBuilder(QueryHelper.safe(q.getFilters()));
         SearchResponse response;
 
@@ -51,12 +51,12 @@ public class ElasticQueryParser {
         SearchHitIterator iter = new SearchHitIterator(_client, response);
         List<SearchTypeAggregationHelper> helpers = QueryHelper.createAggHelpers(q.getSearchTypes());
         // if search types is empty then defaults to getting documents
-        boolean userWantsDocuments = q.getSearchTypes() == null || q.getSearchTypes().isEmpty() ?
-                true : QueryHelper.hasSearchRequest(q.getSearchTypes());
+        boolean userWantsDocuments = q.getSearchTypes() == null || q.getSearchTypes().isEmpty()
+                || QueryHelper.hasSearchRequest(q.getSearchTypes());
 
         while (iter.hasNext()) {
             SearchHit searchHit = iter.next();
-            Map<String, Object> doc = searchHit.getSourceAsMap();
+            Document doc = new Document(searchHit.getSourceAsMap());
             if (q.getJoin() != null) {
                 Query innerJoin = q.getJoin();
                 List<Filter> innerJoinFilters = innerJoin.getFilters() == null ? new LinkedList<>() : innerJoin.getFilters();
@@ -65,7 +65,7 @@ public class ElasticQueryParser {
                 QueryHelper.updateAggHelpers(helpers, doc);
                 doc = QueryHelper.filterAttributes(q.getExcludeAttributes(), q.getIncludeAttributes(), doc);
 
-                doc.put(q.getJoinAttributeName(),
+                doc.setDataField(q.getJoinAttributeName(),
                         exec(new Query(innerJoin.getSearchTypes(),
                                 innerJoin.getTable(),
                                 innerJoinFilters,
@@ -123,12 +123,12 @@ public class ElasticQueryParser {
         return boolQuery;
     }
 
-    private List<Filter> convertJoinAttributesToFilters(Map<String, Object> doc, List<JoinAttribute> attributes) {
+    private List<Filter> convertJoinAttributesToFilters(Document doc, List<JoinAttribute> attributes) {
         List<Filter> filters = new LinkedList<>();
         for (JoinAttribute ma: attributes) {
             if (doc.containsKey(ma.getOuterAttribute())) {
                 String fa = ma.getInnerAttribute();
-                Object val = doc.get(ma.getOuterAttribute());
+                Object val = doc.getValue(ma.getOuterAttribute());
                 filters.add(new Filter(fa, Filter.Operations.EQ, val));
             }
         }
