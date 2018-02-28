@@ -33,7 +33,7 @@ public class SearchType {
             }
         }
     }
-    
+
     private final Type _type;
     private final String _attributeOn;
 

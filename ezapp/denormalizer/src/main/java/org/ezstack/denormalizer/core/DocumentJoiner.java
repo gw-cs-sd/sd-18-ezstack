@@ -88,18 +88,6 @@ public class DocumentJoiner implements FlatMapFunction<DocumentMessage, Writable
                         .collect(Collectors.toSet());
             case INNER:
                 return getDenormalizationForDocuments(outerDocs, innerDocs, message.getQuery());
-//                return outerDocs
-//                    .stream()
-//                    .map(outerDoc -> {
-//                        if (message.getQuery().getJoin() != null) {
-//                            outerDoc = outerDoc.clone();
-//                            outerDoc.setDataField(message.getQuery().getJoinAttributeName(), innerDocs);
-//                        }
-//                        return outerDoc;
-//                    })
-//                    .map(denormDoc -> new WritableResult(denormDoc, message.getQuery().getMurmur3HashAsString(),
-//                            WritableResult.Action.INDEX))
-//                    .collect(Collectors.toSet());
         }
 
         return ImmutableSet.of();
@@ -113,19 +101,6 @@ public class DocumentJoiner implements FlatMapFunction<DocumentMessage, Writable
         joinQueryIndex.refresh();
 
         return getDenormalizationForDocuments(outerDocs, innerDocs, message.getQuery());
-
-//        return outerDocs
-//                .stream()
-//                .map(outerDoc -> {
-//                    if (message.getQuery().getJoin() != null) {
-//                        outerDoc = outerDoc.clone();
-//                        outerDoc.setDataField(message.getQuery().getJoinAttributeName(), innerDocs);
-//                    }
-//                    return outerDoc;
-//                })
-//                .map(denormDoc -> new WritableResult(denormDoc, message.getQuery().getMurmur3HashAsString(),
-//                        WritableResult.Action.INDEX))
-//                .collect(Collectors.toSet());
     }
 
     @Override
