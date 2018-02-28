@@ -52,11 +52,6 @@ public class DocumentJoiner implements FlatMapFunction<DocumentMessage, Writable
 
         innerDocs.forEach(doc -> QueryHelper.updateAggHelpers(helpers, doc));
 
-        innerDocs = innerDocs
-                .stream()
-                .map(doc -> QueryHelper.filterAttributes(query.getExcludeAttributes(), query.getIncludeAttributes(), doc))
-                .collect(Collectors.toList());
-
         if (userWantsDocuments) {
             List<Document> filteredDocs = innerDocs
                     .stream()
