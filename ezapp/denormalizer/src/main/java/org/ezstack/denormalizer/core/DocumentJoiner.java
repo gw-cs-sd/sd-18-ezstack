@@ -47,18 +47,27 @@ public class DocumentJoiner implements FlatMapFunction<DocumentMessage, Writable
         boolean userWantsDocuments = searchTypes == null || searchTypes.isEmpty()
                 || QueryHelper.hasSearchRequest(searchTypes);
 
-        if (userWantsDocuments) {
-            queryResult.addDocuments(innerDocs);
-        }
 
         List<SearchTypeAggregationHelper> helpers = QueryHelper.createAggHelpers(searchTypes);
+
         innerDocs.forEach(doc -> QueryHelper.updateAggHelpers(helpers, doc));
+
+        if (userWantsDocuments) {
+            List<Document> filteredDocs = innerDocs
+                    .stream()
+                    .map(doc -> QueryHelper.filterAttributes(query.getExcludeAttributes(), query.getIncludeAttributes(), doc))
+                    .collect(Collectors.toList());
+
+            queryResult.addDocuments(filteredDocs);
+        }
 
 
         queryResult.addAggregations(helpers);
 
         return outerDocs
                 .stream()
+                .map(outerDoc -> QueryHelper.filterAttributes(query.getExcludeAttributes(),
+                        query.getIncludeAttributes(), outerDoc))
                 .map(outerDoc -> {
                     outerDoc = outerDoc.clone();
                     outerDoc.setDataField(query.getJoinAttributeName(), queryResult);
@@ -111,7 +120,11 @@ public class DocumentJoiner implements FlatMapFunction<DocumentMessage, Writable
         // is being processed.
         // i.e. We won't need it because it will always be in the DocumentMessage parameter
         if (message.getQuery().getJoin() == null) {
-            return ImmutableSet.of(new WritableResult(message.getDocument(), message.getQuery().getMurmur3HashAsString(),
+
+            return ImmutableSet.of(new WritableResult(
+                    QueryHelper.filterAttributes(message.getQuery().getExcludeAttributes(),
+                            message.getQuery().getIncludeAttributes(), message.getDocument()),
+                    message.getQuery().getMurmur3HashAsString(),
                     WritableResult.Action.INDEX));
         }
 

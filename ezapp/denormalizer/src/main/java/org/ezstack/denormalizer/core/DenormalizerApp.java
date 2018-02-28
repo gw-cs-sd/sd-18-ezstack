@@ -66,6 +66,7 @@ public class DenormalizerApp implements StreamApplication {
         String jsonObject1 = "{\n" +
                 "  \"searchTypes\" : [],\n" +
                 "  \"table\" : \"student\",\n" +
+                "  \"excludeAttributes\" : [\"teacher_id\"],\n" +
                 "\"filter\": [\n" +
                 "{\n" +
                 "\"attribute\": \"id\", \n" +
@@ -84,7 +85,6 @@ public class DenormalizerApp implements StreamApplication {
                 "  ]\n" +
                 "}";
         try {
-            log.info(mapper.readValue(jsonObject, Query.class).getJoin().getSearchTypes().toString());
             return ImmutableSet.of(mapper.readValue(jsonObject, Query.class), mapper.readValue(jsonObject1, Query.class));
         } catch (Exception e) {
             log.error(e.toString());
