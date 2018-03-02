@@ -1,8 +1,6 @@
 package org.ezstack.ezapp.datastore.api;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.ezstack.ezapp.datastore.api.Document;
-import org.ezstack.ezapp.datastore.api.Update;
 import org.junit.Before;
 import org.junit.Test;
 

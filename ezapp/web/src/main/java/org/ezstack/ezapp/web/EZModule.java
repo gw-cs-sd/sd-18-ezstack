@@ -3,7 +3,6 @@ package org.ezstack.ezapp.web;
 import com.google.inject.AbstractModule;
 import io.dropwizard.setup.Environment;
 import org.ezstack.ezapp.datastore.ReaderModule;
-import org.ezstack.ezapp.datastore.WriterConfiguration;
 import org.ezstack.ezapp.datastore.WriterModule;
 import org.ezstack.ezapp.querybus.QueryBusModule;
 
