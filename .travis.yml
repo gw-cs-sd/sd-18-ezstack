@@ -1,6 +1,6 @@
 language: java
 
-before_install: cd ezapp
+before_install: cd ezstack
 
 jdk:
   - oraclejdk8
