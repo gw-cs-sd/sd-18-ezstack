@@ -9,7 +9,7 @@
     <packaging>pom</packaging>
     <version>0.1-SNAPSHOT</version>
     <modules>
-        <module>parent</module>
+        <module>ezapp-parent</module>
         <module>web</module>
         <module>web-local</module>
         <module>writer</module>
