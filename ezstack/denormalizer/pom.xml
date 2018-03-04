@@ -9,48 +9,78 @@
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
-    <artifactId>ezapp-denormalizer</artifactId>
+    <artifactId>ezstack-denormalizer</artifactId>
     <build>
         <plugins>
+
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-shade-plugin</artifactId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>3.1</version>
+                <configuration>
+                    <source>1.8</source>
+                    <target>1.8</target>
+                </configuration>
+            </plugin>
+            <plugin>
+                <artifactId>maven-assembly-plugin</artifactId>
                 <version>2.3</version>
                 <configuration>
-                    <createDependencyReducedPom>false</createDependencyReducedPom>
-                    <filters>
-                        <filter>
-                            <artifact>*:*</artifact>
-                            <excludes>
-                                <exclude>META-INF/*.SF</exclude>
-                                <exclude>META-INF/*.DSA</exclude>
-                                <exclude>META-INF/*.RSA</exclude>
-                            </excludes>
-                        </filter>
-                    </filters>
+                    <descriptors>
+                        <descriptor>src/main/assembly/src.xml</descriptor>
+                    </descriptors>
                 </configuration>
                 <executions>
                     <execution>
+                        <id>make-assembly</id>
                         <phase>package</phase>
                         <goals>
-                            <goal>shade</goal>
+                            <goal>single</goal>
                         </goals>
-                        <configuration>
-                            <transformers>
-                                <transformer implementation="org.apache.maven.plugins.shade.resource.ServicesResourceTransformer"/>
-                                <transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
-                                    <mainClass>DenormalizerLocalApplication</mainClass>
-                                </transformer>
-                            </transformers>
-                        </configuration>
                     </execution>
                 </executions>
             </plugin>
+
+            <!--<plugin>-->
+                <!--<groupId>org.apache.maven.plugins</groupId>-->
+                <!--<artifactId>maven-shade-plugin</artifactId>-->
+                <!--<version>2.3</version>-->
+                <!--<configuration>-->
+                    <!--<createDependencyReducedPom>false</createDependencyReducedPom>-->
+                    <!--<filters>-->
+                        <!--<filter>-->
+                            <!--<artifact>*:*</artifact>-->
+                            <!--<excludes>-->
+                                <!--<exclude>META-INF/*.SF</exclude>-->
+                                <!--<exclude>META-INF/*.DSA</exclude>-->
+                                <!--<exclude>META-INF/*.RSA</exclude>-->
+                            <!--</excludes>-->
+                        <!--</filter>-->
+                    <!--</filters>-->
+                <!--</configuration>-->
+                <!--<executions>-->
+                    <!--<execution>-->
+                        <!--<phase>package</phase>-->
+                        <!--<goals>-->
+                            <!--<goal>shade</goal>-->
+                        <!--</goals>-->
+                        <!--<configuration>-->
+                            <!--<transformers>-->
+                                <!--<transformer implementation="org.apache.maven.plugins.shade.resource.ServicesResourceTransformer"/>-->
+                                <!--<transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">-->
+                                    <!--<mainClass>DenormalizerLocalApplication</mainClass>-->
+                                <!--</transformer>-->
+                            <!--</transformers>-->
+                        <!--</configuration>-->
+                    <!--</execution>-->
+                <!--</executions>-->
+            <!--</plugin>-->
         </plugins>
     </build>
 
     <properties>
         <samza.version>0.14.0</samza.version>
+        <hadoop.version>2.6.1</hadoop.version>
     </properties>
 
     <dependencies>
@@ -84,11 +114,64 @@
             <artifactId>samza-kafka_2.11</artifactId>
             <version>${samza.version}</version>
         </dependency>
+
+        <dependency>
+            <groupId>org.apache.samza</groupId>
+            <artifactId>samza-shell</artifactId>
+            <classifier>dist</classifier>
+            <type>tgz</type>
+            <version>${samza.version}</version>
+        </dependency>
+
         <dependency>
             <groupId>org.ezstack.ezapp</groupId>
             <artifactId>ezapp-datastore-api</artifactId>
             <version>${project.version}</version>
         </dependency>
+
+        <dependency>
+            <groupId>org.apache.samza</groupId>
+            <artifactId>samza-yarn_2.11</artifactId>
+            <version>${samza.version}</version>
+        </dependency>
+
+
+        <dependency>
+            <groupId>org.apache.hadoop</groupId>
+            <artifactId>hadoop-annotations</artifactId>
+            <version>${hadoop.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.hadoop</groupId>
+            <artifactId>hadoop-auth</artifactId>
+            <version>${hadoop.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.hadoop</groupId>
+            <artifactId>hadoop-common</artifactId>
+            <version>${hadoop.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.hadoop</groupId>
+            <artifactId>hadoop-hdfs</artifactId>
+            <version>${hadoop.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.hadoop</groupId>
+            <artifactId>hadoop-yarn-api</artifactId>
+            <version>${hadoop.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.hadoop</groupId>
+            <artifactId>hadoop-yarn-client</artifactId>
+            <version>${hadoop.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.hadoop</groupId>
+            <artifactId>hadoop-yarn-common</artifactId>
+            <version>${hadoop.version}</version>
+        </dependency>
+
 
         <dependency>
             <groupId>org.ezstack</groupId>
