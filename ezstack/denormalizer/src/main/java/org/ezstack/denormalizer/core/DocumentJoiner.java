@@ -13,6 +13,7 @@ import org.slf4j.LoggerFactory;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import static com.google.common.base.Preconditions.checkNotNull;
@@ -40,7 +41,7 @@ public class DocumentJoiner implements FlatMapFunction<DocumentMessage, Writable
         checkNotNull(query, "query");
         checkNotNull(query.getJoin(), "query join");
 
-        List<SearchType> searchTypes = query.getJoin().getSearchTypes();
+        Set<SearchType> searchTypes = query.getJoin().getSearchTypes();
 
         QueryResult queryResult = new QueryResult();
 
@@ -48,15 +49,15 @@ public class DocumentJoiner implements FlatMapFunction<DocumentMessage, Writable
                 || QueryHelper.hasSearchRequest(searchTypes);
 
 
-        List<SearchTypeAggregationHelper> helpers = QueryHelper.createAggHelpers(searchTypes);
+        Set<SearchTypeAggregationHelper> helpers = QueryHelper.createAggHelpers(searchTypes);
 
         innerDocs.forEach(doc -> QueryHelper.updateAggHelpers(helpers, doc));
 
         if (userWantsDocuments) {
-            List<Document> filteredDocs = innerDocs
+            Set<Document> filteredDocs = innerDocs
                     .stream()
                     .map(doc -> QueryHelper.filterAttributes(query.getExcludeAttributes(), query.getIncludeAttributes(), doc))
-                    .collect(Collectors.toList());
+                    .collect(Collectors.toSet());
 
             queryResult.addDocuments(filteredDocs);
         }

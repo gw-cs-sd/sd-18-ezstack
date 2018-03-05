@@ -19,8 +19,7 @@ public class QueryMetadata {
         _query = query;
         _responseTimeInMs = responseTimeInMs;
 
-        // TODO: make this a more reliable hash
-        _queryIdentifier =  _query.toString();
+        _queryIdentifier =  _query.getMurmur3HashAsString();
     }
 
     @JsonIgnore

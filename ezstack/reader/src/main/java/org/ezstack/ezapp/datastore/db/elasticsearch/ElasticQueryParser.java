@@ -33,8 +33,8 @@ public class ElasticQueryParser {
             return new QueryResult();
         }
 
-        List<Document> results = new LinkedList<>();
-        BoolQueryBuilder boolQuery = getFilterBoolQueryBuilder(QueryHelper.safe(q.getFilters()));
+        Set<Document> results = new HashSet<>();
+        BoolQueryBuilder boolQuery = getFilterBoolQueryBuilder(QueryHelper.safeSet(q.getFilters()));
         SearchResponse response;
 
         try {
@@ -49,17 +49,16 @@ public class ElasticQueryParser {
         }
 
         SearchHitIterator iter = new SearchHitIterator(_client, response);
-        List<SearchTypeAggregationHelper> helpers = QueryHelper.createAggHelpers(q.getSearchTypes());
+        Set<SearchTypeAggregationHelper> helpers = QueryHelper.createAggHelpers(q.getSearchTypes());
         // if search types is empty then defaults to getting documents
-        boolean userWantsDocuments = q.getSearchTypes() == null || q.getSearchTypes().isEmpty()
-                || QueryHelper.hasSearchRequest(q.getSearchTypes());
+        boolean userWantsDocuments = q.getSearchTypes().isEmpty() || QueryHelper.hasSearchRequest(q.getSearchTypes());
 
         while (iter.hasNext()) {
             SearchHit searchHit = iter.next();
             Document doc = new Document(searchHit.getSourceAsMap());
             if (q.getJoin() != null) {
                 Query innerJoin = q.getJoin();
-                List<Filter> innerJoinFilters = innerJoin.getFilters() == null ? new LinkedList<>() : innerJoin.getFilters();
+                Set<Filter> innerJoinFilters = innerJoin.getFilters().isEmpty() ? new HashSet<>() : innerJoin.getFilters();
                 innerJoinFilters.addAll(convertJoinAttributesToFilters(doc, q.getJoinAttributes()));
 
                 QueryHelper.updateAggHelpers(helpers, doc);
@@ -94,11 +93,11 @@ public class ElasticQueryParser {
         return queryResult;
     }
 
-    private BoolQueryBuilder getFilterBoolQueryBuilder(List<Filter> filters) {
+    private BoolQueryBuilder getFilterBoolQueryBuilder(Set<Filter> filters) {
         BoolQueryBuilder boolQuery = QueryBuilders.boolQuery();
 
         for (Filter f: filters) {
-            switch (f.getOpt()) {
+            switch (f.getOp()) {
                 case EQ:
                     boolQuery.must(QueryBuilders.termsQuery(f.getAttribute(), f.getValue()));
                     break;
@@ -123,13 +122,13 @@ public class ElasticQueryParser {
         return boolQuery;
     }
 
-    private List<Filter> convertJoinAttributesToFilters(Document doc, List<JoinAttribute> attributes) {
+    private List<Filter> convertJoinAttributesToFilters(Document doc, Set<JoinAttribute> attributes) {
         List<Filter> filters = new LinkedList<>();
         for (JoinAttribute ma: attributes) {
             if (doc.containsKey(ma.getOuterAttribute())) {
                 String fa = ma.getInnerAttribute();
                 Object val = doc.getValue(ma.getOuterAttribute());
-                filters.add(new Filter(fa, Filter.Operations.EQ, val));
+                filters.add(new Filter(fa, Filter.Operation.EQ, val));
             }
         }
         return filters;

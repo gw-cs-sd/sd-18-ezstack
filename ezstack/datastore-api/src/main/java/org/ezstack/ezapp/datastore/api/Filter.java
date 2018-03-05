@@ -10,10 +10,12 @@ import com.google.common.hash.Hashing;
 
 import javax.validation.constraints.NotNull;
 
+import static com.google.common.base.Preconditions.checkNotNull;
+
 
 public class Filter {
-    public enum Operations {
-        EQ, NOT_EQ, GT, GTE, LT, LTE, UNKOWN;
+    public enum Operation {
+        EQ, NOT_EQ, GT, GTE, LT, LTE;
 
         @Override
         public String toString() {
@@ -31,27 +33,57 @@ public class Filter {
                 case LTE:
                     return "lte";
                 default:
-                    return "unkown";
+                    return "unknown";
             }
         }
     }
 
     private String _attribute;
-    private String _opt;
+    private Operation _op;
     private Object _value;
 
     @JsonCreator
     public Filter(@NotNull @JsonProperty("attribute") String attribute,
-                  @NotNull @JsonProperty("opt") String opt,
+                  @NotNull @JsonProperty("op") String op,
                   @NotNull @JsonProperty("value") Object value) {
+        switch (op.toLowerCase()) {
+            case "eq":
+            case "==": // fall through
+                _op = Operation.EQ;
+                break;
+            case "not_eq":
+            case "!=": // fall through
+                _op = Operation.NOT_EQ;
+                break;
+            case "gt":
+            case ">": // fall through
+                _op =  Operation.GT;
+                break;
+            case "gte":
+            case ">=": // fall through
+                _op = Operation.GTE;
+                break;
+            case "lt":
+            case "<": // fall through
+                _op = Operation.LT;
+                break;
+            case "lte":
+            case "<=": // fall through
+                _op = Operation.LTE;
+                break;
+            default:
+                _op = null;
+                break;
+        }
+
+        checkNotNull(_op);
         _attribute = attribute;
-        _opt = opt;
         _value = value;
     }
 
-    public Filter(String attribute, Operations opt, Object value) {
+    public Filter(String attribute, Operation op, Object value) {
         _attribute = attribute;
-        _opt = opt.toString();
+        _op = op;
         _value = value;
     }
 
@@ -59,29 +91,8 @@ public class Filter {
         return _attribute;
     }
 
-    public Operations getOpt() {
-        switch (_opt.toLowerCase()) {
-            case "eq":
-            case "==": // fall through
-                return Operations.EQ;
-            case "not_eq":
-            case "!=": // fall through
-                return Operations.NOT_EQ;
-            case "gt":
-            case ">": // fall through
-                return Operations.GT;
-            case "gte":
-            case ">=": // fall through
-                return Operations.GTE;
-            case "lt":
-            case "<": // fall through
-                return Operations.LT;
-            case "lte":
-            case "<=": // fall through
-                return Operations.LTE;
-            default:
-                return Operations.UNKOWN;
-        }
+    public Operation getOp() {
+        return _op;
     }
 
     public Object getValue() {
@@ -91,7 +102,7 @@ public class Filter {
     @JsonIgnore
     public HashCode getMurmur3Hash() {
         StringBuilder sb = new StringBuilder();
-        sb.append(getAttribute()).append("~").append(getOpt().toString()).append("~").append(getValue().toString());
+        sb.append(getAttribute()).append("~").append(getOp().toString()).append("~").append(getValue().toString());
 
         return Hashing.murmur3_128().newHasher()
                 .putString(sb.toString(), Charsets.UTF_8)
@@ -111,14 +122,14 @@ public class Filter {
         Filter filter = (Filter) o;
 
         if (_attribute != null ? !_attribute.equals(filter._attribute) : filter._attribute != null) return false;
-        if (getOpt() != filter.getOpt()) return false;
+        if (getOp() != filter.getOp()) return false;
         return _value != null ? _value.equals(filter._value) : filter._value == null;
     }
 
     @Override
     public int hashCode() {
         int result = _attribute != null ? _attribute.hashCode() : 0;
-        result = 31 * result + getOpt().toString().hashCode();
+        result = 31 * result + getOp().toString().hashCode();
         result = 31 * result + (_value != null ? _value.hashCode() : 0);
         return result;
     }
