@@ -8,6 +8,7 @@ import com.fasterxml.jackson.annotation.JsonUnwrapped;
 import java.util.*;
 
 public class QueryResult {
+    private final String DOCUMENTS_NAME = "_documents";
     private Map<String, Object> _queryResults;
 
     public QueryResult() {
@@ -52,12 +53,15 @@ public class QueryResult {
     }
 
     public void addDocuments(Set<Document> docs) {
-        _queryResults.put("_documents", docs);
+        _queryResults.put(DOCUMENTS_NAME, docs);
     }
 
-    // TODO: I'm pretty sure this method is incomplete
     public void addDocument(Document doc) {
-        Set<Document> docs = (Set)_queryResults.getOrDefault("_documents", new HashSet<>());
+        Set<Document> docs = (Set)_queryResults.get(DOCUMENTS_NAME);
+        if (docs == null) {
+            docs = new HashSet<>();
+            _queryResults.put(DOCUMENTS_NAME, docs);
+        }
         docs.add(doc);
     }
 }

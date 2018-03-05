@@ -31,16 +31,13 @@ public class FanoutHashingUtils {
         } else {
             Set<JoinAttribute> joinAtts = query.getJoinAttributes();
 
-            Set<String> atts = joinAtts
+            joinAtts
                     .stream()
                     .map(queryLevel == QueryLevel.OUTER ? JoinAttribute::getOuterAttribute : JoinAttribute::getInnerAttribute)
-                    .collect(Collectors.toSet());
-
-
-            for (String att : atts) {
-                hasher.putString("|", Charsets.UTF_8);
-                hasher.putString(document.getValue(att).toString(), Charsets.UTF_8);
-            }
+                    .forEach(att -> {
+                        hasher.putString("|", Charsets.UTF_8);
+                        hasher.putString(document.getValue(att).toString(), Charsets.UTF_8);
+            });
         }
 
         return hasher.hash().toString();
