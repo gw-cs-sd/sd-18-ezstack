@@ -26,7 +26,6 @@ public class SearchTypeTest {
         sum = new SearchType("sum", "testAttribute");
         avg = new SearchType("avg", "testAttribute");
         search = new SearchType("search", "testAttribute");
-        unknown = new SearchType("blahblahblah", "testAttribute");
 
         count2 = new SearchType("count", "testAttribute");
         count3 = new SearchType("count", "notTestAttribute");
@@ -60,7 +59,6 @@ public class SearchTypeTest {
         assertEquals(sum.getAttributeOn(), "testAttribute");
         assertEquals(avg.getAttributeOn(), "testAttribute");
         assertEquals(search.getAttributeOn(), "testAttribute");
-        assertEquals(unknown.getAttributeOn(), "testAttribute");
     }
 
     @Test
@@ -71,7 +69,6 @@ public class SearchTypeTest {
         assertEquals(sum.toString(), "_sum_testAttribute");
         assertEquals(avg.toString(), "_avg_testAttribute");
         assertEquals(search.toString(), "_search_testAttribute");
-        assertEquals(unknown.toString(), "_unknown_testAttribute");
     }
 
     @Test
