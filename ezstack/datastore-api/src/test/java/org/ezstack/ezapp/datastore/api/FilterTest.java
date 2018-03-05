@@ -12,7 +12,7 @@ public class FilterTest {
     private static final String TEST_ATT_1 = "att1";
     private static final String TEST_ATT_2 = "hi";
 
-    private static Filter f1, f2, f3, f4, f5, f6, f7, f11, f8, f9;
+    private static Filter f1, f2, f3, f4, f5, f6, f11, f8, f9;
 
     @BeforeClass
     public static void setup() {
@@ -22,7 +22,6 @@ public class FilterTest {
         f4 = new Filter(TEST_ATT_1, "gt", TEST_VALUE_1);
         f5 = new Filter(TEST_ATT_1, "lte", TEST_VALUE_1);
         f6 = new Filter(TEST_ATT_1, "lt", TEST_VALUE_1);
-        f7 = new Filter(TEST_ATT_1, "random", TEST_VALUE_1);
 
         f11 = new Filter(TEST_ATT_1, "eq", TEST_VALUE_1);
         f8 = new Filter(TEST_ATT_2, "eq", TEST_VALUE_1);
@@ -62,12 +61,11 @@ public class FilterTest {
 
     @Test
     public void getOpt() {
-        assertEquals(f1.getOpt(), Filter.Operations.EQ);
-        assertEquals(f2.getOpt(), Filter.Operations.NOT_EQ);
-        assertEquals(f3.getOpt(), Filter.Operations.GTE);
-        assertEquals(f4.getOpt(), Filter.Operations.GT);
-        assertEquals(f5.getOpt(), Filter.Operations.LTE);
-        assertEquals(f6.getOpt(), Filter.Operations.LT);
-        assertEquals(f7.getOpt(), Filter.Operations.UNKOWN);
+        assertEquals(f1.getOp(), Filter.Operation.EQ);
+        assertEquals(f2.getOp(), Filter.Operation.NOT_EQ);
+        assertEquals(f3.getOp(), Filter.Operation.GTE);
+        assertEquals(f4.getOp(), Filter.Operation.GT);
+        assertEquals(f5.getOp(), Filter.Operation.LTE);
+        assertEquals(f6.getOp(), Filter.Operation.LT);
     }
 }

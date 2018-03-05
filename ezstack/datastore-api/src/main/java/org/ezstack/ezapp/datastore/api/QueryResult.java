@@ -8,6 +8,7 @@ import com.fasterxml.jackson.annotation.JsonUnwrapped;
 import java.util.*;
 
 public class QueryResult {
+    private final String DOCUMENTS_NAME = "_documents";
     private Map<String, Object> _queryResults;
 
     public QueryResult() {
@@ -44,20 +45,23 @@ public class QueryResult {
         return true;
     }
 
-    public void addAggregations(List<SearchTypeAggregationHelper> helpers) {
-        helpers = QueryHelper.safe(helpers);
+    public void addAggregations(Set<SearchTypeAggregationHelper> helpers) {
+        helpers = QueryHelper.safeSet(helpers);
         for (SearchTypeAggregationHelper helper: helpers) {
             _queryResults.put(helper.getSearchType().toString(), helper.getResult());
         }
     }
 
-    public void addDocuments(List<Document> docs) {
-        _queryResults.put("_documents", docs);
+    public void addDocuments(Set<Document> docs) {
+        _queryResults.put(DOCUMENTS_NAME, docs);
     }
 
-    // TODO: I'm pretty sure this method is incomplete
     public void addDocument(Document doc) {
-        List<Document> docs = (List)_queryResults.getOrDefault("_documents", new LinkedList<Document>());
+        Set<Document> docs = (Set)_queryResults.get(DOCUMENTS_NAME);
+        if (docs == null) {
+            docs = new HashSet<>();
+            _queryResults.put(DOCUMENTS_NAME, docs);
+        }
         docs.add(doc);
     }
 }

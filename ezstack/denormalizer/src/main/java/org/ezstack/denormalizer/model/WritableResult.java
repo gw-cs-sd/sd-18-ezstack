@@ -13,15 +13,15 @@ public class WritableResult {
 
     private final Document _document;
     private final String _table;
-    private final Action _opCode;
+    private final Action _action;
 
     @JsonCreator
     public WritableResult(@JsonProperty("document") Document document,
                           @JsonProperty("table") String table,
-                          @JsonProperty("opCode") Action opCode) {
+                          @JsonProperty("action") Action action) {
         _document = document;
         _table = table;
-        _opCode = opCode;
+        _action = action;
     }
 
     public Document getDocument() {
@@ -32,7 +32,7 @@ public class WritableResult {
         return _table;
     }
 
-    public Action getOpCode() {
-        return _opCode;
+    public Action getAction() {
+        return _action;
     }
 }

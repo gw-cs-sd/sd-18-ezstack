@@ -1,6 +1,7 @@
 package org.ezstack.denormalizer.core;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.common.base.Throwables;
 import com.google.common.collect.ImmutableSet;
 import org.apache.samza.application.StreamApplication;
 import org.apache.samza.config.Config;
@@ -70,7 +71,7 @@ public class DenormalizerApp implements StreamApplication {
                 "\"filter\": [\n" +
                 "{\n" +
                 "\"attribute\": \"id\", \n" +
-                "\"opt\": \"lte\", \n" +
+                "\"op\": \"lte\", \n" +
                 "\"value\": 1000\n" +
                 "}]," +
                 "  \"join\" : {\n" +
@@ -87,7 +88,7 @@ public class DenormalizerApp implements StreamApplication {
         try {
             return ImmutableSet.of(mapper.readValue(jsonObject, Query.class), mapper.readValue(jsonObject1, Query.class));
         } catch (Exception e) {
-            log.error(e.toString());
+            Throwables.throwIfUnchecked(e);
             return null;
         }
     }

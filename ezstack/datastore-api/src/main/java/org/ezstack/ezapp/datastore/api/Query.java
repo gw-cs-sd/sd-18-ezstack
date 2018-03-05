@@ -19,25 +19,25 @@ public class Query {
     @JsonIgnore
     private static final String DEFAULT_JOIN_ATTRIBUTE_NAME = "_joinAttribute";
 
-    private List<SearchType> _searchTypes;
+    private Set<SearchType> _searchTypes;
     private String _table;
-    private List<Filter> _filters;
+    private Set<Filter> _filters;
     private Query _join;
     private String _joinAttributeName = DEFAULT_JOIN_ATTRIBUTE_NAME;
-    private List<JoinAttribute> _joinAttributes;
+    private Set<JoinAttribute> _joinAttributes;
 
-    private List<String> _excludeAttributes;
-    private List<String> _includeAttributes;
+    private Set<String> _excludeAttributes;
+    private Set<String> _includeAttributes;
 
     @JsonCreator
-    public Query(@JsonProperty("searchTypes") List<SearchType> searchTypes,
+    public Query(@JsonProperty("searchTypes") Set<SearchType> searchTypes,
                  @NotNull @JsonProperty("table") String table,
-                 @JsonProperty("filter") List<Filter> filters,
+                 @JsonProperty("filter") Set<Filter> filters,
                  @JsonProperty("join") Query join,
                  @JsonProperty("joinAttributeName") @DefaultValue(DEFAULT_JOIN_ATTRIBUTE_NAME) String joinAttributeName,
-                 @JsonProperty("joinAttributes") List<JoinAttribute> joinAttributes,
-                 @JsonProperty("excludeAttributes") List<String> excludeAttributes,
-                 @JsonProperty("includeAttributes") List<String> includeAttributes) {
+                 @JsonProperty("joinAttributes") Set<JoinAttribute> joinAttributes,
+                 @JsonProperty("excludeAttributes") Set<String> excludeAttributes,
+                 @JsonProperty("includeAttributes") Set<String> includeAttributes) {
 
         _searchTypes = searchTypes;
         _table = table;
@@ -50,17 +50,8 @@ public class Query {
     }
 
     @JsonProperty("searchTypes")
-    public List<SearchType> getSearchTypes() {
-        return _searchTypes;
-    }
-
-    @JsonIgnore
-    public Set<SearchType> getSearchTypesAsSet() {
-        if (_searchTypes == null || _searchTypes.isEmpty()) {
-            return Collections.emptySet();
-        }
-
-        return new HashSet<>(_searchTypes);
+    public Set<SearchType> getSearchTypes() {
+        return QueryHelper.safeSet(_searchTypes);
     }
 
     @JsonProperty("table")
@@ -69,17 +60,8 @@ public class Query {
     }
 
     @JsonProperty("filter")
-    public List<Filter> getFilters() {
-        return _filters;
-    }
-
-    @JsonIgnore
-    public Set<Filter> getFiltersAsSet() {
-        if (_filters == null || _filters.isEmpty()) {
-            return Collections.emptySet();
-        }
-
-        return new HashSet<>(_filters);
+    public Set<Filter> getFilters() {
+        return QueryHelper.safeSet(_filters);
     }
 
     @JsonProperty("join")
@@ -93,45 +75,18 @@ public class Query {
     }
 
     @JsonProperty("joinAttributes")
-    public List<JoinAttribute> getJoinAttributes() {
-        return _joinAttributes;
-    }
-
-    @JsonIgnore
-    public Set<JoinAttribute> getJoinAttributesAsSet() {
-        if (_joinAttributes == null || _joinAttributes.isEmpty()) {
-            return Collections.emptySet();
-        }
-
-        return new HashSet<>(_joinAttributes);
+    public Set<JoinAttribute> getJoinAttributes() {
+        return QueryHelper.safeSet(_joinAttributes);
     }
 
     @JsonProperty("excludeAttributes")
-    public List<String> getExcludeAttributes() {
-        return _excludeAttributes;
-    }
-
-    @JsonIgnore
-    public Set<String> getExcludeAttributesAsSet() {
-        if (_excludeAttributes == null || _excludeAttributes.isEmpty()) {
-            return Collections.emptySet();
-        }
-
-        return new HashSet<>(_excludeAttributes);
+    public Set<String> getExcludeAttributes() {
+        return QueryHelper.safeSet(_excludeAttributes);
     }
 
     @JsonProperty("includeAttributes")
-    public List<String> getIncludeAttributes() {
-        return _includeAttributes;
-    }
-
-    @JsonIgnore
-    public Set<String> getIncludeAttributesAsSet() {
-        if (_includeAttributes == null || _includeAttributes.isEmpty()) {
-            return Collections.emptySet();
-        }
-
-        return new HashSet<>(_includeAttributes);
+    public Set<String> getIncludeAttributes() {
+        return QueryHelper.safeSet(_includeAttributes);
     }
 
     /**
@@ -196,15 +151,15 @@ public class Query {
     @JsonIgnore
     public HashCode getMurmur3Hash() {
         StringBuilder sb = new StringBuilder();
-        sb.append(getSearchTypesAsSet()).append("~");
+        sb.append(getSearchTypes()).append("~");
         sb.append(_table).append("~");
-        sb.append(getFiltersAsSet()).append("~");
+        sb.append(getFilters()).append("~");
         if (_join != null) {
             sb.append(_join.getMurmur3HashAsString());
         }
-        sb.append(getJoinAttributesAsSet()).append("~");
-        sb.append(getExcludeAttributesAsSet()).append("~");
-        sb.append(getIncludeAttributesAsSet()).append("~");
+        sb.append(getJoinAttributes()).append("~");
+        sb.append(getExcludeAttributes()).append("~");
+        sb.append(getIncludeAttributes()).append("~");
         return Hashing.murmur3_128().newHasher()
                 .putString(sb.toString(), Charsets.UTF_8)
                 .hash();
@@ -222,26 +177,26 @@ public class Query {
 
         Query query = (Query) o;
 
-        if (!getSearchTypesAsSet().equals(query.getSearchTypesAsSet())) return false;
+        if (!getSearchTypes().equals(query.getSearchTypes())) return false;
         if (_table != null ? !_table.equals(query._table) : query._table != null) return false;
         if (_joinAttributeName != null ? !_joinAttributeName.equals(query._joinAttributeName) : query._joinAttributeName != null) return false;
-        if (!getFiltersAsSet().equals(query.getFiltersAsSet())) return false;
+        if (!getFilters().equals(query.getFilters())) return false;
         if (_join != null ? !_join.equals(query._join) : query._join != null) return false;
-        if (!getJoinAttributesAsSet().equals(query.getJoinAttributesAsSet())) return false;
-        if (!getExcludeAttributesAsSet().equals(query.getExcludeAttributesAsSet())) return false;
-        return getIncludeAttributesAsSet().equals(query.getIncludeAttributesAsSet());
+        if (!getJoinAttributes().equals(query.getJoinAttributes())) return false;
+        if (!getExcludeAttributes().equals(query.getExcludeAttributes())) return false;
+        return getIncludeAttributes().equals(query.getIncludeAttributes());
     }
 
     @Override
     public int hashCode() {
-        int result = getSearchTypesAsSet().hashCode();
+        int result = getSearchTypes().hashCode();
         result = 31 * result + (_table != null ? _table.hashCode() : 0);
-        result = 31 * result + getFiltersAsSet().hashCode();
+        result = 31 * result + getFilters().hashCode();
         result = 31 * result + (_join != null ? _join.hashCode() : 0);
         result = 31 * result + (_joinAttributeName != null ? _joinAttributeName.hashCode() : 0);
-        result = 31 * result + getJoinAttributesAsSet().hashCode();
-        result = 31 * result + getExcludeAttributesAsSet().hashCode();
-        result = 31 * result + getIncludeAttributesAsSet().hashCode();
+        result = 31 * result + getJoinAttributes().hashCode();
+        result = 31 * result + getExcludeAttributes().hashCode();
+        result = 31 * result + getIncludeAttributes().hashCode();
         return result;
     }
 
@@ -257,36 +212,36 @@ public class Query {
             return null; // queries don't share core query
         }
 
-        Set<SearchType> sTypes1 = q1.getSearchTypesAsSet();
-        Set<SearchType> sTypes2 = q2.getSearchTypesAsSet();
+        Set<SearchType> sTypes1 = q1.getSearchTypes();
+        Set<SearchType> sTypes2 = q2.getSearchTypes();
         Set<SearchType> sTypes = new HashSet<>(sTypes1);
         sTypes.addAll(sTypes2);
 
-        Set<Filter> filters1 = q1.getFiltersAsSet();
-        Set<Filter> filters2 = q2.getFiltersAsSet();
+        Set<Filter> filters1 = q1.getFilters();
+        Set<Filter> filters2 = q2.getFilters();
         Set<Filter> filters = new HashSet<>(filters1);
         filters.addAll(filters2);
 
-        Set<JoinAttribute> joinAtt1 = q1.getJoinAttributesAsSet();
-        Set<JoinAttribute> joinAtt2 = q2.getJoinAttributesAsSet();
+        Set<JoinAttribute> joinAtt1 = q1.getJoinAttributes();
+        Set<JoinAttribute> joinAtt2 = q2.getJoinAttributes();
         Set<JoinAttribute> joinAtt = new HashSet<>(joinAtt1);
         joinAtt.addAll(joinAtt2);
 
-        Set<String> excludeAtt1 = q1.getExcludeAttributesAsSet();
-        Set<String> excludeAtt2 = q2.getExcludeAttributesAsSet();
+        Set<String> excludeAtt1 = q1.getExcludeAttributes();
+        Set<String> excludeAtt2 = q2.getExcludeAttributes();
         Set<String> excludeAtt = new HashSet<>(excludeAtt1);
         excludeAtt.addAll(excludeAtt2);
 
-        Set<String> includeAtt1 = q1.getIncludeAttributesAsSet();
-        Set<String> includeAtt2 = q2.getIncludeAttributesAsSet();
+        Set<String> includeAtt1 = q1.getIncludeAttributes();
+        Set<String> includeAtt2 = q2.getIncludeAttributes();
         Set<String> includeAtt = new HashSet<>(includeAtt1);
         includeAtt.addAll(includeAtt2);
 
-        List<SearchType> searchTypes = sTypes.isEmpty() ? null : new LinkedList<>(sTypes);
-        List<Filter> filtersList = filters.isEmpty() ? null : new LinkedList<>(filters);
-        List<JoinAttribute> joinAttributes = joinAtt.isEmpty() ? null : new LinkedList<>(joinAtt);
-        List<String> excludeAttributes = excludeAtt.isEmpty() ? null : new LinkedList<>(excludeAtt);
-        List<String> includeAttributes = includeAtt.isEmpty() ? null : new LinkedList<>(includeAtt);
+        Set<SearchType> searchTypes = sTypes.isEmpty() ? null : sTypes;
+        Set<Filter> filtersList = filters.isEmpty() ? null : filters;
+        Set<JoinAttribute> joinAttributes = joinAtt.isEmpty() ? null : joinAtt;
+        Set<String> excludeAttributes = excludeAtt.isEmpty() ? null : excludeAtt;
+        Set<String> includeAttributes = includeAtt.isEmpty() ? null : includeAtt;
 
         return new Query(searchTypes, q1.getTable(), filtersList,
                 q1.getJoin() != null ? compactQuery(q1.getJoin(), q2.getJoin()) : null,

@@ -1,7 +1,6 @@
 package org.ezstack.denormalizer.model;
 
 import com.google.common.base.Charsets;
-import com.google.common.collect.Lists;
 import com.google.common.hash.Hasher;
 import com.google.common.hash.Hashing;
 import org.ezstack.ezapp.datastore.api.Document;
@@ -10,7 +9,8 @@ import org.ezstack.ezapp.datastore.api.Query;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 
 public class FanoutHashingUtils {
@@ -29,15 +29,15 @@ public class FanoutHashingUtils {
             hasher.putString("|", Charsets.UTF_8);
             hasher.putString(document.getKey(), Charsets.UTF_8);
         } else {
-            List<JoinAttribute> joinAtts = query.getJoinAttributes();
+            Set<JoinAttribute> joinAtts = query.getJoinAttributes();
 
-            List<String> atts = Lists.transform(joinAtts,
-                    queryLevel == QueryLevel.OUTER ? JoinAttribute::getOuterAttribute : JoinAttribute::getInnerAttribute);
-
-            for (String att : atts) {
-                hasher.putString("|", Charsets.UTF_8);
-                hasher.putString(document.getValue(att).toString(), Charsets.UTF_8);
-            }
+            joinAtts
+                    .stream()
+                    .map(queryLevel == QueryLevel.OUTER ? JoinAttribute::getOuterAttribute : JoinAttribute::getInnerAttribute)
+                    .forEach(att -> {
+                        hasher.putString("|", Charsets.UTF_8);
+                        hasher.putString(document.getValue(att).toString(), Charsets.UTF_8);
+            });
         }
 
         return hasher.hash().toString();

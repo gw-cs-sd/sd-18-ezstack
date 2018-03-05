@@ -4,16 +4,16 @@ import java.util.*;
 
 public class QueryHelper {
 
-    public static Document filterAttributes(List<String> excludeAttributes,
-                                                       List<String> includeAttributes,
+    public static Document filterAttributes(Set<String> excludeAttributes,
+                                                       Set<String> includeAttributes,
                                                        Document doc) {
-        return includeAttributes == null ?
+        return includeAttributes.isEmpty() ?
                 excludeAttributes(excludeAttributes, doc) : includeAttributes(includeAttributes, doc);
     }
 
-    public static List<SearchTypeAggregationHelper> createAggHelpers(List<SearchType> searchTypeList) {
-        searchTypeList = safe(searchTypeList);
-        List<SearchTypeAggregationHelper> ret = new LinkedList<>();
+    public static Set<SearchTypeAggregationHelper> createAggHelpers(Set<SearchType> searchTypeList) {
+        searchTypeList = safeSet(searchTypeList);
+        Set<SearchTypeAggregationHelper> ret = new HashSet<>();
 
         for (SearchType st: searchTypeList) {
             if (st.getType() != SearchType.Type.SEARCH) {
@@ -24,16 +24,16 @@ public class QueryHelper {
         return ret;
     }
 
-    public static void updateAggHelpers(List<SearchTypeAggregationHelper> aggregationHelpers, Document doc) {
-        aggregationHelpers = safe(aggregationHelpers);
+    public static void updateAggHelpers(Set<SearchTypeAggregationHelper> aggregationHelpers, Document doc) {
+        aggregationHelpers = safeSet(aggregationHelpers);
 
         for (SearchTypeAggregationHelper helper: aggregationHelpers) {
             helper.computeDocument(doc);
         }
     }
 
-    public static boolean hasSearchRequest(List<SearchType> searchTypeList) {
-        searchTypeList = safe(searchTypeList);
+    public static boolean hasSearchRequest(Set<SearchType> searchTypeList) {
+        searchTypeList = safeSet(searchTypeList);
 
         for (SearchType st: searchTypeList) {
             if (st.getType() == SearchType.Type.SEARCH) {
@@ -49,8 +49,8 @@ public class QueryHelper {
      * @param doc
      * @return true if document passes all filters, otherwise false
      */
-    public static boolean meetsFilters(List<Filter> filters, Document doc) {
-        filters = safe(filters);
+    public static boolean meetsFilters(Set<Filter> filters, Document doc) {
+        filters = safeSet(filters);
         for (Filter f: filters) {
             if (!meetsFilter(f, doc)) return false;
         }
@@ -63,24 +63,24 @@ public class QueryHelper {
             return false;
         }
 
-        switch (f.getOpt()) {
+        switch (f.getOp()) {
             case EQ:
                 return val.equals(f.getValue());
             case NOT_EQ:
                 return !val.equals(f.getValue());
             case GT:
-                return compare(val, f.getValue(), Filter.Operations.GT);
+                return compare(val, f.getValue(), Filter.Operation.GT);
             case GTE:
-                return compare(val, f.getValue(), Filter.Operations.GTE);
+                return compare(val, f.getValue(), Filter.Operation.GTE);
             case LT:
-                return compare(val, f.getValue(), Filter.Operations.LT);
+                return compare(val, f.getValue(), Filter.Operation.LT);
             case LTE:
-                return compare(val, f.getValue(), Filter.Operations.LTE);
+                return compare(val, f.getValue(), Filter.Operation.LTE);
         }
         return false;
     }
 
-    private static boolean compare(Object o1, Object o2, Filter.Operations op) {
+    private static boolean compare(Object o1, Object o2, Filter.Operation op) {
         DataType.JsonTypes type = DataType.getDataType(o1);
         if (type != DataType.getDataType(o2) || type == DataType.JsonTypes.UNKNOWN ||
                 // should we have some fun with list and map comparisons ?
@@ -164,12 +164,16 @@ public class QueryHelper {
         return false;
     }
 
-    public static <T> List<T> safe(List<T> l) {
+    public static <T> List<T> safeList(List<T> l) {
         return l == null ? Collections.emptyList() : l;
     }
 
-    private static Document excludeAttributes(List<String> excludeAttributes, Document doc) {
-        if (excludeAttributes == null || excludeAttributes.size() == 0) {
+    public static <T> Set<T> safeSet(Set<T> s) {
+        return s == null ? Collections.emptySet() : s;
+    }
+
+    private static Document excludeAttributes(Set<String> excludeAttributes, Document doc) {
+        if (excludeAttributes == null || excludeAttributes.isEmpty()) {
             return doc;
         }
 
@@ -179,8 +183,8 @@ public class QueryHelper {
         return doc;
     }
 
-    private static Document includeAttributes(List<String> includeAttributes, Document doc) {
-        if (includeAttributes == null || includeAttributes.size() == 0) {
+    private static Document includeAttributes(Set<String> includeAttributes, Document doc) {
+        if (includeAttributes == null || includeAttributes.isEmpty()) {
             return doc;
         }
 

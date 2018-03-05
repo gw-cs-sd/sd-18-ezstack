@@ -31,7 +31,7 @@ public class ElasticsearchIndexer implements SinkFunction<WritableResult> {
     @Override
     public void apply(WritableResult resultMsg, MessageCollector messageCollector, TaskCoordinator taskCoordinator) {
 
-        switch (resultMsg.getOpCode()) {
+        switch (resultMsg.getAction()) {
             case INDEX:
                 messageCollector.send(new OutgoingMessageEnvelope(
                         new SystemStream(_clusterName,
