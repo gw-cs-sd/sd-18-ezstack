@@ -40,7 +40,6 @@ public class SearchTypeTest {
         assertEquals(sum.getType(), SearchType.Type.SUM);
         assertEquals(avg.getType(), SearchType.Type.AVG);
         assertEquals(search.getType(), SearchType.Type.SEARCH);
-        assertEquals(unknown.getType(), SearchType.Type.UNKNOWN);
     }
 
     @Test
@@ -51,7 +50,6 @@ public class SearchTypeTest {
         assertEquals(sum.getType().toString(), SearchType.Type.SUM.toString());
         assertEquals(avg.getType().toString(), SearchType.Type.AVG.toString());
         assertEquals(search.getType().toString(), SearchType.Type.SEARCH.toString());
-        assertEquals(unknown.getType().toString(), SearchType.Type.UNKNOWN.toString());
     }
 
     @Test
