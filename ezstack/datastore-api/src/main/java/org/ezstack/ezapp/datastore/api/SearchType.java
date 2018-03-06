@@ -63,7 +63,6 @@ public class SearchType {
             default:
                 _type = null;
                 break;
-
         }
 
         checkNotNull(_type);

@@ -36,7 +36,7 @@ public class QueryHelperTest {
         includeAttributes.add("title");
 
         searchTypes = new HashSet<>();
-        type = new SearchType("max", "likes");
+        type = new SearchType("max", "~version");
         searchTypes.add(type);
 
         filters = new HashSet<>();
@@ -70,17 +70,32 @@ public class QueryHelperTest {
 
     @Test
     public void testUpdateAggHelpers() {
-        QueryHelper.updateAggHelpers(helpers, document);
+        SearchTypeAggregationHelper helper = new SearchTypeAggregationHelper(type);
+        Set<SearchTypeAggregationHelper> helpersSet = new HashSet<>();
+        helpersSet.add(helper);
+
+        QueryHelper.updateAggHelpers(helpersSet, document);
+
+        assertEquals(helper.getResult().toString(), "2");
     }
 
     @Test
     public void testHasSearchRequest() {
         assertFalse(QueryHelper.hasSearchRequest(searchTypes));
+        SearchType searchRequest = new SearchType("search", "likes");
+        searchTypes.add(searchRequest);
+        assertTrue(QueryHelper.hasSearchRequest(searchTypes));
     }
 
     @Test
     public void testMeetFilters() {
         assertFalse(QueryHelper.meetsFilters(filters, document));
         assertFalse(QueryHelper.meetsFilter(filter, document));
+
+        Set<Filter> otherFilters = new HashSet<>();
+        Filter newFilter = new Filter("~version", "not_eq", "10");
+        otherFilters.add(newFilter);
+        assertTrue(QueryHelper.meetsFilters(otherFilters, document));
+        assertTrue(QueryHelper.meetsFilter(newFilter, document));
     }
 }

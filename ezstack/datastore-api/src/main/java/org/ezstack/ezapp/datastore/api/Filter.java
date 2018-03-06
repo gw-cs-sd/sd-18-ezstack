@@ -57,7 +57,7 @@ public class Filter {
                 break;
             case "gt":
             case ">": // fall through
-                _op =  Operation.GT;
+                _op = Operation.GT;
                 break;
             case "gte":
             case ">=": // fall through

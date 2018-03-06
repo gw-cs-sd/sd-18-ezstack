@@ -13,7 +13,6 @@ public class SearchTypeTest {
     private SearchType sum;
     private SearchType avg;
     private SearchType search;
-    private SearchType unknown;
 
     private SearchType count2;
     private SearchType count3;
