@@ -5,10 +5,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import static org.junit.Assert.*;
 
@@ -18,31 +15,31 @@ public class QueryHelperTest {
     private Document document;
     private ObjectMapper mapper;
 
-    private List<String> excludeAttributes;
-    private List<String> includeAttributes;
-    private List<SearchType> searchTypes;
+    private Set<String> excludeAttributes;
+    private Set<String> includeAttributes;
+    private Set<SearchType> searchTypes;
     private Filter filter;
-    private List<Filter> filters;
+    private Set<Filter> filters;
     private SearchType type;
 
-    private List<SearchTypeAggregationHelper> helpers;
+    private Set<SearchTypeAggregationHelper> helpers;
 
     @Before
     public void setUpHelper() throws IOException {
         mapper = new ObjectMapper();
         document = mapper.readValue(jsonDoc, Document.class);
 
-        excludeAttributes = new ArrayList<>();
+        excludeAttributes = new HashSet<>();
         excludeAttributes.add("lastName");
 
-        includeAttributes = new ArrayList<>();
+        includeAttributes = new HashSet<>();
         includeAttributes.add("title");
 
-        searchTypes = new ArrayList<>();
+        searchTypes = new HashSet<>();
         type = new SearchType("max", "likes");
         searchTypes.add(type);
 
-        filters = new ArrayList<>();
+        filters = new HashSet<>();
         filter = new Filter("firstName", "eq", "Bob");
         filters.add(filter);
     }
@@ -66,9 +63,9 @@ public class QueryHelperTest {
     public void testCreateAggHelpers() {
         helpers = QueryHelper.createAggHelpers(searchTypes);
 
-        List<SearchTypeAggregationHelper> helperList = QueryHelper.createAggHelpers(searchTypes);
+        Set<SearchTypeAggregationHelper> helperList = QueryHelper.createAggHelpers(searchTypes);
 
-        assertEquals(helpers.get(0).getSearchType(), helperList.get(0).getSearchType());
+        assertEquals(helpers.contains(searchTypes), helperList.contains(searchTypes));
     }
 
     @Test

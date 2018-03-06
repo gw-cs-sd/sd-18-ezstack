@@ -16,22 +16,22 @@ public class QueryTest {
 
     @Before
     public void buildQuery() {
-        List<SearchType> searchTypes = new ArrayList<>();
+        Set<SearchType> searchTypes = new HashSet<>();
         SearchType type = new SearchType("max", "testAttribute");
         searchTypes.add(type);
 
-        List<Filter> filters = new ArrayList<>();
+        Set<Filter> filters = new HashSet<>();
         Filter filter = new Filter("testAttribute", "eq", 5);
         filters.add(filter);
 
-        List<JoinAttribute> joinAttributes = new ArrayList<>();
+        Set<JoinAttribute> joinAttributes = new HashSet<>();
         JoinAttribute joinAttribute = new JoinAttribute("outer", "inner");
         joinAttributes.add(joinAttribute);
 
-        List<String> excludeAttributes = new ArrayList<>();
+        Set<String> excludeAttributes = new HashSet<>();
         excludeAttributes.add("attribute1");
 
-        List<String> includeAttributes = new ArrayList<>();
+        Set<String> includeAttributes = new HashSet<>();
         includeAttributes.add("attribute2");
 
         query = new Query(searchTypes, "myTable", filters, null, "attribute", joinAttributes, excludeAttributes, includeAttributes);
@@ -43,114 +43,78 @@ public class QueryTest {
         List<SearchType> searchlist = new ArrayList<>();
         SearchType type = new SearchType("max", "testAttribute");
         searchlist.add(type);
-        assertEquals(query.getSearchTypes(), searchlist);
-
-        assertEquals(query.getTable(), "myTable");
-
-        List<Filter> filters = new ArrayList<>();
-        Filter filter = new Filter("testAttribute", "eq", 5);
-        filters.add(filter);
-        assertEquals(query.getFilters(), filters);
-
-        assertEquals(query.getJoin(), null);
-
-        assertEquals(query.getJoinAttributeName(), "attribute");
-
-        List<JoinAttribute> joinAttributes = new ArrayList<>();
-        JoinAttribute joinAttribute = new JoinAttribute("outer", "inner");
-        joinAttributes.add(joinAttribute);
-        assertEquals(query.getJoinAttributes(), joinAttributes);
-
-        List<String> excludeAttributes = new ArrayList<>();
-        excludeAttributes.add("attribute1");
-        assertEquals(query.getExcludeAttributes(), excludeAttributes);
-
-        List<String> includeAttributes = new ArrayList<>();
-        includeAttributes.add("attribute2");
-        assertEquals(query.getIncludeAttributes(), includeAttributes);
-    }
-
-    @Test
-    public void testAsSet() {
-
-        List<SearchType> searchlist = new ArrayList<>();
-        SearchType type = new SearchType("max", "testAttribute");
-        searchlist.add(type);
         Set<SearchType> searchSet = new HashSet<>(searchlist);
-        assertEquals(query.getSearchTypesAsSet(), searchSet);
+        assertEquals(query.getSearchTypes(), searchSet);
 
         List<Filter> filters = new ArrayList<>();
         Filter filter = new Filter("testAttribute", "eq", 5);
         filters.add(filter);
         Set<Filter> filterSet = new HashSet<>(filters);
-        assertEquals(query.getFiltersAsSet(), filterSet);
+        assertEquals(query.getFilters(), filterSet);
 
         List<JoinAttribute> joinAttributes = new ArrayList<>();
         JoinAttribute joinAttribute = new JoinAttribute("outer", "inner");
         joinAttributes.add(joinAttribute);
         Set<JoinAttribute> joinAttributeSet = new HashSet<>(joinAttributes);
-        assertEquals(query.getJoinAttributesAsSet(), joinAttributeSet);
+        assertEquals(query.getJoinAttributes(), joinAttributeSet);
 
         List<String> excludeAttributes = new ArrayList<>();
         excludeAttributes.add("attribute1");
         Set<String> excludeAttributesSet = new HashSet<>(excludeAttributes);
-        assertEquals(query.getExcludeAttributesAsSet(), excludeAttributesSet);
+        assertEquals(query.getExcludeAttributes(), excludeAttributesSet);
 
         List<String> includeAttributes = new ArrayList<>();
         includeAttributes.add("attribute2");
         Set<String> includeAttributesSet = new HashSet<>(includeAttributes);
-        assertEquals(query.getIncludeAttributesAsSet(), includeAttributesSet);
+        assertEquals(query.getIncludeAttributes(), includeAttributesSet);
     }
 
     @Test
     public void testCompactQuery() {
-        List<SearchType> searchTypes = new ArrayList<>();
+        Set<SearchType> searchTypes = new HashSet<>();
         SearchType type = new SearchType("max", "testAttribute");
         searchTypes.add(type);
 
-        List<Filter> filters = new ArrayList<>();
+        Set<Filter> filters = new HashSet<>();
         Filter filter = new Filter("testAttribute", "eq", 5);
         filters.add(filter);
 
-        List<JoinAttribute> joinAttributes = new ArrayList<>();
+        Set<JoinAttribute> joinAttributes = new HashSet<>();
         JoinAttribute joinAttribute = new JoinAttribute("outer", "inner");
         joinAttributes.add(joinAttribute);
 
-        List<String> excludeAttributes = new ArrayList<>();
+        Set<String> excludeAttributes = new HashSet<>();
         excludeAttributes.add("attribute1");
 
-        List<String> includeAttributes = new ArrayList<>();
+        Set<String> includeAttributes = new HashSet<>();
         includeAttributes.add("attribute2");
 
         Query query2 = new Query(searchTypes, "myTable", filters, null, "attribute", joinAttributes, excludeAttributes, includeAttributes);
         Query query3 = new Query(searchTypes, "myTable2", filters, null, "attribute", joinAttributes, excludeAttributes, includeAttributes);
 
         assertEquals(query, query2);
-        assertEquals(query.compactQuery(query2), query);
-        assertEquals(query.compactQuery(query2), query2);
-        assertEquals(query2.compactQuery(query), query);
-        assertEquals(query2.compactQuery(query), query2);
+        assertEquals(query.compactQuery(query2), query2.compactQuery(query));
         assertEquals(query.compactQuery(query3), null);
     }
 
     @Test
     public void testHash() {
-        List<SearchType> searchTypes = new ArrayList<>();
+        Set<SearchType> searchTypes = new HashSet<>();
         SearchType type = new SearchType("max", "testAttribute");
         searchTypes.add(type);
 
-        List<Filter> filters = new ArrayList<>();
+        Set<Filter> filters = new HashSet<>();
         Filter filter = new Filter("testAttribute", "eq", 5);
         filters.add(filter);
 
-        List<JoinAttribute> joinAttributes = new ArrayList<>();
+        Set<JoinAttribute> joinAttributes = new HashSet<>();
         JoinAttribute joinAttribute = new JoinAttribute("outer", "inner");
         joinAttributes.add(joinAttribute);
 
-        List<String> excludeAttributes = new ArrayList<>();
+        Set<String> excludeAttributes = new HashSet<>();
         excludeAttributes.add("attribute1");
 
-        List<String> includeAttributes = new ArrayList<>();
+        Set<String> includeAttributes = new HashSet<>();
         includeAttributes.add("attribute2");
 
         Query query2 = new Query(searchTypes, "myTable", filters, null, "attribute", joinAttributes, excludeAttributes, includeAttributes);
@@ -161,22 +125,22 @@ public class QueryTest {
 
     @Test
     public void testToString() {
-        List<SearchType> searchTypes = new ArrayList<>();
+        Set<SearchType> searchTypes = new HashSet<>();
         SearchType type = new SearchType("max", "testAttribute");
         searchTypes.add(type);
 
-        List<Filter> filters = new ArrayList<>();
+        Set<Filter> filters = new HashSet<>();
         Filter filter = new Filter("testAttribute", "eq", 5);
         filters.add(filter);
 
-        List<JoinAttribute> joinAttributes = new ArrayList<>();
+        Set<JoinAttribute> joinAttributes = new HashSet<>();
         JoinAttribute joinAttribute = new JoinAttribute("outer", "inner");
         joinAttributes.add(joinAttribute);
 
-        List<String> excludeAttributes = new ArrayList<>();
+        Set<String> excludeAttributes = new HashSet<>();
         excludeAttributes.add("attribute1");
 
-        List<String> includeAttributes = new ArrayList<>();
+        Set<String> includeAttributes = new HashSet<>();
         includeAttributes.add("attribute2");
 
         Query query2 = new Query(searchTypes, "myTable", filters, null, "attribute", joinAttributes, excludeAttributes, includeAttributes);
@@ -186,22 +150,22 @@ public class QueryTest {
 
     @Test
     public void testStrippedQuery() {
-        List<SearchType> searchTypes = new ArrayList<>();
+        Set<SearchType> searchTypes = new HashSet<>();
         SearchType type = new SearchType("max", "testAttribute");
         searchTypes.add(type);
 
-        List<Filter> filters = new ArrayList<>();
+        Set<Filter> filters = new HashSet<>();
         Filter filter = new Filter("testAttribute", "eq", 5);
         filters.add(filter);
 
-        List<JoinAttribute> joinAttributes = new ArrayList<>();
+        Set<JoinAttribute> joinAttributes = new HashSet<>();
         JoinAttribute joinAttribute = new JoinAttribute("outer", "inner");
         joinAttributes.add(joinAttribute);
 
-        List<String> excludeAttributes = new ArrayList<>();
+        Set<String> excludeAttributes = new HashSet<>();
         excludeAttributes.add("attribute1");
 
-        List<String> includeAttributes = new ArrayList<>();
+        Set<String> includeAttributes = new HashSet<>();
         includeAttributes.add("attribute2");
 
         Query query2 = new Query(searchTypes, "myTable", filters, null, "attribute", joinAttributes, excludeAttributes, includeAttributes);

@@ -39,7 +39,7 @@ public class SearchTypeAggregationHelperTest {
     }
 
     @Test
-    public void testComputeDocument() {
+    public void testComputeDocumentAndGetResult() {
         countHelper.computeDocument(document);
         maxHelper.computeDocument(document);
         minHelper.computeDocument(document);
