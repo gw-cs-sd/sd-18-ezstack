@@ -5,6 +5,7 @@ import io.dropwizard.Configuration;
 import org.ezstack.ezapp.datastore.WriterConfiguration;
 import org.ezstack.ezapp.datastore.db.elasticsearch.ElasticSearchConfiguration;
 import org.ezstack.ezapp.querybus.QueryBusConfiguration;
+import org.ezstack.ezapp.rules.RulesManagerConfiguration;
 
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
@@ -21,13 +22,20 @@ public class EZConfiguration extends Configuration {
 
     @Valid
     @NotNull
-    @JsonProperty("elasticConfiguration")
+    @JsonProperty("elasticsearch")
     private ElasticSearchConfiguration _elasticSearchConfiguration;
 
     @Valid
     @NotNull
     @JsonProperty("queryBus")
     private QueryBusConfiguration _queryBusConfiguration;
+
+    @Valid
+    @NotNull
+    @JsonProperty("rulesManager")
+    private RulesManagerConfiguration _rulesManagerConfiguration;
+
+
 
     public WriterConfiguration getWriterConfiguration() {
         return _writerConfiguration;
@@ -39,5 +47,9 @@ public class EZConfiguration extends Configuration {
 
     public QueryBusConfiguration getQueryBusConfiguration() {
         return _queryBusConfiguration;
+    }
+
+    public RulesManagerConfiguration getRulesManagerConfiguration() {
+        return _rulesManagerConfiguration;
     }
 }

@@ -4,6 +4,7 @@ import com.datastax.driver.core.utils.UUIDs;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.google.common.base.MoreObjects;
+import org.hibernate.validator.constraints.NotEmpty;
 
 import java.util.Map;
 import java.util.UUID;
@@ -19,13 +20,10 @@ public class Update {
     private final boolean _isUpdate;
 
     @JsonCreator
-    public Update(@JsonProperty("_table") String table, @JsonProperty("_key") String key,
-                  @JsonProperty("_timestamp") UUID timestamp, @JsonProperty("_data") Map<String, Object> data,
+    public Update(@NotEmpty @JsonProperty("_table") String table, @NotEmpty @JsonProperty("_key") String key,
+                  @JsonProperty("_timestamp") UUID timestamp, @NotEmpty @JsonProperty("_data") Map<String, Object> data,
                   @JsonProperty("_isUpdate") boolean isUpdate) {
 
-        checkNotNull(table, "table");
-        checkNotNull(key, "key");
-        checkNotNull(data, "data");
         checkArgument(Names.isLegalTableName(table), "Invalid Table Name");
         checkArgument(Names.isLegalKey("Invalid key"));
 

@@ -1,5 +1,6 @@
 package org.ezstack.ezapp.datastore;
 
+import com.google.inject.Key;
 import com.google.inject.PrivateModule;
 import com.google.inject.Provides;
 import com.google.inject.Singleton;
@@ -8,6 +9,7 @@ import org.elasticsearch.common.settings.Settings;
 import org.elasticsearch.common.transport.TransportAddress;
 import org.elasticsearch.transport.client.PreBuiltTransportClient;
 import org.ezstack.ezapp.datastore.api.DataReader;
+import org.ezstack.ezapp.datastore.api.RulesManager;
 import org.ezstack.ezapp.datastore.core.DefaultDataReader;
 import org.ezstack.ezapp.datastore.db.elasticsearch.ElasticSearchConfiguration;
 import org.ezstack.ezapp.datastore.db.elasticsearch.ElasticSearchDataReaderDAO;
@@ -26,6 +28,9 @@ public class ReaderModule extends PrivateModule {
 
     @Override
     protected void configure() {
+
+        requireBinding(Key.get(RulesManager.class));
+
         bind(DataReader.class).to(DefaultDataReader.class).asEagerSingleton();
         bind(ElasticSearchDataReaderDAO.class).asEagerSingleton();
         bind(Client.class).to(PreBuiltTransportClient.class);

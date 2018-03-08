@@ -5,7 +5,7 @@ dataWriter:
   writerTopicName: "documents"
   writerTopicPartitionCount: 1
   zookeeperHosts: "localhost:2181"
-elasticConfiguration:
+elasticsearch:
     transportAddresses:
         - address: "localhost"
           port: 9300
@@ -14,4 +14,6 @@ queryBus:
   producerName: "EZapp-queryBus"
   queryBusTopicName: "queries"
   queryBusTopicPartitionCount: 1
+  zookeeperHosts: "localhost:2181"
+rulesManager:
   zookeeperHosts: "localhost:2181"

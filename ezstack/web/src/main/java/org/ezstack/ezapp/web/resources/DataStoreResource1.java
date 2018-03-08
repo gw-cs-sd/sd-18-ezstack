@@ -27,11 +27,14 @@ public class DataStoreResource1 {
     private final DataWriter _dataWriter;
     private final DataReader _dataReader;
     private final QueryBusPublisher _queryBusPublisher;
+    private final RulesManager _rulesManager;
 
-    public DataStoreResource1(DataWriter dataWriter, DataReader dataReader, QueryBusPublisher queryBusPublisher) {
+    public DataStoreResource1(DataWriter dataWriter, DataReader dataReader, QueryBusPublisher queryBusPublisher,
+                              RulesManager rulesManager) {
         _dataWriter = dataWriter;
         _dataReader = dataReader;
         _queryBusPublisher = queryBusPublisher;
+        _rulesManager = rulesManager;
     }
 
     @POST
@@ -142,4 +145,15 @@ public class DataStoreResource1 {
 
         return bulkResponse;
     }
-}
+
+    @POST
+    @Path("_rule/")
+    @Timed
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON)
+    public SuccessResponse createRule(Rule rule) throws RuleAlreadyExistsException {
+        _rulesManager.create(rule);
+        return SuccessResponse.instance();
+    }
+
+    }
