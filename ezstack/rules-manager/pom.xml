@@ -6,6 +6,7 @@
         <artifactId>ezapp-parent</artifactId>
         <groupId>org.ezstack.ezapp</groupId>
         <version>0.1-SNAPSHOT</version>
+        <relativePath>../ezapp-parent</relativePath>
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
