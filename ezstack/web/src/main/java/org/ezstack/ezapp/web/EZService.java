@@ -5,7 +5,11 @@ import com.datastax.driver.core.utils.UUIDs;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
 import org.ezstack.ezapp.datastore.api.DataReader;
+import org.ezstack.ezapp.datastore.api.RulesManager;
 import org.ezstack.ezapp.querybus.api.QueryBusPublisher;
+import org.ezstack.ezapp.web.exceptionmappers.IllegalArgumentExceptionMapper;
+import org.ezstack.ezapp.web.exceptionmappers.JsonProcessingExceptionMapper;
+import org.ezstack.ezapp.web.exceptionmappers.RuleAlreadyExistsExceptionMapper;
 import org.ezstack.ezapp.web.resources.DataStoreResource1;
 import org.ezstack.ezapp.web.resources.EZHealthCheck;
 import io.dropwizard.Application;
@@ -45,8 +49,13 @@ public class EZService extends Application<EZConfiguration> {
 
         _injector = Guice.createInjector(new EZModule(_configuration, _environment));
 
+        environment.jersey().register(new IllegalArgumentExceptionMapper());
+        environment.jersey().register(new RuleAlreadyExistsExceptionMapper());
+        environment.jersey().register(new JsonProcessingExceptionMapper());
+
         environment.jersey().register(new DataStoreResource1(_injector.getInstance(DataWriter.class),
-                _injector.getInstance(DataReader.class), _injector.getInstance(QueryBusPublisher.class)));
+                _injector.getInstance(DataReader.class), _injector.getInstance(QueryBusPublisher.class),
+                _injector.getInstance(RulesManager.class)));
 
     }
 

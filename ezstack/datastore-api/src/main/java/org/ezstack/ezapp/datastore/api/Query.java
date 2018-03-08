@@ -6,12 +6,14 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.base.Charsets;
+import com.google.common.base.MoreObjects;
 import com.google.common.hash.HashCode;
 import com.google.common.hash.Hashing;
 
-import javax.validation.constraints.NotNull;
-import javax.ws.rs.DefaultValue;
 import java.util.*;
+
+import static com.google.common.base.Preconditions.checkNotNull;
+import static com.google.common.base.MoreObjects.firstNonNull;
 
 public class Query {
     @JsonIgnore
@@ -31,19 +33,21 @@ public class Query {
 
     @JsonCreator
     public Query(@JsonProperty("searchTypes") Set<SearchType> searchTypes,
-                 @NotNull @JsonProperty("table") String table,
+                 @JsonProperty("table") String table,
                  @JsonProperty("filter") Set<Filter> filters,
                  @JsonProperty("join") Query join,
-                 @JsonProperty("joinAttributeName") @DefaultValue(DEFAULT_JOIN_ATTRIBUTE_NAME) String joinAttributeName,
+                 @JsonProperty("joinAttributeName") String joinAttributeName,
                  @JsonProperty("joinAttributes") Set<JoinAttribute> joinAttributes,
                  @JsonProperty("excludeAttributes") Set<String> excludeAttributes,
                  @JsonProperty("includeAttributes") Set<String> includeAttributes) {
+
+        checkNotNull(table, "table");
 
         _searchTypes = searchTypes;
         _table = table;
         _filters = filters;
         _join = join;
-        _joinAttributeName = joinAttributeName;
+        _joinAttributeName = firstNonNull(joinAttributeName, DEFAULT_JOIN_ATTRIBUTE_NAME);
         _joinAttributes = joinAttributes;
         _excludeAttributes = excludeAttributes;
         _includeAttributes = includeAttributes;

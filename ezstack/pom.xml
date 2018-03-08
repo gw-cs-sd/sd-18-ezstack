@@ -18,6 +18,7 @@
         <module>samza-elasticsearch</module>
         <module>reader</module>
         <module>query-bus</module>
+        <module>rules-manager</module>
     </modules>
     <name>EZstack</name>
 

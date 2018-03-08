@@ -37,6 +37,11 @@
             <artifactId>ezapp-query-bus</artifactId>
             <version>${project.version}</version>
         </dependency>
+        <dependency>
+            <groupId>org.ezstack.ezapp</groupId>
+            <artifactId>ezapp-rules-manager</artifactId>
+            <version>${project.version}</version>
+        </dependency>
     </dependencies>
 
     <build>

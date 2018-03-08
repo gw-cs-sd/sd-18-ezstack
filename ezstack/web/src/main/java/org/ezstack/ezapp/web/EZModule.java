@@ -5,6 +5,7 @@ import io.dropwizard.setup.Environment;
 import org.ezstack.ezapp.datastore.ReaderModule;
 import org.ezstack.ezapp.datastore.WriterModule;
 import org.ezstack.ezapp.querybus.QueryBusModule;
+import org.ezstack.ezapp.rules.RulesManagerModule;
 
 public class EZModule extends AbstractModule {
 
@@ -20,5 +21,6 @@ public class EZModule extends AbstractModule {
         install(new WriterModule(_configuration.getWriterConfiguration()));
         install(new ReaderModule(_configuration.getElasticSearchConfiguration()));
         install(new QueryBusModule(_configuration.getQueryBusConfiguration()));
+        install(new RulesManagerModule(_configuration.getRulesManagerConfiguration()));
     }
 }
