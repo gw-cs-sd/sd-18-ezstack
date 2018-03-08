@@ -2,6 +2,8 @@ package org.ezstack.ezapp.datastore.api;
 
 import java.util.Set;
 
+import static org.ezstack.ezapp.datastore.api.Rule.RuleStatus;
+
 public interface RulesManager {
 
     void create(Rule rule) throws RuleAlreadyExistsException;
@@ -10,8 +12,10 @@ public interface RulesManager {
 
     Set<Rule> getRules();
 
-    Set<Rule> getActiveRules(String outerTable);
+    Set<Rule> getRules(RuleStatus status);
 
-    Set<Rule> getActiveRules(String outerTable, String innerTable);
+    Set<Rule> getRules(String outerTable, RuleStatus status);
+
+    Set<Rule> getRules(String outerTable, String innerTable, RuleStatus status);
 
 }

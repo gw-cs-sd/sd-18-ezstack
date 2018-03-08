@@ -26,6 +26,7 @@ import java.util.concurrent.TimeUnit;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.MoreObjects.firstNonNull;
+import static org.ezstack.ezapp.datastore.api.Rule.RuleStatus;
 
 public class CuratorRulesManager implements RulesManager {
 
@@ -36,7 +37,7 @@ public class CuratorRulesManager implements RulesManager {
     private final ObjectMapper _mapper;
 
     // outer table, inner table
-    private volatile Supplier<ImmutableTable<String, String, Set<Rule>>> _ruleIndex;
+    private volatile Supplier<ImmutableTable<String, String, Set<Rule>>> _activeRuleIndex;
     private final TreeCache _ruleCache;
 
     // <rule table name, rule itself>
@@ -50,7 +51,7 @@ public class CuratorRulesManager implements RulesManager {
         _rulesPath = rulesPath;
         _mapper = new ObjectMapper();
         _rules = new ConcurrentHashMap<>();
-        _ruleIndex = Suppliers.memoizeWithExpiration(this::getRuleIndex, 10, TimeUnit.SECONDS);
+        _activeRuleIndex = Suppliers.memoizeWithExpiration(this::getActiveRuleIndex, 10, TimeUnit.SECONDS);
 
         _ruleCache = new TreeCache(_client, _rulesPath);
         _ruleCache.getListenable().addListener(this::updateTableForEvent);
@@ -82,7 +83,7 @@ public class CuratorRulesManager implements RulesManager {
         }
     }
 
-    private ImmutableTable<String, String, Set<Rule>> getRuleIndex() {
+    private ImmutableTable<String, String, Set<Rule>> getActiveRuleIndex() {
         LOG.info("Building rule index");
         Table<String, String, Set<Rule>> table = HashBasedTable.create();
         _rules.values()
@@ -90,9 +91,9 @@ public class CuratorRulesManager implements RulesManager {
                 .filter(rule -> rule.getStatus() == Rule.RuleStatus.ACTIVE)
                 .forEach(rule -> {
                     String innerKey = rule.getQuery().getJoin() != null ? rule.getQuery().getJoin().getTable() : Strings.EMPTY;
-                    Set<Rule> applicableRules = firstNonNull(table.get(rule.getTable(), innerKey), new HashSet<>());
+                    Set<Rule> applicableRules = firstNonNull(table.get(rule.getQuery().getTable(), innerKey), new HashSet<>());
                     applicableRules.add(rule);
-                    table.put(rule.getTable(), innerKey, applicableRules);
+                    table.put(rule.getQuery().getTable(), innerKey, applicableRules);
                 });
 
         return table.cellSet()
@@ -145,22 +146,45 @@ public class CuratorRulesManager implements RulesManager {
         return ImmutableSet.copyOf(_rules.values());
     }
 
-    // Should we pre-compute this like we do for the inner-outer getter?
-    // Also, should this return all queries with this outerTable, or just those
-    // which have this outer table and do not have an inner table
     @Override
-    public Set<Rule> getActiveRules(String outerTable) {
-        return _ruleIndex.get()
-                .row(outerTable)
-                .values()
+    public Set<Rule> getRules(String outerTable, RuleStatus status) {
+        if (status == RuleStatus.ACTIVE) {
+            return _activeRuleIndex.get()
+                    .row(outerTable)
+                    .values()
+                    .stream()
+                    .flatMap(Set::stream)
+                    .collect(ImmutableSet.toImmutableSet());
+        }
+
+        return _rules.values()
                 .stream()
-                .flatMap(Set::stream)
+                .filter(rule -> rule.getQuery().getTable().equals(outerTable))
+                .filter(rule -> rule.getStatus() == status)
                 .collect(ImmutableSet.toImmutableSet());
     }
 
     @Override
-    public Set<Rule> getActiveRules(String outerTable, String innerTable) {
-        return _ruleIndex.get().get(outerTable, innerTable);
+    public Set<Rule> getRules(String outerTable, String innerTable, RuleStatus status) {
+        if (status == RuleStatus.ACTIVE) {
+            return _activeRuleIndex.get().get(outerTable, innerTable);
+        }
+
+        return _rules.values()
+                .stream()
+                .filter(rule -> rule.getQuery().getTable().equals(outerTable))
+                .filter(rule -> rule.getQuery().getJoin() != null)
+                .filter(rule -> rule.getQuery().getJoin().getTable().equals(innerTable))
+                .filter(rule -> rule.getStatus() == status)
+                .collect(ImmutableSet.toImmutableSet());
+    }
+
+    @Override
+    public Set<Rule> getRules(RuleStatus status) {
+        return _rules.values()
+                .stream()
+                .filter(rule -> rule.getStatus() == status)
+                .collect(ImmutableSet.toImmutableSet());
     }
 
 }
