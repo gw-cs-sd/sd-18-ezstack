@@ -32,10 +32,15 @@ public class QueryHelper {
         }
     }
 
-    public static boolean hasSearchRequest(Set<SearchType> searchTypeList) {
-        searchTypeList = safeSet(searchTypeList);
+    public static boolean userWantsDocuments(Set<SearchType> searchTypeSet) {
+        // if searchTypeSet is empty then default to getting documents
+        return searchTypeSet.isEmpty() || QueryHelper.hasSearchRequest(searchTypeSet);
+    }
 
-        for (SearchType st: searchTypeList) {
+    public static boolean hasSearchRequest(Set<SearchType> searchTypeSet) {
+        searchTypeSet = safeSet(searchTypeSet);
+
+        for (SearchType st: searchTypeSet) {
             if (st.getType() == SearchType.Type.SEARCH) {
                 return true;
             }
