@@ -63,7 +63,8 @@ public class RuleHelper {
                 _closestMatch.getQuery().getExcludeAttributes());
         Set<String> includeAttributes = _originalQuery.getIncludeAttributes();
 
-        // TODO
+        _execQuery = new Query(searchTypes, tableName, filters, null,
+                null, null, excludeAttributes, includeAttributes);
     }
 
     public Query getExecQuery() {
