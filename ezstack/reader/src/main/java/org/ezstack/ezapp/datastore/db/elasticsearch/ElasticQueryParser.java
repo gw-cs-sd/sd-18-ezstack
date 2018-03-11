@@ -58,7 +58,7 @@ public class ElasticQueryParser {
             if (q.getJoin() != null) {
                 Query innerJoin = q.getJoin();
                 Set<Filter> innerJoinFilters = innerJoin.getFilters().isEmpty() ? new HashSet<>() : innerJoin.getFilters();
-                innerJoinFilters.addAll(convertJoinAttributesToFilters(doc, q.getJoinAttributes()));
+                innerJoinFilters.addAll(QueryHelper.convertJoinAttributesToFilters(doc, q.getJoinAttributes()));
 
                 QueryHelper.updateAggHelpers(helpers, doc);
                 doc = QueryHelper.filterAttributes(q.getExcludeAttributes(), q.getIncludeAttributes(), doc);
@@ -119,17 +119,5 @@ public class ElasticQueryParser {
         }
 
         return boolQuery;
-    }
-
-    private List<Filter> convertJoinAttributesToFilters(Document doc, Set<JoinAttribute> attributes) {
-        List<Filter> filters = new LinkedList<>();
-        for (JoinAttribute ma: attributes) {
-            if (doc.containsKey(ma.getOuterAttribute())) {
-                String fa = ma.getInnerAttribute();
-                Object val = doc.getValue(ma.getOuterAttribute());
-                filters.add(new Filter(fa, Filter.Operation.EQ, val));
-            }
-        }
-        return filters;
     }
 }

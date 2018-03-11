@@ -24,6 +24,18 @@ public class QueryHelper {
         return ret;
     }
 
+    public static Set<Filter> convertJoinAttributesToFilters(Document doc, Set<JoinAttribute> attributes) {
+        Set<Filter> filters = new HashSet<>();
+        for (JoinAttribute ma: attributes) {
+            if (doc.containsKey(ma.getOuterAttribute())) {
+                String fa = ma.getInnerAttribute();
+                Object val = doc.getValue(ma.getOuterAttribute());
+                filters.add(new Filter(fa, Filter.Operation.EQ, val));
+            }
+        }
+        return filters;
+    }
+
     public static void updateAggHelpers(Set<SearchTypeAggregationHelper> aggregationHelpers, Document doc) {
         aggregationHelpers = safeSet(aggregationHelpers);
 
