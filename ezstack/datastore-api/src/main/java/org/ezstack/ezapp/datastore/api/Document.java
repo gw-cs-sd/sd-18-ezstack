@@ -181,7 +181,32 @@ public class Document {
     @JsonAnySetter
     public void setDataField(String key, Object value) {
         checkNotNull(key, "key");
-        _data.put(key, value);
+        String[] path = key.split(DIRECTORY_SEPARATOR);
+        Map<String, Object> current = _data;
+
+        for (int i = 0; i < path.length; i++) {
+            // last level reached
+            if (i == path.length-1) {
+                current.put(path[i], value);
+                return;
+            }
+
+            // still more levels
+            Object tempResult = current.get(path[i]);
+
+            if (tempResult instanceof Document) {
+                current = ((Document) tempResult)._data;
+            }
+            else if (tempResult instanceof Map<?, ?>) {
+                current = (Map<String, Object>) tempResult;
+            }
+            else {
+                // not a doc and not a map so create map
+                Map<String, Object> tempMap = new HashMap<>();
+                current.put(path[i], tempMap);
+                current = tempMap;
+            }
+        }
     }
 
     public Object getValue(String key) {
