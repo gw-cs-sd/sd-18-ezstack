@@ -8,6 +8,7 @@ public class RuleHelper {
     private QueryWeight _weight;
     private RulesManager _manager;
     private Rule _closestMatch;
+    private double _closestMatchScore;
 
     public RuleHelper(Query originalQuery, RulesManager manager) {
         this(originalQuery, new QueryWeight(), manager);
@@ -18,6 +19,8 @@ public class RuleHelper {
         _manager =manager;
         _weight = weight;
 
+        _closestMatch = null;
+        _closestMatchScore = 0;
         computeClosestMatch();
     }
 
@@ -28,7 +31,7 @@ public class RuleHelper {
      * compilation once.
      */
     public void computeClosestMatch() {
-        if (!isTwoLevelQuery(_originalQuery)) {
+        if (!isTwoLevelQuery(_originalQuery) || _closestMatchScore == _weight.getTotal()) {
             return;
         }
 
@@ -38,12 +41,15 @@ public class RuleHelper {
         String outerTable = _originalQuery.getTable();
         String innerTable = _originalQuery.getJoin().getTable();
         for (Rule r: _manager.getRules(outerTable, innerTable, Rule.RuleStatus.ACTIVE)) {
-            if (queryCloseness(_originalQuery, r.getQuery(), _weight) > highestMatch) {
+            double temp = queryCloseness(_originalQuery, r.getQuery(), _weight);
+            if (temp > highestMatch) {
+                highestMatch = temp;
                 closestRuleMatch = r;
             }
         }
 
         _closestMatch = closestRuleMatch;
+        _closestMatchScore = highestMatch;
     }
 
     /**
