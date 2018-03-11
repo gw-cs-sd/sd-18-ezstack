@@ -106,7 +106,7 @@ public class RuleHelper {
         double filters = computeWeight(q1.getFilters(), q2.getFilters(), weight.getFilters());
         double joinAttributeName = q1.getJoinAttributeName().equals(q2.getJoinAttributeName()) ?
                 weight.getJoinAttributeName() : 0;
-        double joinAttributes = computeWeight(q1.getJoinAttributes(), q2.getJoinAttributes(), weight.getJoinAttributes());
+        double joinAttributes = weight.getJoinAttributes();
         double excludeAttributes = computeWeight(q1.getExcludeAttributes(), q2.getExcludeAttributes(), weight.getExcludeAttributes());
         double includeAttributes = q2.getIncludeAttributes().isEmpty() ?
                 computeWeight(q1.getIncludeAttributes(), q2.getIncludeAttributes(), weight.getIncludeAttributes())
@@ -140,7 +140,12 @@ public class RuleHelper {
         if (!q2.getIncludeAttributes().isEmpty() &&
                 !setEncopassesSet(q2.getIncludeAttributes(), q1.getIncludeAttributes())) return false;
         if (!setEncopassesSet(q1.getFilters(), q2.getFilters())) return false;
-        if (!setEncopassesSet(q1.getJoinAttributes(), q2.getJoinAttributes())) return false;
+
+        // there is so much extra logic that has to go in to determine which attributes are missing
+        // and then if those attributes were filtered out by the q2 query it makes it impossible to
+        // do enhancements on it. so rather than wasting my time comming up with that logic, I will save
+        // my self the trouble and say join attributes have to match.
+        if (!q1.getJoinAttributes().equals(q2.getJoinAttributes())) return false;
 
         return true;
     }

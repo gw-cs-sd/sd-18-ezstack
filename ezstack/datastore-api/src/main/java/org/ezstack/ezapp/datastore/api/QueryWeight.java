@@ -3,11 +3,11 @@ package org.ezstack.ezapp.datastore.api;
 public class QueryWeight {
     // maybe change the weights
     public static int MAX_SEARCH_TYPES_CLOSENESS = 10;
-    public static int MAX_TABLE_NAME_CLOSENESS = 0; // must match for any type of queries to be considered close, hence default 0
+    public static int MAX_TABLE_NAME_CLOSENESS = 0; // must match
     public static int MAX_FILTERS_CLOSENESS = 10;
     public static int MAX_JOIN_QUERY_CLOSENESS = 20;
-    public static int MAX_JOIN_ATTRIBUTE_NAME_CLOSENESS = 0; // simple name swap, hence default 0
-    public static int MAX_JOIN_ATTRIBUTES_CLOSENESS = 10;
+    public static int MAX_JOIN_ATTRIBUTE_NAME_CLOSENESS = 0; // must match
+    public static int MAX_JOIN_ATTRIBUTES_CLOSENESS = 0; // must match
     public static int MAX_EXCLUDE_ATTRIBUTES_CLOSENESS = 10;
     public static int MAX_INCLUDE_ATTRIBUTES_CLOSENESS = 10;
     public static int MAX_NORMALIZED_QUERY_CLOSENESS = MAX_SEARCH_TYPES_CLOSENESS + MAX_TABLE_NAME_CLOSENESS +
