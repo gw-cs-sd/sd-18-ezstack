@@ -61,7 +61,11 @@ public class RuleHelper {
         Set<Filter> filters = asymmetricSet(_originalQuery.getFilters(), _closestMatch.getQuery().getFilters());
         Set<String> excludeAttributes = asymmetricSet(_originalQuery.getExcludeAttributes(),
                 _closestMatch.getQuery().getExcludeAttributes());
-        Set<String> includeAttributes = _originalQuery.getIncludeAttributes();
+        excludeAttributes.remove(_closestMatch.getQuery().getJoinAttributeName());
+        Set<String> includeAttributes = new HashSet<>(_originalQuery.getIncludeAttributes());
+        if (!includeAttributes.isEmpty()) {
+            includeAttributes.add(_closestMatch.getQuery().getJoinAttributeName()); // gota make sure join isn't removed ;)
+        }
 
         _execQuery = new Query(searchTypes, tableName, filters, null,
                 null, null, excludeAttributes, includeAttributes);
