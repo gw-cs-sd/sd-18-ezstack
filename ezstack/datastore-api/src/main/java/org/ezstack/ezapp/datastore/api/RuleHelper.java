@@ -5,6 +5,7 @@ import java.util.Set;
 
 public class RuleHelper {
     private Query _originalQuery;
+    private Query _execQuery;
     private QueryWeight _weight;
     private RulesManager _manager;
     private Rule _closestMatch;
@@ -19,18 +20,13 @@ public class RuleHelper {
         _manager =manager;
         _weight = weight;
 
+        _execQuery = null;
         _closestMatch = null;
         _closestMatchScore = 0;
         computeClosestMatch();
     }
 
-    /**
-     * computes the closest matching rule if any exist.
-     * It is made public in case a developer wants to do periodic checks on if more efficient
-     * rules relating to the query have been created. However, the class itself only does that
-     * compilation once.
-     */
-    public void computeClosestMatch() {
+    private void computeClosestMatch() {
         if (!isTwoLevelQuery(_originalQuery) || _closestMatchScore == _weight.getTotal()) {
             return;
         }
@@ -50,6 +46,32 @@ public class RuleHelper {
 
         _closestMatch = closestRuleMatch;
         _closestMatchScore = highestMatch;
+        computeExecQuery();
+    }
+
+    private void computeExecQuery() {
+        if (_closestMatch == null) {
+            return;
+        }
+
+        // Top level query modifications only
+        // all other modifications have to be done after document is retrieved from ES
+        Set<SearchType> searchTypes = asymmetricSet(_originalQuery.getSearchTypes(), _closestMatch.getQuery().getSearchTypes());
+        String tableName = _closestMatch.getTable();
+        Set<Filter> filters = asymmetricSet(_originalQuery.getFilters(), _closestMatch.getQuery().getFilters());
+        Set<String> excludeAttributes = asymmetricSet(_originalQuery.getExcludeAttributes(),
+                _closestMatch.getQuery().getExcludeAttributes());
+        Set<String> includeAttributes = _originalQuery.getIncludeAttributes();
+
+        // TODO
+    }
+
+    public Query getExecQuery() {
+        if (_execQuery == null) {
+            return _originalQuery;
+        }
+
+        return _execQuery;
     }
 
     /**
@@ -74,17 +96,29 @@ public class RuleHelper {
             return 0;
         }
 
-        double searchTypes = (asymmetricSet(q1.getSearchTypes(), q2.getSearchTypes()).size()/q1.getSearchTypes().size()) * weight.getSearchTypes();
+        double searchTypes = computeWeight(q1.getSearchTypes(), q2.getSearchTypes(), weight.getSearchTypes());
         double tableName = weight.getTableName();
-        double filters = (asymmetricSet(q1.getFilters(), q2.getFilters()).size()/q1.getFilters().size()) * weight.getFilters();
+        double filters = computeWeight(q1.getFilters(), q2.getFilters(), weight.getFilters());
         double joinAttributeName = q1.getJoinAttributeName().equals(q2.getJoinAttributeName()) ?
                 weight.getJoinAttributeName() : 0;
-        double joinAttributes = (asymmetricSet(q1.getJoinAttributes(), q2.getJoinAttributes()).size()/q1.getJoinAttributes().size()) * weight.getJoinAttributes();
-        double excludeAttributes = (asymmetricSet(q1.getExcludeAttributes(), q2.getExcludeAttributes()).size()/q1.getExcludeAttributes().size()) * weight.getExcludeAttributes();
-        double includeAttributes = (asymmetricSet(q2.getIncludeAttributes(), q1.getIncludeAttributes()).size()/q2.getIncludeAttributes().size()) * weight.getIncludeAttributes();
+        double joinAttributes = computeWeight(q1.getJoinAttributes(), q2.getJoinAttributes(), weight.getJoinAttributes());
+        double excludeAttributes = computeWeight(q1.getExcludeAttributes(), q2.getExcludeAttributes(), weight.getExcludeAttributes());
+        double includeAttributes = q2.getIncludeAttributes().isEmpty() ?
+                computeWeight(q1.getIncludeAttributes(), q2.getIncludeAttributes(), weight.getIncludeAttributes())
+                : computeWeight(q2.getIncludeAttributes(), q1.getIncludeAttributes(), weight.getIncludeAttributes());
 
         return searchTypes + tableName + filters + join + joinAttributeName +
                 joinAttributes + excludeAttributes + includeAttributes;
+    }
+
+    public static <T> double computeWeight(Set<T> s1, Set<T> s2, int maxWeight) {
+        if (s1.size() == 0) {
+            return maxWeight;
+        }
+
+        Set<T> s3 = asymmetricSet(s1, s2);
+        int diff = s1.size() - s3.size();
+        return ((double)diff/s1.size()) * maxWeight;
     }
 
     /**
@@ -98,7 +132,8 @@ public class RuleHelper {
         if (QueryHelper.userWantsDocuments(q1.getSearchTypes()) != QueryHelper.userWantsDocuments(q2.getSearchTypes()))
             return false;
         if (!setEncopassesSet(q1.getExcludeAttributes(), q2.getExcludeAttributes())) return false;
-        if (!setEncopassesSet(q2.getIncludeAttributes(), q1.getIncludeAttributes())) return false;
+        if (!q2.getIncludeAttributes().isEmpty() &&
+                !setEncopassesSet(q2.getIncludeAttributes(), q1.getIncludeAttributes())) return false;
         if (!setEncopassesSet(q1.getFilters(), q2.getFilters())) return false;
         if (!setEncopassesSet(q1.getJoinAttributes(), q2.getJoinAttributes())) return false;
 
@@ -132,7 +167,7 @@ public class RuleHelper {
      * @return new rule compliant query, or null if original query could not be converted
      */
     public static Query getRuleCompliantQuery(Query query) {
-        // For now all queries turned into rules must be at least 2 levels long
+        // For now all queries turned into rules must be exactly 2 levels long
         if (!isTwoLevelQuery(query)) {
             return null;
         }
