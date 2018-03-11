@@ -12,6 +12,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 public class Document {
 
     private static final long NUM_100NS_INTERVALS_SINCE_UUID_EPOCH = 0x01b21dd213814000L;
+    public static String DIRECTORY_SEPARATOR = "->";
 
     private static final String TABLE = "~table";
     private static final String KEY = "~key";
@@ -192,7 +193,67 @@ public class Document {
             case VERSION:
                 return getVersion();
             default:
-                return _data.get(key);
+                return getRecursiveValue(key);
+        }
+    }
+
+    private Object getRecursiveValue(String key) {
+        String[] path = key.split(DIRECTORY_SEPARATOR);
+        Map<String, Object> current = _data;
+        Document alternateCurrent = null; // documents can be inside documents
+
+        for (int i = 0; i < path.length; i++) {
+            // last level reached
+            if (i == path.length-1) {
+                if (current != null) {
+                    return current.get(path[i]);
+                }
+                else if (alternateCurrent != null) {
+                    return simpleGetValue(alternateCurrent, path[i]);
+                }
+                return null;
+            }
+
+            // still more levels
+            Object tempResult = null;
+            if (current != null) {
+                tempResult = current.get(path[i]);
+            }
+            else if (alternateCurrent != null) {
+                tempResult = simpleGetValue(alternateCurrent, path[i]);
+            }
+
+            if (tempResult instanceof Document) {
+                alternateCurrent = (Document) tempResult;
+                current = null;
+            }
+            else if (tempResult instanceof Map<?, ?>) {
+                current = (Map<String, Object>) tempResult;
+                alternateCurrent = null;
+            }
+            else {
+                // not a doc and not a map so val doesn't exist
+                return null;
+            }
+        }
+
+        return null;
+    }
+
+    private static Object simpleGetValue(Document doc, String key) {
+        switch (key) {
+            case KEY:
+                return doc.getKey();
+            case TABLE:
+                return doc.getTable();
+            case FIRST_UPDATE_AT:
+                return doc.getFirstUpdateAt();
+            case LAST_UPDATE_AT:
+                return doc.getLastUpdateAt();
+            case VERSION:
+                return doc.getVersion();
+            default:
+                return doc._data.get(key);
         }
     }
 
