@@ -10,6 +10,7 @@ import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 public class Document {
+    private enum RecursiveType { GET, DELETE }
 
     private static final long NUM_100NS_INTERVALS_SINCE_UUID_EPOCH = 0x01b21dd213814000L;
     public static String DIRECTORY_SEPARATOR = "->";
@@ -167,10 +168,13 @@ public class Document {
         return getValue(key) != null;
     }
 
-    // removes key from the document as long as it is not an instric
+    /**
+     * removes key from the document as long as it is not an instric
+     * @param key
+     */
     public void remove(String key) {
         if (!INTRINSIC_ATTRIBUTES.contains(key)) {
-            _data.remove(key);
+            recursiveValue(key, RecursiveType.DELETE);
         }
     }
 
@@ -193,11 +197,11 @@ public class Document {
             case VERSION:
                 return getVersion();
             default:
-                return getRecursiveValue(key);
+                return recursiveValue(key, RecursiveType.GET);
         }
     }
 
-    private Object getRecursiveValue(String key) {
+    private Object recursiveValue(String key, RecursiveType type) {
         String[] path = key.split(DIRECTORY_SEPARATOR);
         Map<String, Object> current = _data;
         Document alternateCurrent = null; // documents can be inside documents
@@ -205,11 +209,24 @@ public class Document {
         for (int i = 0; i < path.length; i++) {
             // last level reached
             if (i == path.length-1) {
-                if (current != null) {
-                    return current.get(path[i]);
-                }
-                else if (alternateCurrent != null) {
-                    return simpleGetValue(alternateCurrent, path[i]);
+                switch (type) {
+                    case GET:
+                        if (current != null) {
+                            return current.get(path[i]);
+                        }
+                        else if (alternateCurrent != null) {
+                            return simpleGetValue(alternateCurrent, path[i]);
+                        }
+                        break;
+                    case DELETE:
+                        if (current != null) {
+                            return current.remove(path[i]);
+                        }
+                        else if (alternateCurrent != null) {
+                            simpleRemove(alternateCurrent, path[i]);
+                            return null;
+                        }
+                        break;
                 }
                 return null;
             }
@@ -240,6 +257,17 @@ public class Document {
         return null;
     }
 
+    private void setData(Map<String, Object> data) {
+        _data = data;
+    }
+
+    @Override
+    public Document clone() {
+        Document clone = new Document(_table, _key, _firstUpdateAt, _lastUpdateAt, _version);
+        clone.setData(getDataCopy(_data));
+        return clone;
+    }
+
     private static Object simpleGetValue(Document doc, String key) {
         switch (key) {
             case KEY:
@@ -257,15 +285,10 @@ public class Document {
         }
     }
 
-    private void setData(Map<String, Object> data) {
-        _data = data;
-    }
-
-    @Override
-    public Document clone() {
-        Document clone = new Document(_table, _key, _firstUpdateAt, _lastUpdateAt, _version);
-        clone.setData(getDataCopy(_data));
-        return clone;
+    private static void simpleRemove(Document doc, String key) {
+        if (!INTRINSIC_ATTRIBUTES.contains(key)) {
+            doc._data.remove(key);
+        }
     }
 
     private static Map<String, Object> getDataCopy(Map<String, Object> data) {
