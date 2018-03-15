@@ -1,6 +1,7 @@
 package org.ezstack.ezapp.datastore.api;
 
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 
 public class RuleHelper {
@@ -77,6 +78,39 @@ public class RuleHelper {
         }
 
         return _execQuery;
+    }
+
+
+    /**
+     * The follwoing method cleansup/reshapes documents rendered from rules
+     * to be of the form of the expected data based on the original query.
+     * If there is no optimal query it returns the original document as is.
+     *
+     * @param doc
+     * @return
+     */
+    public Document correctfyDocument(Document doc) {
+        // no optimal queries
+        if (_execQuery == null) {
+            return doc;
+        }
+
+        // get inner query
+        QueryResult val = (QueryResult) doc.getValue(_closestMatch.getQuery().getJoinAttributeName());
+        Map<String, Object> innerData = val.getQueryResults();
+
+        // set the new join field
+        if (!_originalQuery.getJoinAttributeName().equals(_closestMatch.getQuery().getJoinAttributeName())) {
+            doc.remove(_closestMatch.getQuery().getJoinAttributeName());
+            doc.setDataField(_originalQuery.getJoinAttributeName(), val);
+        }
+
+        // inner join document modifications
+        Query origInner = _originalQuery.getJoin();
+        Query newInner = _closestMatch.getQuery().getJoin();
+
+
+        return doc;
     }
 
     /**

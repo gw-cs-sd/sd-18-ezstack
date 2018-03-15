@@ -8,7 +8,7 @@ import com.fasterxml.jackson.annotation.JsonUnwrapped;
 import java.util.*;
 
 public class QueryResult {
-    private final String DOCUMENTS_NAME = "_documents";
+    public final String DOCUMENTS_NAME = "_documents";
     private Map<String, Object> _queryResults;
 
     public QueryResult() {
