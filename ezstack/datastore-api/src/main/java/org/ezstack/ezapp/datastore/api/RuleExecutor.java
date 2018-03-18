@@ -60,7 +60,10 @@ public class RuleExecutor {
     }
 
     /**
-     *
+     * Will check if RuleExecutor is using a modified query from the original query requested.
+     * If it is then it will modify the document to add/remove the needed data from the original
+     * query. Otherwise if it detects that the original query was used then it will return the
+     * document as is umodified.
      * @param doc
      * @return
      */
