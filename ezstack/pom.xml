@@ -19,6 +19,7 @@
         <module>reader</module>
         <module>query-bus</module>
         <module>rules-manager</module>
+        <module>client</module>
     </modules>
     <name>EZstack</name>
 
