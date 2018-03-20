@@ -61,9 +61,7 @@ public class EZappClient implements DataWriter, DataReader, RulesManager {
                 .request(MediaType.APPLICATION_JSON)
                 .get();
 
-        if (response.getStatus() != Response.Status.OK.getStatusCode()) {
-            throw convertException(response);
-        }
+        checkResponseForError(response);
 
         return response.readEntity(new GenericType<Set<Rule>>() {});
     }
@@ -80,9 +78,7 @@ public class EZappClient implements DataWriter, DataReader, RulesManager {
                 .request(MediaType.APPLICATION_JSON)
                 .get();
 
-        if (response.getStatus() != Response.Status.OK.getStatusCode()) {
-            throw convertException(response);
-        }
+        checkResponseForError(response);
 
         return response.readEntity(new GenericType<Set<Rule>>() {});
     }
@@ -96,9 +92,7 @@ public class EZappClient implements DataWriter, DataReader, RulesManager {
                 .request(MediaType.APPLICATION_JSON)
                 .get();
 
-        if (response.getStatus() != Response.Status.OK.getStatusCode()) {
-            throw convertException(response);
-        }
+        checkResponseForError(response);
 
         return response.readEntity(new GenericType<Set<Rule>>() {});
     }
@@ -114,9 +108,7 @@ public class EZappClient implements DataWriter, DataReader, RulesManager {
                 .request(MediaType.APPLICATION_JSON)
                 .get();
 
-        if (response.getStatus() != Response.Status.OK.getStatusCode()) {
-            throw convertException(response);
-        }
+        checkResponseForError(response);
 
         return response.readEntity(new GenericType<Set<Rule>>() {});
     }
@@ -135,8 +127,7 @@ public class EZappClient implements DataWriter, DataReader, RulesManager {
             throw convertException(response);
         }
 
-        WriteResponse writeResponse = response.readEntity(WriteResponse.class);
-        return writeResponse.getKey();
+        return response.readEntity(WriteResponse.class).getKey();
     }
 
     @Override
@@ -150,12 +141,9 @@ public class EZappClient implements DataWriter, DataReader, RulesManager {
                 .request(MediaType.APPLICATION_JSON)
                 .post(Entity.entity(doc, MediaType.APPLICATION_JSON));
 
-        if (response.getStatus() != Response.Status.OK.getStatusCode()) {
-            throw convertException(response);
-        }
+        checkResponseForError(response);
 
-        WriteResponse writeResponse = response.readEntity(WriteResponse.class);
-        return writeResponse.getKey();
+        return response.readEntity(WriteResponse.class).getKey();
     }
 
     public String update(String table, String key, Map<String, Object> doc) {
@@ -164,12 +152,9 @@ public class EZappClient implements DataWriter, DataReader, RulesManager {
                 .request(MediaType.APPLICATION_JSON)
                 .put(Entity.entity(doc, MediaType.APPLICATION_JSON));
 
-        if (response.getStatus() != Response.Status.OK.getStatusCode()) {
-            throw convertException(response);
-        }
+        checkResponseForError(response);
 
-        WriteResponse writeResponse = response.readEntity(WriteResponse.class);
-        return writeResponse.getKey();
+        return response.readEntity(WriteResponse.class).getKey();
     }
 
     // TODO: refactor the datawriter to have a bulk function, then refactor this function to implement it
@@ -186,9 +171,7 @@ public class EZappClient implements DataWriter, DataReader, RulesManager {
                 .request(MediaType.APPLICATION_JSON)
                 .get();
 
-        if (response.getStatus() != Response.Status.OK.getStatusCode()) {
-            throw convertException(response);
-        }
+        checkResponseForError(response);
 
         return response.readEntity(new GenericType<Map<String, Object>>() {});
 
@@ -209,20 +192,23 @@ public class EZappClient implements DataWriter, DataReader, RulesManager {
         return getDocuments(DEFAULT_RETENTION_TIME_IN_MILLIS, DEFAULT_BATCH_SIZE, query);
     }
 
-    public QueryResult getDocuments(long scrollInMillis, int batchSize, Query query) {
+    public QueryResult getDocuments(long retentionTimeInMillis, int batchSize, Query query) {
         Response response =  _client
                 .target(UriBuilder.fromUri(_uri).path(SOR_PATH).path("_search"))
                 .request(MediaType.APPLICATION_JSON)
-                .property("scrolInMillis", scrollInMillis)
+                .property("retentionTimeInMillis", retentionTimeInMillis)
                 .property("batchSize", batchSize)
                 .post(Entity.entity(query, MediaType.APPLICATION_JSON));
 
-        if (response.getStatus() != Response.Status.OK.getStatusCode()) {
-            throw new RuntimeException(response.getEntity().toString());
-        }
+        checkResponseForError(response);
 
         return response.readEntity(QueryResult.class);
+    }
 
+    private void checkResponseForError(Response response) {
+        if (response.getStatus() != Response.Status.OK.getStatusCode()) {
+            throw convertException(response);
+        }
     }
 
     private RuntimeException convertException(Response response) {

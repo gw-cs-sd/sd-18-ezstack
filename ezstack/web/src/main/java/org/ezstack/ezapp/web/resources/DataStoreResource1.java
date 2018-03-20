@@ -19,6 +19,12 @@ import javax.ws.rs.DefaultValue;
 import javax.ws.rs.core.MediaType;
 import java.util.*;
 
+/**
+ * Jersey resource for accessing EZapp's {@link DataWriter}, {@link DataReader}, and {@link RulesManager}.
+ *
+ * <p>If a 4xx error is thrown by the resource, a header with the exeception will be defined under "X-EZ-Exception".
+ */
+
 @Path("sor/1")
 @Produces(MediaType.APPLICATION_JSON)
 public class DataStoreResource1 {
@@ -83,11 +89,11 @@ public class DataStoreResource1 {
     @Timed
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
-    public QueryResult search(@QueryParam("scroll") @DefaultValue("120000") long scrollInMillis,
+    public QueryResult search(@QueryParam("retentionTimeInMillis") @DefaultValue("120000") long retentionTimeInMillis,
                               @QueryParam("batchSize") @DefaultValue("100") int batchSize,
                               Query query) {
         long timeStart = System.currentTimeMillis();
-        QueryResult ret = _dataReader.getDocuments(scrollInMillis, batchSize, query);
+        QueryResult ret = _dataReader.getDocuments(retentionTimeInMillis, batchSize, query);
         _queryBusPublisher.publishQueryAsync(query, System.currentTimeMillis() - timeStart);
         return ret;
     }
