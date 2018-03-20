@@ -2,6 +2,9 @@
 <project version="4">
   <component name="ChangeListManager">
 <<<<<<< HEAD
+<<<<<<< HEAD
+=======
+>>>>>>> fixed dependency issues
     <list default="true" id="b81533ce-eddc-4b53-921c-d2d174694f2d" name="Default" comment="">
       <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/ezstack/denormalization-deity/pom.xml" />
       <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/ezstack/denormalization-deity/src/main/config/denormalization-deity-app.properties" />
@@ -13,9 +16,12 @@
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/ezstack/pom.xml" afterPath="$PROJECT_DIR$/ezstack/pom.xml" />
     </list>
+<<<<<<< HEAD
 =======
     <list default="true" id="b81533ce-eddc-4b53-921c-d2d174694f2d" name="Default" comment="" />
 >>>>>>> changes
+=======
+>>>>>>> fixed dependency issues
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="TRACKING_ENABLED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
@@ -24,6 +30,7 @@
     <option name="LAST_RESOLUTION" value="IGNORE" />
   </component>
   <component name="FileEditorManager">
+<<<<<<< HEAD
 <<<<<<< HEAD
     <leaf SIDE_TABS_SIZE_LIMIT_KEY="300">
       <file leaf-file-name="DenormalizationDeityApp.java" pinned="false" current-in-tab="true">
@@ -34,15 +41,24 @@
               <folding />
 =======
     <leaf>
+=======
+    <leaf SIDE_TABS_SIZE_LIMIT_KEY="300">
+>>>>>>> fixed dependency issues
       <file leaf-file-name="DenormalizationDeityApp.java" pinned="false" current-in-tab="true">
-        <entry file="file://$PROJECT_DIR$/ezapp/denormalization-deity/src/main/java/DenormalizationDeityApp.java">
+        <entry file="file://$PROJECT_DIR$/ezstack/denormalization-deity/src/main/java/DenormalizationDeityApp.java">
           <provider selected="true" editor-type-id="text-editor">
+<<<<<<< HEAD
             <state relative-caret-position="390">
               <caret line="26" column="0" lean-forward="false" selection-start-line="26" selection-start-column="0" selection-end-line="26" selection-end-column="0" />
               <folding>
                 <element signature="imports" expanded="true" />
               </folding>
 >>>>>>> changes
+=======
+            <state relative-caret-position="75">
+              <caret line="5" column="38" lean-forward="true" selection-start-line="5" selection-start-column="38" selection-end-line="5" selection-end-column="38" />
+              <folding />
+>>>>>>> fixed dependency issues
             </state>
           </provider>
         </entry>
@@ -50,13 +66,19 @@
     </leaf>
   </component>
 <<<<<<< HEAD
+<<<<<<< HEAD
+=======
+>>>>>>> fixed dependency issues
   <component name="FindInProjectRecents">
     <findStrings>
       <find>ez</find>
     </findStrings>
   </component>
+<<<<<<< HEAD
 =======
 >>>>>>> changes
+=======
+>>>>>>> fixed dependency issues
   <component name="Git.Settings">
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
   </component>
@@ -83,12 +105,18 @@
         <option value="$PROJECT_DIR$/ezapp/denormalizer/src/main/java/DenormalizerLocalApplication.java" />
         <option value="$PROJECT_DIR$/aggregations/src/main/java/org/ezstack/aggregations/Aggregation.java" />
 <<<<<<< HEAD
+<<<<<<< HEAD
+=======
+>>>>>>> fixed dependency issues
         <option value="$PROJECT_DIR$/ezstack/denormalization-deity/pom.xml" />
         <option value="$PROJECT_DIR$/ezstack/pom.xml" />
         <option value="$PROJECT_DIR$/ezapp/denormalization-deity/src/main/java/DenormalizationDeityApp.java" />
         <option value="$PROJECT_DIR$/ezstack/denormalization-deity/src/main/java/DenormalizationDeityApp.java" />
+<<<<<<< HEAD
 =======
 >>>>>>> changes
+=======
+>>>>>>> fixed dependency issues
       </list>
     </option>
   </component>
@@ -113,6 +141,7 @@
     </navigator>
     <panes>
 <<<<<<< HEAD
+<<<<<<< HEAD
       <pane id="Scratches" />
       <pane id="Scope" />
 =======
@@ -120,6 +149,10 @@
       <pane id="Scope" />
       <pane id="Scratches" />
 >>>>>>> changes
+=======
+      <pane id="Scratches" />
+      <pane id="Scope" />
+>>>>>>> fixed dependency issues
       <pane id="PackagesPane" />
       <pane id="ProjectPane">
         <subPane>
@@ -164,6 +197,9 @@
               <item name="java" type="462c0819:PsiDirectoryNode" />
             </path>
 <<<<<<< HEAD
+<<<<<<< HEAD
+=======
+>>>>>>> fixed dependency issues
             <path>
               <item name="sd-18-ezstack" type="b2602c69:ProjectViewProjectNode" />
               <item name="sd-18-ezstack" type="462c0819:PsiDirectoryNode" />
@@ -208,16 +244,23 @@
               <item name="main" type="462c0819:PsiDirectoryNode" />
               <item name="java" type="462c0819:PsiDirectoryNode" />
             </path>
+<<<<<<< HEAD
 =======
 >>>>>>> changes
+=======
+>>>>>>> fixed dependency issues
           </expand>
           <select />
         </subPane>
       </pane>
 <<<<<<< HEAD
+<<<<<<< HEAD
       <pane id="AndroidView" />
 =======
 >>>>>>> changes
+=======
+      <pane id="AndroidView" />
+>>>>>>> fixed dependency issues
     </panes>
   </component>
   <component name="PropertiesComponent">
@@ -225,11 +268,17 @@
   </component>
   <component name="RecentsManager">
 <<<<<<< HEAD
+<<<<<<< HEAD
     <key name="CopyFile.RECENT_KEYS">
       <recent name="$PROJECT_DIR$/ezstack" />
     </key>
 =======
 >>>>>>> changes
+=======
+    <key name="CopyFile.RECENT_KEYS">
+      <recent name="$PROJECT_DIR$/ezstack" />
+    </key>
+>>>>>>> fixed dependency issues
     <key name="MoveFile.RECENT_KEYS">
       <recent name="$PROJECT_DIR$/aggregations/src/main/java/org/ezstack/aggregations" />
     </key>
@@ -348,9 +397,13 @@
   <component name="ToolWindowManager">
     <frame x="0" y="23" width="1440" height="799" extended-state="6" />
 <<<<<<< HEAD
+<<<<<<< HEAD
     <editor active="true" />
 =======
 >>>>>>> changes
+=======
+    <editor active="true" />
+>>>>>>> fixed dependency issues
     <layout>
       <window_info id="Palette" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
       <window_info id="TODO" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="6" side_tool="false" content_ui="tabs" />
@@ -365,10 +418,14 @@
       <window_info id="Capture Tool" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
       <window_info id="Designer" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
 <<<<<<< HEAD
+<<<<<<< HEAD
       <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="0" side_tool="false" content_ui="combo" />
 =======
       <window_info id="Project" active="true" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="0" side_tool="false" content_ui="combo" />
 >>>>>>> changes
+=======
+      <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="0" side_tool="false" content_ui="combo" />
+>>>>>>> fixed dependency issues
       <window_info id="Structure" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
       <window_info id="Ant Build" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
       <window_info id="UI Designer" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
@@ -392,6 +449,7 @@
   </component>
   <component name="editorHistoryManager">
 <<<<<<< HEAD
+<<<<<<< HEAD
     <entry file="file://$PROJECT_DIR$/ezapp/denormalization-deity/src/main/java/DenormalizationDeityApp.java">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="0">
@@ -407,21 +465,21 @@
     <entry file="file://$PROJECT_DIR$/ezapp/denormalizer/src/main/java/DenormalizerLocalApplication.java" />
 =======
     <entry file="file://$PROJECT_DIR$/ezapp/denormalizer/src/main/java/DenormalizerLocalApplication.java">
+=======
+    <entry file="file://$PROJECT_DIR$/ezapp/denormalization-deity/src/main/java/DenormalizationDeityApp.java">
+>>>>>>> fixed dependency issues
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="0">
           <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
+          <folding />
         </state>
       </provider>
     </entry>
+    <entry file="file://$PROJECT_DIR$/ezapp/denormalizer/src/main/java/DenormalizerLocalApplication.java" />
     <entry file="file://$PROJECT_DIR$/samza-mesos/src/main/java/org/ezstack/samza/MesosConfig.java" />
-    <entry file="file://$PROJECT_DIR$/ezapp/denormalizer/src/main/java/DocumentResolverApp.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="0">
-          <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
-        </state>
-      </provider>
-    </entry>
+    <entry file="file://$PROJECT_DIR$/ezapp/denormalizer/src/main/java/DocumentResolverApp.java" />
     <entry file="file://$PROJECT_DIR$/samza-mesos/src/main/java/org/ezstack/samza/MesosConfig.java" />
+<<<<<<< HEAD
     <entry file="file://$PROJECT_DIR$/ezapp/denormalizer/src/main/java/DenormalizerLocalApplication.java">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="330">
@@ -430,6 +488,9 @@
       </provider>
     </entry>
 >>>>>>> changes
+=======
+    <entry file="file://$PROJECT_DIR$/ezapp/denormalizer/src/main/java/DenormalizerLocalApplication.java" />
+>>>>>>> fixed dependency issues
     <entry file="file://$PROJECT_DIR$/aggregations/src/main/java/org/ezstack/aggregations/TempRule.java" />
     <entry file="file://$PROJECT_DIR$/aggregations/src/main/java/org/ezstack/aggregations/Sum.java" />
     <entry file="file://$PROJECT_DIR$/aggregations/src/main/java/org/ezstack/aggregations/QueryVerb.java" />
@@ -444,6 +505,9 @@
     <entry file="file://$PROJECT_DIR$/aggregations/src/main/java/org/ezstack/aggregations/App.java" />
     <entry file="file://$PROJECT_DIR$/aggregations/src/main/java/org/ezstack/aggregations/Aggregation.java" />
 <<<<<<< HEAD
+<<<<<<< HEAD
+=======
+>>>>>>> fixed dependency issues
     <entry file="file://$PROJECT_DIR$/ezstack/samza-elasticsearch/pom.xml">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="360">
@@ -494,6 +558,7 @@
         </state>
       </provider>
     </entry>
+<<<<<<< HEAD
     <entry file="file://$PROJECT_DIR$/ezapp/denormalization-deity/src/main/java/DenormalizationDeityApp.java">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="285">
@@ -512,6 +577,20 @@
         <state relative-caret-position="390">
           <caret line="26" column="0" lean-forward="false" selection-start-line="26" selection-start-column="0" selection-end-line="26" selection-end-column="0" />
 >>>>>>> changes
+=======
+    <entry file="file://$PROJECT_DIR$/ezapp/denormalization-deity/src/main/java/DenormalizationDeityApp.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="285">
+          <caret line="19" column="25" lean-forward="true" selection-start-line="19" selection-start-column="25" selection-end-line="19" selection-end-column="25" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/ezstack/denormalization-deity/src/main/java/DenormalizationDeityLocalRunner.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="0">
+          <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
+>>>>>>> fixed dependency issues
           <folding>
             <element signature="imports" expanded="true" />
           </folding>
@@ -519,6 +598,9 @@
       </provider>
     </entry>
 <<<<<<< HEAD
+<<<<<<< HEAD
+=======
+>>>>>>> fixed dependency issues
     <entry file="file://$PROJECT_DIR$/ezstack/denormalization-deity/src/main/java/DeityConfig.java">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="0">
@@ -553,8 +635,11 @@
         </state>
       </provider>
     </entry>
+<<<<<<< HEAD
 =======
 >>>>>>> changes
+=======
+>>>>>>> fixed dependency issues
   </component>
   <component name="masterDetails">
     <states>

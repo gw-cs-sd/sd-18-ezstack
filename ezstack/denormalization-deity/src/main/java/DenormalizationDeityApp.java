@@ -99,7 +99,7 @@ public class DenormalizationDeityApp implements StreamApplication {
         else {
             priority = median + meanAbsoluteDeviation;
         }
-        
+
         long stamp = _timestamp.getTime();
 
         QueryObject queryObject;

@@ -41,5 +41,4 @@ public class QueryObject {
     public Query getQuery() {
         return _query;
     }
-
 }
