@@ -2,25 +2,35 @@ package org.ezstack.ezapp.datastore.api;
 
 public class RuleHelper {
     /**
-     * Query - will return the new query that can be safely passed as a rule for the denormalizer.
-     * null - will be returned if the original query is not possible to be converted into a rule.
-     * @param q
+     * Given an original query it will modify it to a rule query and then build a rule for the modified query.
+     * if such a task can't be done then null is returned.
+     * @param original
      * @return
      */
-    public static Query getRuleQuery(Query q) {
-        if (!isTwoLevelQuery(q)) {
+    public static Rule getRule(Query original) {
+        return new Rule(getRuleQuery(original));
+    }
+
+    /**
+     * Query - will return the new query that can be safely passed as a rule for the denormalizer.
+     * null - will be returned if the original query is not possible to be converted into a rule.
+     * @param original
+     * @return
+     */
+    public static Query getRuleQuery(Query original) {
+        if (!isTwoLevelQuery(original)) {
             return null;
         }
 
         return new Query(
                 null,
-                q.getTable(),
-                q.getFilters(),
-                q.getJoin(),
-                q.getJoinAttributeName(),
-                q.getJoinAttributes(),
-                q.getExcludeAttributes(),
-                q.getIncludeAttributes()
+                original.getTable(),
+                original.getFilters(),
+                original.getJoin(),
+                original.getJoinAttributeName(),
+                original.getJoinAttributes(),
+                original.getExcludeAttributes(),
+                original.getIncludeAttributes()
         );
     }
 
