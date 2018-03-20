@@ -148,7 +148,7 @@ public class EZappClient implements DataWriter, DataReader, RulesManager {
 
     public String update(String table, String key, Map<String, Object> doc) {
         Response response = _client
-                .target(UriBuilder.fromUri(_uri).path(SOR_PATH).path(table))
+                .target(UriBuilder.fromUri(_uri).path(SOR_PATH).path(table).path(key))
                 .request(MediaType.APPLICATION_JSON)
                 .put(Entity.entity(doc, MediaType.APPLICATION_JSON));
 
