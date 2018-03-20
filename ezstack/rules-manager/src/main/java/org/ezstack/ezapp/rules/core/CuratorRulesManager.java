@@ -137,7 +137,7 @@ public class CuratorRulesManager implements RulesManager {
     }
 
     @Override
-    public void remove(Rule rule) {
+    public void removeRule(Rule rule) {
         throw new UnsupportedOperationException();
     }
 

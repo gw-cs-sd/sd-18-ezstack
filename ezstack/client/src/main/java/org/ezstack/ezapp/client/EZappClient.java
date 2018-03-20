@@ -69,7 +69,7 @@ public class EZappClient implements DataWriter, DataReader, RulesManager {
     }
 
     @Override
-    public void remove(Rule rule) {
+    public void removeRule(Rule rule) {
         throw new UnsupportedOperationException();
     }
 
