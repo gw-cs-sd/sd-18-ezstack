@@ -7,6 +7,7 @@ import org.elasticsearch.client.Client;
 import org.elasticsearch.index.IndexNotFoundException;
 import org.ezstack.ezapp.datastore.api.Query;
 import org.ezstack.ezapp.datastore.api.QueryResult;
+import org.ezstack.ezapp.datastore.api.RuleExecutor;
 
 import java.util.Map;
 import java.util.Collections;
@@ -30,7 +31,7 @@ public class ElasticSearchDataReaderDAO {
         }
     }
 
-    public QueryResult getDocuments(long scrollInMillis, int batchSize, Query query) {
-        return new ElasticQueryParser(scrollInMillis, batchSize, query, _client).getDocuments();
+    public QueryResult getDocuments(long scrollInMillis, int batchSize, RuleExecutor ruleExecutor) {
+        return new ElasticQueryParser(scrollInMillis, batchSize, ruleExecutor, _client).getDocuments();
     }
 }

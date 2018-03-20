@@ -14,18 +14,18 @@ import java.util.*;
 public class ElasticQueryParser {
     private long _scrollInMillis;
     private int _batchSize;
-    private Query _query;
+    private RuleExecutor _ruleExecutor;
     private Client _client;
 
-    public ElasticQueryParser(long scrollInMillis, int batchSize, Query query, Client client) {
+    public ElasticQueryParser(long scrollInMillis, int batchSize, RuleExecutor ruleExecutor, Client client) {
         _scrollInMillis = scrollInMillis;
         _batchSize = batchSize;
-        _query = query;
+        _ruleExecutor = ruleExecutor;
         _client = client;
     }
 
     QueryResult getDocuments() {
-        return exec(_query);
+        return exec(_ruleExecutor.getExecQuery());
     }
 
     private QueryResult exec(Query q) {
@@ -78,6 +78,7 @@ public class ElasticQueryParser {
                 doc = QueryHelper.filterAttributes(q.getExcludeAttributes(), q.getIncludeAttributes(), doc);
             }
 
+            doc = _ruleExecutor.correctfyDocument(doc);
             if (userWantsDocuments) {
                 results.add(doc);
             }

@@ -27,6 +27,7 @@ public class DefaultDataReader implements DataReader {
 
     @Override
     public QueryResult getDocuments(long scrollInMillis, int batchSize, Query query) {
-        return _dataReaderDAO.getDocuments(scrollInMillis, batchSize, query);
+        RuleExecutor ruleExecutor = new RuleExecutor(query, _rulesManager);
+        return _dataReaderDAO.getDocuments(scrollInMillis, batchSize, ruleExecutor);
     }
 }
