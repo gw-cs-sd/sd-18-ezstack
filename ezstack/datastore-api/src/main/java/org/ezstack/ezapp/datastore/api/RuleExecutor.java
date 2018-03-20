@@ -30,7 +30,7 @@ public class RuleExecutor {
         String outerTable = _originalQuery.getTable();
         String innerTable = _originalQuery.getJoin().getTable();
 
-        for (Rule r: _ruleManager.getRules(outerTable, innerTable, Rule.RuleStatus.ACTIVE)) {
+        for (Rule r : _ruleManager.getRules(outerTable, innerTable, Rule.RuleStatus.ACTIVE)) {
             if (ruleQueryMatch(_originalQuery, r.getQuery())) {
                 _closestRule = r;
                 computeExecQuery();
