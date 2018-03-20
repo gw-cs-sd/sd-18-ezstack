@@ -12,6 +12,7 @@ import com.google.common.hash.Hashing;
 
 import java.util.*;
 
+import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.MoreObjects.firstNonNull;
 
@@ -42,6 +43,7 @@ public class Query {
                  @JsonProperty("includeAttributes") Set<String> includeAttributes) {
 
         checkNotNull(table, "table");
+        checkArgument(Names.isLegalTableName(table));
 
         _searchTypes = searchTypes;
         _table = table;

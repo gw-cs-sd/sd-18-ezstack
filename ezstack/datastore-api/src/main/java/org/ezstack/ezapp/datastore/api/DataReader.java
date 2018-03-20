@@ -15,4 +15,10 @@ public interface DataReader {
      *
      */
     QueryResult getDocuments(long retentionTimeInMillis, int batchSize, Query query);
+
+    QueryResult getDocuments(long retentionTimeInMillis, Query query);
+
+    QueryResult getDocuments(int batchSize, Query query);
+
+    QueryResult getDocuments(Query query);
 }

@@ -6,7 +6,7 @@ import static org.ezstack.ezapp.datastore.api.Rule.RuleStatus;
 
 public interface RulesManager {
 
-    void create(Rule rule) throws RuleAlreadyExistsException;
+    void createRule(Rule rule) throws RuleAlreadyExistsException;
 
     void remove(Rule rule);
 

@@ -1,4 +1,4 @@
-package org.ezstack.ezapp.web.resources;
+package org.ezstack.ezapp.web.api;
 
 public class SuccessResponse {
 

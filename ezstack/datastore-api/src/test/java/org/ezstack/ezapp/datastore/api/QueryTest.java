@@ -34,7 +34,7 @@ public class QueryTest {
         Set<String> includeAttributes = new HashSet<>();
         includeAttributes.add("attribute2");
 
-        query = new Query(searchTypes, "myTable", filters, null, "attribute", joinAttributes, excludeAttributes, includeAttributes);
+        query = new Query(searchTypes, "mytable", filters, null, "attribute", joinAttributes, excludeAttributes, includeAttributes);
     }
 
     @Test
@@ -89,8 +89,8 @@ public class QueryTest {
         Set<String> includeAttributes = new HashSet<>();
         includeAttributes.add("attribute2");
 
-        Query query2 = new Query(searchTypes, "myTable", filters, null, "attribute", joinAttributes, excludeAttributes, includeAttributes);
-        Query query3 = new Query(searchTypes, "myTable2", filters, null, "attribute", joinAttributes, excludeAttributes, includeAttributes);
+        Query query2 = new Query(searchTypes, "mytable", filters, null, "attribute", joinAttributes, excludeAttributes, includeAttributes);
+        Query query3 = new Query(searchTypes, "mytable2", filters, null, "attribute", joinAttributes, excludeAttributes, includeAttributes);
 
         assertEquals(query, query2);
         assertEquals(query.compactQuery(query2), query2.compactQuery(query));
@@ -117,7 +117,7 @@ public class QueryTest {
         Set<String> includeAttributes = new HashSet<>();
         includeAttributes.add("attribute2");
 
-        Query query2 = new Query(searchTypes, "myTable", filters, null, "attribute", joinAttributes, excludeAttributes, includeAttributes);
+        Query query2 = new Query(searchTypes, "mytable", filters, null, "attribute", joinAttributes, excludeAttributes, includeAttributes);
 
         assertEquals(query.getMurmur3HashAsString(), query2.getMurmur3HashAsString());
         assertEquals(query.hashCode(), query2.hashCode());
@@ -143,7 +143,7 @@ public class QueryTest {
         Set<String> includeAttributes = new HashSet<>();
         includeAttributes.add("attribute2");
 
-        Query query2 = new Query(searchTypes, "myTable", filters, null, "attribute", joinAttributes, excludeAttributes, includeAttributes);
+        Query query2 = new Query(searchTypes, "mytable", filters, null, "attribute", joinAttributes, excludeAttributes, includeAttributes);
 
         assertEquals(query.toString(), query2.toString());
     }
@@ -168,7 +168,7 @@ public class QueryTest {
         Set<String> includeAttributes = new HashSet<>();
         includeAttributes.add("attribute2");
 
-        Query query2 = new Query(searchTypes, "myTable", filters, null, "attribute", joinAttributes, excludeAttributes, includeAttributes);
+        Query query2 = new Query(searchTypes, "mytable", filters, null, "attribute", joinAttributes, excludeAttributes, includeAttributes);
 
         assertEquals(query.getStrippedQuery(), query2.getStrippedQuery());
         assertEquals(query.getStrippedQueryWithFilters(), query2.getStrippedQueryWithFilters());

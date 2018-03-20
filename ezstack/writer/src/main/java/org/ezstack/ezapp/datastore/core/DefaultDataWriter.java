@@ -6,6 +6,7 @@ import org.ezstack.ezapp.datastore.api.Update;
 import org.ezstack.ezapp.datastore.db.kafka.KafkaDataWriterDAO;
 
 import java.util.Map;
+import java.util.UUID;
 
 public class DefaultDataWriter implements DataWriter {
 
@@ -17,12 +18,21 @@ public class DefaultDataWriter implements DataWriter {
     }
 
     @Override
-    public void create(String table, String key, Map<String, Object> document) {
+    public String create(String table, String key, Map<String, Object> document) {
         _dataWriterDAO.update(new Update(table, key, null, document, false));
+        return key;
     }
 
     @Override
-    public void update(String table, String key, Map<String, Object> update) {
+    public String create(String table, Map<String, Object> document) {
+        String key = UUID.randomUUID().toString();
+        create(table, key, document);
+        return key;
+    }
+
+    @Override
+    public String update(String table, String key, Map<String, Object> update) {
         _dataWriterDAO.update(new Update(table, key, null, update, true));
+        return key;
     }
 }

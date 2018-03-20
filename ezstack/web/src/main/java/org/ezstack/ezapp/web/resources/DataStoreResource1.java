@@ -3,6 +3,9 @@ package org.ezstack.ezapp.web.resources;
 import com.codahale.metrics.annotation.Timed;
 import org.ezstack.ezapp.datastore.api.*;
 import org.ezstack.ezapp.querybus.api.QueryBusPublisher;
+import org.ezstack.ezapp.web.api.BulkResponse;
+import org.ezstack.ezapp.web.api.SuccessResponse;
+import org.ezstack.ezapp.web.api.WriteResponse;
 
 import javax.ws.rs.Consumes;
 import javax.ws.rs.Produces;
@@ -14,11 +17,7 @@ import javax.ws.rs.PUT;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.DefaultValue;
 import javax.ws.rs.core.MediaType;
-import java.util.UUID;
-import java.util.Collections;
-import java.util.Map;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 @Path("sor/1")
 @Produces(MediaType.APPLICATION_JSON)
@@ -43,20 +42,19 @@ public class DataStoreResource1 {
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     public WriteResponse create(@PathParam("table") String table,
-                                  Map<String, Object> json) {
-        return create(table, UUID.randomUUID().toString(), json);
+                                Map<String, Object> json) {
+        return new WriteResponse(_dataWriter.create(table, json));
     }
 
     @POST
-    @Path ("{table}/{key}")
+    @Path("{table}/{key}")
     @Timed
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     public WriteResponse create(@PathParam("table") String table,
-                                  @PathParam("key") String key,
-                                  Map<String, Object> json) {
-        _dataWriter.create(table, key, json);
-        return new WriteResponse(key);
+                                @PathParam("key") String key,
+                                Map<String, Object> json) {
+        return new WriteResponse(_dataWriter.create(table, key, json));
     }
 
     @PUT
@@ -65,16 +63,14 @@ public class DataStoreResource1 {
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     public WriteResponse update(@PathParam("table") String table,
-                                  @PathParam("key") String key,
-                                  Map<String, Object> json) {
-        _dataWriter.update(table, key, json);
-        return new WriteResponse(key);
+                                @PathParam("key") String key,
+                                Map<String, Object> json) {
+        return new WriteResponse(_dataWriter.update(table, key, json));
     }
 
     @GET
     @Path("{table}/{key}")
     @Timed
-    @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     public Map<String, Object> getDocument(@PathParam("table") String table,
                                            @PathParam("key") String key) {
@@ -88,8 +84,8 @@ public class DataStoreResource1 {
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     public QueryResult search(@QueryParam("scroll") @DefaultValue("120000") long scrollInMillis,
-                                            @QueryParam("batchSize") @DefaultValue("100") int batchSize,
-                                            Query query) {
+                              @QueryParam("batchSize") @DefaultValue("100") int batchSize,
+                              Query query) {
         long timeStart = System.currentTimeMillis();
         QueryResult ret = _dataReader.getDocuments(scrollInMillis, batchSize, query);
         _queryBusPublisher.publishQueryAsync(query, System.currentTimeMillis() - timeStart);
@@ -104,7 +100,7 @@ public class DataStoreResource1 {
     public BulkResponse bulkWrite(List<BulkDocument> bulkDocuments) {
         BulkResponse bulkResponse = new BulkResponse();
 
-        for (BulkDocument doc: bulkDocuments) {
+        for (BulkDocument doc : bulkDocuments) {
             switch (doc.getOpType()) {
                 case CREATE:
                     try {
@@ -152,8 +148,44 @@ public class DataStoreResource1 {
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     public SuccessResponse createRule(Rule rule) throws RuleAlreadyExistsException {
-        _rulesManager.create(rule);
+        _rulesManager.createRule(rule);
         return SuccessResponse.instance();
     }
 
+    @GET
+    @Path("_rule/")
+    @Timed
+    @Produces(MediaType.APPLICATION_JSON)
+    public Set<Rule> getRules() {
+        return _rulesManager.getRules();
     }
+
+    @GET
+    @Path("_rule/{status}")
+    @Timed
+    @Produces(MediaType.APPLICATION_JSON)
+    public Set<Rule> getRules(@PathParam("status") Rule.RuleStatus status) {
+        return _rulesManager.getRules(status);
+    }
+
+
+    @GET
+    @Path("_rule/{status}/{outerTable}")
+    @Timed
+    @Produces(MediaType.APPLICATION_JSON)
+    public Set<Rule> getRules(@PathParam("status") Rule.RuleStatus status,
+                              @PathParam(("outerTable")) String outerTable) {
+        return _rulesManager.getRules(outerTable, status);
+    }
+
+    @GET
+    @Path("_rule/{status}/{outerTable}/{innerTable}")
+    @Timed
+    @Produces(MediaType.APPLICATION_JSON)
+    public Set<Rule> getRules(@PathParam("status") Rule.RuleStatus status,
+                              @PathParam("outerTable") String outerTable,
+                              @PathParam("innerTable") String innerTable) {
+        return _rulesManager.getRules(outerTable, innerTable, status);
+    }
+
+}

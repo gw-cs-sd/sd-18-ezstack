@@ -118,7 +118,7 @@ public class CuratorRulesManager implements RulesManager {
     }
 
     @Override
-    public void create(Rule rule) throws RuleAlreadyExistsException {
+    public void createRule(Rule rule) throws RuleAlreadyExistsException {
         // check to make sure they are submitting a pending rule
         checkArgument(rule.getStatus() == Rule.RuleStatus.PENDING);
         try {
