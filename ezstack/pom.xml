@@ -19,6 +19,8 @@
         <module>reader</module>
         <module>query-bus</module>
         <module>rules-manager</module>
+        <module>client</module>
+        <module>web-api</module>
     </modules>
     <name>EZstack</name>
 

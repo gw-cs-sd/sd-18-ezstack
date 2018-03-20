@@ -42,6 +42,11 @@
             <artifactId>ezapp-rules-manager</artifactId>
             <version>${project.version}</version>
         </dependency>
+        <dependency>
+            <groupId>org.ezstack.ezapp</groupId>
+            <artifactId>ezapp-web-api</artifactId>
+            <version>${project.version}</version>
+        </dependency>
     </dependencies>
 
     <build>

@@ -85,4 +85,13 @@ public class Rule {
     public int hashCode() {
         return Objects.hash(_query, _table, _status);
     }
+
+    @Override
+    public String toString() {
+        return "Rule{" +
+                "_query=" + _query +
+                ", _table='" + _table + '\'' +
+                ", _status=" + _status +
+                '}';
+    }
 }
