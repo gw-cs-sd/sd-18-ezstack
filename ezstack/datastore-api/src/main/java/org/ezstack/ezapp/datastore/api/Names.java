@@ -8,6 +8,7 @@ public class Names {
             CharMatcher.inRange('a', 'z')
                     .or(CharMatcher.inRange('0', '9'))
                     .or(CharMatcher.anyOf("-.:_"))
+                    .or(CharMatcher.noneOf(","))
                     .precomputed();
 
     public static boolean isLegalTableName(String table) {
