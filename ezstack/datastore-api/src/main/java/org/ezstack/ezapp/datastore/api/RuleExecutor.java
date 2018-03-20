@@ -23,7 +23,7 @@ public class RuleExecutor {
      * for this query has been created since object creation.
      */
     public void computeClosestRule() {
-        if (_closestRule != null || !isTwoLevelQuery(_originalQuery)) {
+        if (_closestRule != null || !RuleHelper.isTwoLevelQuery(_originalQuery)) {
             return;
         }
 
@@ -31,7 +31,7 @@ public class RuleExecutor {
         String innerTable = _originalQuery.getJoin().getTable();
 
         for (Rule r : _ruleManager.getRules(outerTable, innerTable, Rule.RuleStatus.ACTIVE)) {
-            if (ruleQueryMatch(_originalQuery, r.getQuery())) {
+            if (RuleHelper.ruleQueryMatch(_originalQuery, r.getQuery())) {
                 _closestRule = r;
                 computeExecQuery();
                 return;
@@ -83,23 +83,5 @@ public class RuleExecutor {
         }
 
         return doc;
-    }
-
-    public static boolean ruleQueryMatch(Query original, Query rule) {
-        if (!isTwoLevelQuery(original) || !isTwoLevelQuery(rule)) {
-            return false;
-        }
-
-        if (!original.getTable().equals(rule.getTable())) return false;
-        if (!original.getFilters().equals(rule.getFilters())) return false;
-        if (!original.getJoin().equals(rule.getJoin())) return false;
-        if (!original.getJoinAttributes().equals(rule.getJoinAttributes())) return false;
-        if (!original.getExcludeAttributes().equals(rule.getExcludeAttributes())) return false;
-        if (!original.getIncludeAttributes().equals(rule.getIncludeAttributes())) return false;
-        return true;
-    }
-
-    public static boolean isTwoLevelQuery(Query q) {
-        return q.getJoin() != null && q.getJoin().getJoin() == null;
     }
 }
