@@ -1,11 +1,13 @@
+import org.ezstack.ezapp.client.EZappClientFactory;
 import org.ezstack.ezapp.datastore.api.*;
-
 import java.util.Set;
 
 public class QueryToRule {
 
-    public Rule convertToRule(Query query) {
+    private DeityConfig _config;
 
+    public Rule convertToRule(Query query, DeityConfig config) {
+        _config = config;
         RuleHelper helper = new RuleHelper();
         Rule rule = helper.getRule(query);
 
@@ -19,7 +21,8 @@ public class QueryToRule {
     }
 
     public boolean ruleExists(Rule rule) {
-        RulesManager rulesManager = new RulesManager();
+        DeityConfig deityConfig = new DeityConfig(_config);
+        RulesManager rulesManager = EZappClientFactory.newRulesManager(deityConfig.getUriAddress());
         Set<Rule> ruleSet = rulesManager.getRules();
 
         for (Rule ruleInSet:ruleSet) {
@@ -32,9 +35,10 @@ public class QueryToRule {
     }
 
     public void addRule(Rule rule) {
-        RulesManager rulesManager = new RulesManager();
+        DeityConfig deityConfig = new DeityConfig(_config);
+        RulesManager rulesManager = EZappClientFactory.newRulesManager(deityConfig.getUriAddress());
         try {
-            rulesManager.create(rule);
+            rulesManager.createRule(rule);
         } catch (RuleAlreadyExistsException exception) {
             return;
         }
