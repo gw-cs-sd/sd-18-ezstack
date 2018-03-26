@@ -29,6 +29,7 @@ public class DenormalizationDeityApp implements StreamApplication {
     private final MetricRegistry.MetricSupplier<Histogram> _histogramSupplier;
     private Map<String, QueryObject> _priorityObjects;
     private final Date _timestamp = new Date();
+    private DeityConfig _config;
 
     private long _globalStamp;
     private long _adjustmentPeriodMS = 0; // This is set up in the config file, this is the amount of time between updates, in milliseconds.
@@ -42,8 +43,8 @@ public class DenormalizationDeityApp implements StreamApplication {
 
     @Override
     public void init(StreamGraph streamGraph, Config config) {
-        DeityConfig deityConfig = new DeityConfig(config);
-        _adjustmentPeriodMS = deityConfig.getAdjustmentPeriod();
+        _config = new DeityConfig(config);
+        _adjustmentPeriodMS = _config.getAdjustmentPeriod();
 
         MessageStream<QueryMetadata> queryStream = streamGraph.getInputStream("queries", new JsonSerdeV3<>(QueryMetadata.class));
         queryStream.map(this::processQueryMetadata);
@@ -53,7 +54,7 @@ public class DenormalizationDeityApp implements StreamApplication {
                         queryMetadata -> queryMetadata,
                         KVSerde.of(new StringSerde(), new JsonSerdeV3<>(QueryMetadata.class)),
                         "partition-query-metadata");
-        HttpTransport transport = new HttpTransport.Builder().withApiKey(deityConfig.getDatadogKey()).build();
+        HttpTransport transport = new HttpTransport.Builder().withApiKey(_config.getDatadogKey()).build();
         DatadogReporter reporter = DatadogReporter.forRegistry(_metrics).withTransport(transport).withExpansions(Expansion.ALL).build();
 
         reporter.start(10, TimeUnit.SECONDS);
@@ -140,7 +141,7 @@ public class DenormalizationDeityApp implements StreamApplication {
 
             if (value.getPriority() >= threshold) {
                 QueryToRule ruleConverter = new QueryToRule();
-                Rule rule = ruleConverter.convertToRule(value.getQuery());
+                Rule rule = ruleConverter.convertToRule(value.getQuery(), _config);
                 ruleConverter.addRule(rule);
             }
             else {
