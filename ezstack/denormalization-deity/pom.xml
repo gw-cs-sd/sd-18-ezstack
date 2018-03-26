@@ -121,11 +121,14 @@
             <artifactId>ezapp-query-bus</artifactId>
             <version>0.1-SNAPSHOT</version>
         </dependency>
+<<<<<<< HEAD
         <dependency>
             <groupId>org.ezstack.ezapp</groupId>
             <artifactId>ezapp-client</artifactId>
             <version>0.1-SNAPSHOT</version>
         </dependency>
+=======
+>>>>>>> 33d2eb8c2c70a5a1a3aebc8854cfed18a139fe51
     </dependencies>
 
 

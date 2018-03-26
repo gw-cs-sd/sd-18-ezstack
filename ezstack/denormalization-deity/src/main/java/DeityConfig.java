@@ -6,6 +6,7 @@ public class DeityConfig extends JobConfig {
     public static final String DATADOG_KEY = "deity.datadog.key";
     public static final String ADJUSTMENT_PERIOD_MS = "deity.update.interval.ms";
     public static final String URI_ADDRESS = "deity.clientfactory.uri.address";
+
     private static final long DEFAULT_ADJUSTMENT_PERIOD_MS = 86400000;
 
     public DeityConfig(Config config) {

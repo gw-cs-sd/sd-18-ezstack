@@ -54,6 +54,7 @@ public class DenormalizationDeityApp implements StreamApplication {
                         queryMetadata -> queryMetadata,
                         KVSerde.of(new StringSerde(), new JsonSerdeV3<>(QueryMetadata.class)),
                         "partition-query-metadata");
+
         HttpTransport transport = new HttpTransport.Builder().withApiKey(_config.getDatadogKey()).build();
         DatadogReporter reporter = DatadogReporter.forRegistry(_metrics).withTransport(transport).withExpansions(Expansion.ALL).build();
 

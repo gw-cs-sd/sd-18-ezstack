@@ -8,6 +8,7 @@ public class QueryToRule {
 
     public Rule convertToRule(Query query, DeityConfig config) {
         _config = config;
+
         RuleHelper helper = new RuleHelper();
         Rule rule = helper.getRule(query);
 
