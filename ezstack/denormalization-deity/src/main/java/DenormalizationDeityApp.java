@@ -11,6 +11,7 @@ import org.apache.samza.serializers.KVSerde;
 import org.apache.samza.serializers.StringSerde;
 import org.coursera.metrics.datadog.DatadogReporter;
 import org.coursera.metrics.datadog.DatadogReporter.Expansion;
+import org.ezstack.ezapp.datastore.api.Rule;
 import org.ezstack.ezapp.querybus.api.QueryMetadata;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -64,7 +65,7 @@ public class DenormalizationDeityApp implements StreamApplication {
         Histogram histogram = _metrics.histogram(strippedQuery, _histogramSupplier);
         histogram.update(queryMetadata.getResponseTimeInMs());
 
-        updateQueryObject(strippedQuery);
+        updateQueryObject(strippedQuery, queryMetadata);
 
         long tempstamp = _timestamp.getTime();
         if (tempstamp - _adjustmentPeriodMS >= _globalStamp) {
@@ -75,7 +76,7 @@ public class DenormalizationDeityApp implements StreamApplication {
         return queryMetadata;
     }
 
-    private void updateQueryObject(String strippedQuery) { //Priority is represented as the Median, skewed by the mean absolute deviation from the median
+    private void updateQueryObject(String strippedQuery, QueryMetadata metadata) { //Priority is represented as the Median, skewed by the mean absolute deviation from the median
         Histogram histogram = _metrics.histogram(strippedQuery, _histogramSupplier);
         Snapshot snap = histogram.getSnapshot();
 
@@ -107,9 +108,10 @@ public class DenormalizationDeityApp implements StreamApplication {
             queryObject = _priorityObjects.get(strippedQuery);
             queryObject.setRecentTimestamp(stamp);
             queryObject.setPriority(priority);
+            queryObject.setQuery(metadata.getQuery());
         }
         else {
-            queryObject = new QueryObject(strippedQuery, priority, stamp);
+            queryObject = new QueryObject(strippedQuery, priority, stamp, metadata.getQuery());
             _priorityObjects.put(strippedQuery, queryObject);
         }
     }
@@ -137,11 +139,12 @@ public class DenormalizationDeityApp implements StreamApplication {
             QueryObject value = entry.getValue();
 
             if (value.getPriority() >= threshold) {
-                //add the rule
-                LOG.info("We are adding the rule for " + key);
+                QueryToRule ruleConverter = new QueryToRule();
+                Rule rule = ruleConverter.convertToRule(value.getQuery());
+                ruleConverter.addRule(rule);
             }
             else {
-                //if the rule exists, remove the rule
+                //if the rule exists, remove the rule --- THIS IS NOT IMPLEMENTED YET
                 LOG.info("We are removing the rule for " + key);
             }
         }
