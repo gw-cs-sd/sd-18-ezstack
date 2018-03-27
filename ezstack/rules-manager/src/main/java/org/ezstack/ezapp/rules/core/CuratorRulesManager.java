@@ -93,7 +93,7 @@ public class CuratorRulesManager extends AbstractService implements RulesManager
             _client.close();
         } catch (Exception e) {
             notifyFailed(e);
-            return;
+            throw e;
         }
 
         notifyStopped();
