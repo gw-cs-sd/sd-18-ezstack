@@ -27,7 +27,7 @@ public class Rule {
     private RuleStatus _status;
 
     @JsonCreator
-    private Rule(@NotEmpty @JsonProperty("query") Query query,
+    public Rule(@NotEmpty @JsonProperty("query") Query query,
                  @NotEmpty @JsonProperty("table") String table,
                  @JsonProperty("status") RuleStatus status) {
         checkNotNull(query, "query");

@@ -7,15 +7,7 @@ import org.ezstack.ezapp.web.api.BulkResponse;
 import org.ezstack.ezapp.web.api.SuccessResponse;
 import org.ezstack.ezapp.web.api.WriteResponse;
 
-import javax.ws.rs.Consumes;
-import javax.ws.rs.Produces;
-import javax.ws.rs.PathParam;
-import javax.ws.rs.Path;
-import javax.ws.rs.POST;
-import javax.ws.rs.GET;
-import javax.ws.rs.PUT;
-import javax.ws.rs.QueryParam;
-import javax.ws.rs.DefaultValue;
+import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 import java.util.*;
 
@@ -156,6 +148,29 @@ public class DataStoreResource1 {
     public SuccessResponse createRule(Rule rule) throws RuleAlreadyExistsException {
         _rulesManager.createRule(rule);
         return SuccessResponse.instance();
+    }
+
+    @PUT
+    @Path("_rule/_table/{ruleTable}")
+    @Timed
+    @Consumes(MediaType.TEXT_PLAIN)
+    @Produces(MediaType.APPLICATION_JSON)
+    public SuccessResponse setRuleStatus(@PathParam("ruleTable") String ruleTable,
+                                         String status) {
+        _rulesManager.setRuleStatus(ruleTable, Rule.RuleStatus.valueOf(status.toUpperCase()));
+        return SuccessResponse.instance();
+    }
+
+    @GET
+    @Path("_rule/_table/{ruleTable}")
+    @Timed
+    @Produces(MediaType.APPLICATION_JSON)
+    public Rule getRule(@PathParam("ruleTable") String ruleTable) {
+        Rule rule = _rulesManager.getRule(ruleTable);
+        if (rule == null) {
+            throw new NotFoundException("Rule does not exist");
+        }
+        return rule;
     }
 
     @GET

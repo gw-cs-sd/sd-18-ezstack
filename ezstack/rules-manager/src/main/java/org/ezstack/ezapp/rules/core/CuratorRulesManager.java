@@ -132,12 +132,45 @@ public class CuratorRulesManager implements RulesManager {
                 throw new RuleAlreadyExistsException(rule.getTable());
             }
             LOG.error(e.toString());
-            throw new RuntimeException("Failed to create rule");
+            throw new RuntimeException("Failed to create rule", e);
         }
     }
 
     @Override
-    public void removeRule(Rule rule) {
+    public void setRuleStatus(String ruleTable, RuleStatus status) {
+        Rule rule = getRule(ruleTable);
+        if (rule == null) {
+            throw new IllegalArgumentException("Rule does not exist");
+        }
+
+        try {
+        _client.setData()
+                    .forPath(ZKPaths.makePath(_rulesPath, ruleTable),
+                            _mapper.writeValueAsBytes(new Rule(rule.getQuery(), ruleTable, status)));
+
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to set rule status", e);
+        }
+    }
+
+    @Override
+    public Rule getRule(String ruleTable) {
+        Rule rule;
+        if ((rule = _rules.get(ruleTable)) != null) {
+            return rule;
+        }
+        try {
+            return _mapper.readValue(_client.getData().forPath(ZKPaths.makePath(_rulesPath, ruleTable)), Rule.class);
+        } catch (Exception e) {
+            if (e instanceof KeeperException.NoNodeException) {
+                return null;
+            }
+            throw new RuntimeException("Failed to retrieve rule", e);
+        }
+    }
+
+    @Override
+    public void removeRule(String ruleTable) {
         throw new UnsupportedOperationException();
     }
 

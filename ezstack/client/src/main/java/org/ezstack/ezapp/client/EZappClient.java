@@ -1,6 +1,7 @@
 package org.ezstack.ezapp.client;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.jaxrs.json.JacksonJsonProvider;
 import org.ezstack.ezapp.datastore.api.*;
 import org.ezstack.ezapp.web.api.WriteResponse;
 import org.slf4j.Logger;
@@ -35,7 +36,7 @@ public class EZappClient implements DataWriter, DataReader, RulesManager {
 
     public EZappClient(String uri) {
         _uri = URI.create(uri);
-        _client = ClientBuilder.newClient();
+        _client = ClientBuilder.newClient().register(JacksonJsonProvider.class);
     }
 
     @Override
@@ -55,6 +56,38 @@ public class EZappClient implements DataWriter, DataReader, RulesManager {
     }
 
     @Override
+    public void removeRule(String ruleTable) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public void setRuleStatus(String ruleTable, Rule.RuleStatus status) {
+        Response response =  _client
+                .target(UriBuilder.fromUri(_uri).path(SOR_PATH).path("_rule/_table").path(ruleTable))
+                .request(MediaType.TEXT_PLAIN)
+                .accept(MediaType.APPLICATION_JSON)
+                .put(Entity.entity(status.toString(), MediaType.TEXT_PLAIN));
+
+        checkResponseForError(response);
+    }
+
+    @Override
+    public Rule getRule(String ruleTable) {
+        Response response =  _client
+                .target(UriBuilder.fromUri(_uri).path(SOR_PATH).path("_rule/_table").path(ruleTable))
+                .request(MediaType.APPLICATION_JSON)
+                .get();
+
+        if (response.getStatus() == Response.Status.NOT_FOUND.getStatusCode()) {
+            return null;
+        }
+
+        checkResponseForError(response);
+
+        return response.readEntity(Rule.class);
+    }
+
+    @Override
     public Set<Rule> getRules() {
         Response response =  _client
                 .target(UriBuilder.fromUri(_uri).path(SOR_PATH).path("_rule"))
@@ -64,11 +97,6 @@ public class EZappClient implements DataWriter, DataReader, RulesManager {
         checkResponseForError(response);
 
         return response.readEntity(new GenericType<Set<Rule>>() {});
-    }
-
-    @Override
-    public void removeRule(Rule rule) {
-        throw new UnsupportedOperationException();
     }
 
     @Override
