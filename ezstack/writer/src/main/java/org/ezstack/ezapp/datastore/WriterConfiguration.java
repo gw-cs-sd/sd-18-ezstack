@@ -27,6 +27,10 @@ public class WriterConfiguration {
     @JsonProperty("zookeeperHosts")
     private String _zookeeperHosts;
 
+    @NotNull
+    @JsonProperty("writerTopicReplicationFactor")
+    private Integer _writerTopicReplicationFactor;
+
     public String getBootstrapServers() {
         return _bootstrapServers;
     }
@@ -45,5 +49,9 @@ public class WriterConfiguration {
 
     public String getZookeeperHosts() {
         return _zookeeperHosts;
+    }
+
+    public int getWriterTopicReplicationFactor() {
+        return _writerTopicReplicationFactor;
     }
 }

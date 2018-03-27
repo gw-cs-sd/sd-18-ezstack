@@ -21,6 +21,7 @@
         <module>rules-manager</module>
         <module>client</module>
         <module>web-api</module>
+        <module>common</module>
     </modules>
     <name>EZstack</name>
 

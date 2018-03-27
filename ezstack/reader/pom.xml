@@ -29,6 +29,11 @@
             <artifactId>ezapp-datastore-api</artifactId>
             <version>${project.version}</version>
         </dependency>
+        <dependency>
+            <groupId>org.ezstack.ezapp</groupId>
+            <artifactId>ezapp-common</artifactId>
+            <version>${project.version}</version>
+        </dependency>
     </dependencies>
 
 </project>
