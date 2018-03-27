@@ -3,6 +3,7 @@ package org.ezstack.ezapp.datastore.db.elasticsearch;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import org.hibernate.validator.constraints.NotEmpty;
 
+import javax.annotation.Nullable;
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 import java.util.List;
@@ -15,7 +16,7 @@ public class ElasticSearchConfiguration {
     private String _clusterName = "elasticsearch";
 
     @Valid
-    @NotEmpty
+    @Nullable
     @JsonProperty("transportAddresses")
     private List<TransportAddressConfig> _transportAddresses;
 

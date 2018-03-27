@@ -12,7 +12,10 @@ import org.ezstack.ezapp.datastore.db.elasticsearch.ElasticSearchConfiguration;
 import org.ezstack.ezapp.datastore.db.elasticsearch.ElasticSearchDataReaderDAO;
 import org.ezstack.ezapp.datastore.db.elasticsearch.TransportAddressConfig;
 
+import java.util.Collections;
 import java.util.List;
+
+import static com.google.common.base.MoreObjects.firstNonNull;
 
 public class ReaderModule extends PrivateModule {
     private final ElasticSearchConfiguration _elasticSearchConfiguration;
@@ -28,7 +31,8 @@ public class ReaderModule extends PrivateModule {
 
         bind(DataReader.class).to(DefaultDataReader.class).asEagerSingleton();
         bind(String.class).annotatedWith(Names.named("clusterName")).toInstance(_elasticSearchConfiguration.getClusterName());
-        bind(new TypeLiteral<List<TransportAddressConfig>>(){}).annotatedWith(Names.named("transportAddresses")).toInstance(_elasticSearchConfiguration.getTransportAddresses());
+        bind(new TypeLiteral<List<TransportAddressConfig>>(){}).annotatedWith(Names.named("transportAddresses"))
+                .toInstance(firstNonNull(_elasticSearchConfiguration.getTransportAddresses(), Collections.emptyList()));
         expose(DataReader.class);
     }
 

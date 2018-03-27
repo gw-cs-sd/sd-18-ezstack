@@ -34,6 +34,10 @@ import static org.ezstack.ezapp.datastore.api.Rule.RuleStatus;
 
 public class CuratorRulesManager extends AbstractService implements RulesManager {
 
+    private final static int BASE_RETRY_SLEEP_TYPE_IN_MS = 1000;
+    private final static int MAX_CURATOR_RETRIES = 3;
+    private final static int TIME_BETWEEN_REINDEXING_SECONDS = 10;
+
     private final static Logger LOG = LoggerFactory.getLogger(CuratorRulesManager.class);
 
     private final CuratorFramework _client;
@@ -58,10 +62,10 @@ public class CuratorRulesManager extends AbstractService implements RulesManager
 
         _mapper = new ObjectMapper();
         _rules = new ConcurrentHashMap<>();
-        _activeRuleIndex = Suppliers.memoizeWithExpiration(this::getActiveRuleIndex, 10, TimeUnit.SECONDS);
+        _activeRuleIndex = Suppliers.memoizeWithExpiration(this::getActiveRuleIndex, TIME_BETWEEN_REINDEXING_SECONDS, TimeUnit.SECONDS);
 
         _client = CuratorFrameworkFactory.newClient(_zookeeperHosts,
-                new ExponentialBackoffRetry(1000, 3));
+                new ExponentialBackoffRetry(BASE_RETRY_SLEEP_TYPE_IN_MS, MAX_CURATOR_RETRIES));
 
         _ruleCache = new TreeCache(_client, _rulesPath);
         _ruleCache.getListenable().addListener(this::updateTableForEvent);
@@ -89,7 +93,7 @@ public class CuratorRulesManager extends AbstractService implements RulesManager
             _client.close();
         } catch (Exception e) {
             notifyFailed(e);
-            throw e;
+            return;
         }
 
         notifyStopped();

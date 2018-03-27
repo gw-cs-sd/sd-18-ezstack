@@ -31,7 +31,7 @@ public class KafkaQueryBusPublisherDAO extends AbstractService {
 
     private static final Logger LOG = LoggerFactory.getLogger(KafkaQueryBusPublisherDAO.class);
 
-    private static final int MAX_PUBLISH_RETRIES = 2;
+    private static final int MAX_PUBLISH_RETRIES = 3;
     private static final int BATCH_TIME_INTERVAL_MS = 250;
     private static final int REQUEST_TIMEOUT_MS_CONFIG = 3000;
     private static final int TRANSACTION_TIMEOUT_CONFIG = 3000;

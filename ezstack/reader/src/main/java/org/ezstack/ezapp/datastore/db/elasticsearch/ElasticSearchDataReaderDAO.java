@@ -33,9 +33,6 @@ public class ElasticSearchDataReaderDAO extends AbstractService {
                                       @Named("transportAddresses") List<TransportAddressConfig> transportAddressConfigs) {
         _clusterName = checkNotNull(clusterName, "clusterName");
         _transportAddresses = checkNotNull(transportAddressConfigs, "transportAddresses");
-
-        checkArgument(_transportAddresses.size() > 0, "transport address list size must be > 0");
-
     }
 
     @Override
