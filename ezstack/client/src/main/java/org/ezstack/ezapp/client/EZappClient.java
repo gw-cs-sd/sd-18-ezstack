@@ -3,7 +3,7 @@ package org.ezstack.ezapp.client;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.jaxrs.json.JacksonJsonProvider;
 import org.ezstack.ezapp.datastore.api.*;
-import org.ezstack.ezapp.web.api.WriteResponse;
+import org.ezstack.ezapp.web.api.response.WriteResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

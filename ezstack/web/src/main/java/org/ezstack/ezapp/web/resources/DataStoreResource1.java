@@ -3,9 +3,9 @@ package org.ezstack.ezapp.web.resources;
 import com.codahale.metrics.annotation.Timed;
 import org.ezstack.ezapp.datastore.api.*;
 import org.ezstack.ezapp.querybus.api.QueryBusPublisher;
-import org.ezstack.ezapp.web.api.BulkResponse;
-import org.ezstack.ezapp.web.api.SuccessResponse;
-import org.ezstack.ezapp.web.api.WriteResponse;
+import org.ezstack.ezapp.web.api.response.BulkResponse;
+import org.ezstack.ezapp.web.api.response.SuccessResponse;
+import org.ezstack.ezapp.web.api.response.WriteResponse;
 
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;

@@ -22,6 +22,11 @@
             <artifactId>ezapp-datastore-api</artifactId>
             <version>${project.version}</version>
         </dependency>
+        <dependency>
+            <groupId>org.ezstack.ezapp</groupId>
+            <artifactId>ezapp-common</artifactId>
+            <version>${project.version}</version>
+        </dependency>
         <!--third-party dependencies-->
         <dependency>
             <groupId>org.apache.kafka</groupId>

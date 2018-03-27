@@ -1,4 +1,4 @@
-package org.ezstack.ezapp.web.api;
+package org.ezstack.ezapp.web.api.response;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;

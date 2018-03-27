@@ -1,13 +1,10 @@
 package org.ezstack.ezapp.datastore;
 
-import com.google.inject.Key;
-import com.google.inject.PrivateModule;
-import com.google.inject.Provides;
-import com.google.inject.Singleton;
-import org.elasticsearch.client.Client;
-import org.elasticsearch.common.settings.Settings;
-import org.elasticsearch.common.transport.TransportAddress;
-import org.elasticsearch.transport.client.PreBuiltTransportClient;
+import com.google.inject.*;
+import com.google.inject.name.Named;
+import com.google.inject.name.Names;
+import org.ezstack.ezapp.common.lifecycle.GuavaManagedService;
+import org.ezstack.ezapp.common.lifecycle.LifeCycleRegistry;
 import org.ezstack.ezapp.datastore.api.DataReader;
 import org.ezstack.ezapp.datastore.api.RulesManager;
 import org.ezstack.ezapp.datastore.core.DefaultDataReader;
@@ -15,9 +12,10 @@ import org.ezstack.ezapp.datastore.db.elasticsearch.ElasticSearchConfiguration;
 import org.ezstack.ezapp.datastore.db.elasticsearch.ElasticSearchDataReaderDAO;
 import org.ezstack.ezapp.datastore.db.elasticsearch.TransportAddressConfig;
 
-import java.net.InetAddress;
-import java.net.UnknownHostException;
+import java.util.Collections;
 import java.util.List;
+
+import static com.google.common.base.MoreObjects.firstNonNull;
 
 public class ReaderModule extends PrivateModule {
     private final ElasticSearchConfiguration _elasticSearchConfiguration;
@@ -32,32 +30,19 @@ public class ReaderModule extends PrivateModule {
         requireBinding(Key.get(RulesManager.class));
 
         bind(DataReader.class).to(DefaultDataReader.class).asEagerSingleton();
-        bind(ElasticSearchDataReaderDAO.class).asEagerSingleton();
-        bind(Client.class).to(PreBuiltTransportClient.class);
+        bind(String.class).annotatedWith(Names.named("clusterName")).toInstance(_elasticSearchConfiguration.getClusterName());
+        bind(new TypeLiteral<List<TransportAddressConfig>>(){}).annotatedWith(Names.named("transportAddresses"))
+                .toInstance(firstNonNull(_elasticSearchConfiguration.getTransportAddresses(), Collections.emptyList()));
         expose(DataReader.class);
     }
 
     @Provides
     @Singleton
-    public PreBuiltTransportClient getBuiltTransportClient() {
-        Settings settings = Settings.builder()
-                .put("cluster.name", _elasticSearchConfiguration.getClusterName())
-                .put("client.transport.sniff", true)
-                .build();
-        PreBuiltTransportClient client = new PreBuiltTransportClient(settings);
-
-        List<TransportAddressConfig> transportAddresses = _elasticSearchConfiguration.getTransportAddresses();
-        if (transportAddresses == null) {
-            return client;
-        }
-
-        for (TransportAddressConfig node: transportAddresses) {
-            try {
-                client.addTransportAddress(new TransportAddress(InetAddress.getByName(node.getAddress()), node.getPort()));
-            } catch (UnknownHostException e) {
-                // maybe log it?
-            }
-        }
-        return client;
+    ElasticSearchDataReaderDAO provideElasticSearchDataReaderDAO(@Named("clusterName") String clusterName,
+                                                                 @Named("transportAddresses") List<TransportAddressConfig> transportAddresses,
+                                                                 LifeCycleRegistry lifeCycleRegistry) {
+        ElasticSearchDataReaderDAO elasticSearchDataReaderDAO = new ElasticSearchDataReaderDAO(clusterName, transportAddresses);
+        lifeCycleRegistry.manage(new GuavaManagedService(elasticSearchDataReaderDAO));
+        return elasticSearchDataReaderDAO;
     }
 }

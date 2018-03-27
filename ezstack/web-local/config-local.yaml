@@ -5,6 +5,7 @@ dataWriter:
   writerTopicName: "documents"
   writerTopicPartitionCount: 1
   zookeeperHosts: "localhost:2181"
+  writerTopicReplicationFactor: 1
 elasticsearch:
     transportAddresses:
         - address: "localhost"
@@ -15,5 +16,6 @@ queryBus:
   queryBusTopicName: "queries"
   queryBusTopicPartitionCount: 1
   zookeeperHosts: "localhost:2181"
+  queryBusTopicReplicationFactor: 1
 rulesManager:
   zookeeperHosts: "localhost:2181"
