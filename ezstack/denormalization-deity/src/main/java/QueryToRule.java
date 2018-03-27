@@ -1,13 +1,19 @@
-import org.ezstack.ezapp.client.EZappClientFactory;
 import org.ezstack.ezapp.datastore.api.*;
 import java.util.Set;
+import java.util.function.Supplier;
 
 public class QueryToRule {
 
-    private DeityConfig _config;
+    private final RulesManager _rulesManager;
+    private final Supplier<Set<Rule>> _rules;
 
-    public Rule convertToRule(Query query, DeityConfig config) {
-        _config = config;
+    public QueryToRule(RulesManager rulesManager, Supplier<Set<Rule>> rules) {
+        _rulesManager = rulesManager;
+        _rules = rules;
+    }
+
+    public Rule convertToRule(Query query) {
+
         RuleHelper helper = new RuleHelper();
         Rule rule = helper.getRule(query);
 
@@ -21,24 +27,12 @@ public class QueryToRule {
     }
 
     public boolean ruleExists(Rule rule) {
-        DeityConfig deityConfig = new DeityConfig(_config);
-        RulesManager rulesManager = EZappClientFactory.newRulesManager(deityConfig.getUriAddress());
-        Set<Rule> ruleSet = rulesManager.getRules();
-
-        for (Rule ruleInSet:ruleSet) {
-            if (ruleInSet == rule) {
-                return false;
-            }
-        }
-
-        return true;
+        return _rules.get().contains(rule);
     }
 
     public void addRule(Rule rule) {
-        DeityConfig deityConfig = new DeityConfig(_config);
-        RulesManager rulesManager = EZappClientFactory.newRulesManager(deityConfig.getUriAddress());
         try {
-            rulesManager.createRule(rule);
+            _rulesManager.createRule(rule);
         } catch (RuleAlreadyExistsException exception) {
             return;
         }
