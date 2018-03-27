@@ -2,6 +2,7 @@ import com.codahale.metrics.Histogram;
 import com.codahale.metrics.MetricRegistry;
 import com.codahale.metrics.Snapshot;
 import com.codahale.metrics.UniformReservoir;
+import com.google.common.base.Suppliers;
 import org.apache.samza.application.StreamApplication;
 import org.apache.samza.config.Config;
 import org.apache.samza.operators.KV;
@@ -11,7 +12,9 @@ import org.apache.samza.serializers.KVSerde;
 import org.apache.samza.serializers.StringSerde;
 import org.coursera.metrics.datadog.DatadogReporter;
 import org.coursera.metrics.datadog.DatadogReporter.Expansion;
+import org.ezstack.ezapp.client.EZappClientFactory;
 import org.ezstack.ezapp.datastore.api.Rule;
+import org.ezstack.ezapp.datastore.api.RulesManager;
 import org.ezstack.ezapp.querybus.api.QueryMetadata;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -20,7 +23,9 @@ import org.coursera.metrics.datadog.transport.HttpTransport;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.TimeUnit;
+import java.util.function.Supplier;
 
 public class DenormalizationDeityApp implements StreamApplication {
     private static final Logger LOG = LoggerFactory.getLogger(DenormalizationDeityApp.class);
@@ -30,6 +35,8 @@ public class DenormalizationDeityApp implements StreamApplication {
     private Map<String, QueryObject> _priorityObjects;
     private final Date _timestamp = new Date();
     private DeityConfig _config;
+    private RulesManager _rulesManager;
+    private Supplier<Set<Rule>> _ruleSupplier;
 
     private long _globalStamp;
     private long _adjustmentPeriodMS = 0; // This is set up in the config file, this is the amount of time between updates, in milliseconds.
@@ -44,6 +51,9 @@ public class DenormalizationDeityApp implements StreamApplication {
     @Override
     public void init(StreamGraph streamGraph, Config config) {
         _config = new DeityConfig(config);
+        _rulesManager = EZappClientFactory.newRulesManager(_config.getUriAddress());
+        _ruleSupplier = Suppliers.memoizeWithExpiration(_rulesManager::getRules, _config.getCachePeriod(), TimeUnit.SECONDS);
+
         _adjustmentPeriodMS = _config.getAdjustmentPeriod();
 
         MessageStream<QueryMetadata> queryStream = streamGraph.getInputStream("queries", new JsonSerdeV3<>(QueryMetadata.class));
@@ -139,11 +149,13 @@ public class DenormalizationDeityApp implements StreamApplication {
         for(Map.Entry<String, QueryObject> entry : _priorityObjects.entrySet()) {
             String key = entry.getKey();
             QueryObject value = entry.getValue();
+            QueryToRule ruleConverter = new QueryToRule(_rulesManager, _ruleSupplier);
 
             if (value.getPriority() >= threshold) {
-                QueryToRule ruleConverter = new QueryToRule();
-                Rule rule = ruleConverter.convertToRule(value.getQuery(), _config);
-                ruleConverter.addRule(rule);
+                Rule rule = ruleConverter.convertToRule(value.getQuery());
+                if (rule != null) {
+                    ruleConverter.addRule(rule);
+                }
             }
             else {
                 //if the rule exists, remove the rule --- THIS IS NOT IMPLEMENTED YET

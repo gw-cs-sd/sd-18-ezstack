@@ -92,45 +92,31 @@
             <scope>runtime</scope>
             <version>1.6.2</version>
         </dependency>
-
         <dependency>
             <groupId>io.dropwizard.metrics</groupId>
             <artifactId>metrics-core</artifactId>
             <version>${metrics.version}</version>
         </dependency>
-
         <dependency>
             <groupId>org.coursera</groupId>
             <artifactId>metrics-datadog</artifactId>
             <version>1.1.13</version>
         </dependency>
-
         <dependency>
             <groupId>org.ezstack.ezapp</groupId>
             <artifactId>ezapp-datastore-api</artifactId>
             <version>${project.version}</version>
         </dependency>
-
-        <dependency>
-            <groupId>org.ezstack.ezapp</groupId>
-            <artifactId>ezapp-query-bus</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.ezstack.ezapp</groupId>
-            <artifactId>ezapp-query-bus</artifactId>
-            <version>0.1-SNAPSHOT</version>
-        </dependency>
-<<<<<<< HEAD
         <dependency>
             <groupId>org.ezstack.ezapp</groupId>
             <artifactId>ezapp-client</artifactId>
             <version>0.1-SNAPSHOT</version>
         </dependency>
-=======
->>>>>>> 33d2eb8c2c70a5a1a3aebc8854cfed18a139fe51
+        <dependency>
+            <groupId>org.ezstack.ezapp</groupId>
+            <artifactId>ezapp-query-bus</artifactId>
+            <version>0.1-SNAPSHOT</version>
+        </dependency>
     </dependencies>
-
-
 
 </project>
