@@ -8,7 +8,11 @@ public interface RulesManager {
 
     void createRule(Rule rule) throws RuleAlreadyExistsException;
 
-    void removeRule(Rule rule);
+    void removeRule(String ruleTable);
+
+    void setRuleStatus(String ruleTable, RuleStatus status);
+
+    Rule getRule(String ruleTable);
 
     Set<Rule> getRules();
 

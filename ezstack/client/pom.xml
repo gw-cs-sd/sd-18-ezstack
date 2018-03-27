@@ -12,11 +12,22 @@
 
     <artifactId>ezapp-client</artifactId>
 
+    <properties>
+        <cxf.version>3.0.15</cxf.version>
+    </properties>
+
     <dependencies>
+
         <dependency>
-            <groupId>io.dropwizard</groupId>
-            <artifactId>dropwizard-client</artifactId>
-            <version>1.2.4</version>
+            <groupId>org.apache.cxf</groupId>
+            <artifactId>cxf-rt-rs-client</artifactId>
+            <version>${cxf.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>com.fasterxml.jackson.jaxrs</groupId>
+            <artifactId>jackson-jaxrs-json-provider</artifactId>
+            <version>${jackson.version}</version>
         </dependency>
 
         <dependency>
