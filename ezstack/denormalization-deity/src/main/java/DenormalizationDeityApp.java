@@ -153,6 +153,7 @@ public class DenormalizationDeityApp implements StreamApplication {
             if (value.getPriority() >= threshold) {
                 Rule rule = ruleConverter.convertToRule(value.getQuery());
                 if (rule != null) {
+                    LOG.info("We are adding the rule for " + key);
                     ruleConverter.addRule(rule);
                 }
             }
