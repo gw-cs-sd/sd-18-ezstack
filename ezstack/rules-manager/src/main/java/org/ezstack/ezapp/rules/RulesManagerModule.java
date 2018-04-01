@@ -9,7 +9,9 @@ import org.ezstack.ezapp.common.lifecycle.GuavaManagedService;
 import org.ezstack.ezapp.common.lifecycle.LifeCycleRegistry;
 import org.ezstack.ezapp.datastore.api.RulesManager;
 import org.ezstack.ezapp.rules.api.RulesPath;
+import org.ezstack.ezapp.rules.core.CuratorFactory;
 import org.ezstack.ezapp.rules.core.CuratorRulesManager;
+import org.ezstack.ezapp.rules.core.RulesMonitor;
 
 public class RulesManagerModule extends PrivateModule {
 
@@ -25,14 +27,17 @@ public class RulesManagerModule extends PrivateModule {
     protected void configure() {
         bind(String.class).annotatedWith(RulesPath.class).toInstance(RULES_PATH);
         bind(String.class).annotatedWith(Names.named("zookeeperHosts")).toInstance(_configuration.getZookeeperHosts());
+        bind(CuratorFactory.class).asEagerSingleton();
+        bind(RulesMonitor.class).asEagerSingleton();
+
         expose(RulesManager.class);
     }
 
     @Singleton
     @Provides
-    RulesManager provideRulesManager(@RulesPath String rulesPath, @Named("zookeeperHosts") String zookeeperHosts,
+    RulesManager provideRulesManager(@RulesPath String rulesPath, CuratorFactory curatorFactory,
                                      LifeCycleRegistry lifeCycleRegistry) {
-        CuratorRulesManager rulesManager = new CuratorRulesManager(rulesPath, zookeeperHosts);
+        CuratorRulesManager rulesManager = new CuratorRulesManager(rulesPath, curatorFactory);
         lifeCycleRegistry.manage(new GuavaManagedService(rulesManager));
         return rulesManager;
     }

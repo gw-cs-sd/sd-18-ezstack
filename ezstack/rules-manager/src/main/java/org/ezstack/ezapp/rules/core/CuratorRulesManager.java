@@ -6,11 +6,8 @@ import com.google.common.base.Suppliers;
 import com.google.common.collect.*;
 import com.google.common.util.concurrent.AbstractService;
 import com.google.inject.Inject;
-import com.google.inject.name.Named;
 import org.apache.curator.framework.CuratorFramework;
-import org.apache.curator.framework.CuratorFrameworkFactory;
 import org.apache.curator.framework.recipes.cache.*;
-import org.apache.curator.retry.ExponentialBackoffRetry;
 import org.apache.curator.utils.ZKPaths;
 import org.apache.logging.log4j.util.Strings;
 import org.apache.zookeeper.CreateMode;
@@ -34,47 +31,45 @@ import static org.ezstack.ezapp.datastore.api.Rule.RuleStatus;
 
 public class CuratorRulesManager extends AbstractService implements RulesManager {
 
-    private final static int BASE_RETRY_SLEEP_TYPE_IN_MS = 1000;
-    private final static int MAX_CURATOR_RETRIES = 3;
     private final static int TIME_BETWEEN_REINDEXING_SECONDS = 10;
 
     private final static Logger LOG = LoggerFactory.getLogger(CuratorRulesManager.class);
 
-    private final CuratorFramework _client;
+    private CuratorFramework _client;
 
-    private final String _zookeeperHosts;
+    private final CuratorFactory _curatorFactory;
+
     private final String _rulesPath;
     private final ObjectMapper _mapper;
 
     // outer table, inner table
     private volatile Supplier<ImmutableTable<String, String, Set<Rule>>> _activeRuleIndex;
-    private final TreeCache _ruleCache;
+    private TreeCache _ruleCache;
 
     // <rule table name, rule itself>
     private volatile ConcurrentHashMap<String, Rule> _rules;
 
     @Inject
     public CuratorRulesManager(@RulesPath String rulesPath,
-                               @Named("zookeeperHosts") String zookeeperHosts) {
+                               CuratorFactory curatorFactory) {
 
-        _zookeeperHosts = checkNotNull(zookeeperHosts, "zookeeperHosts");
         _rulesPath = checkNotNull(rulesPath, "rulesPath");
 
         _mapper = new ObjectMapper();
         _rules = new ConcurrentHashMap<>();
         _activeRuleIndex = Suppliers.memoizeWithExpiration(this::getActiveRuleIndex, TIME_BETWEEN_REINDEXING_SECONDS, TimeUnit.SECONDS);
 
-        _client = CuratorFrameworkFactory.newClient(_zookeeperHosts,
-                new ExponentialBackoffRetry(BASE_RETRY_SLEEP_TYPE_IN_MS, MAX_CURATOR_RETRIES));
-
-        _ruleCache = new TreeCache(_client, _rulesPath);
-        _ruleCache.getListenable().addListener(this::updateTableForEvent);
-
+        _curatorFactory = curatorFactory;
     }
 
     @Override
     protected void doStart() {
         try {
+            _client = _curatorFactory.getStartedCuratorFramework();
+
+            _ruleCache = new TreeCache(_client, _rulesPath);
+            _ruleCache.getListenable().addListener(this::updateTableForEvent);
+
             _client.start();
             _ruleCache.start();
 
