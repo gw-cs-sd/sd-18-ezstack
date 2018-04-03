@@ -104,8 +104,8 @@ public class CuratorRulesManager extends AbstractService implements RulesManager
         }
 
         if (pathLength >= 3) {
-            LOG.error("Invalid Znodes in rule directory in Zookeeper");
-            LOG.error(childData.toString());
+            LOG.info("Ignoring acknowledgement node {}", childData.getPath(), event);
+            return;
         }
 
         try {

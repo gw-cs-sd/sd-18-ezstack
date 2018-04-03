@@ -3,7 +3,10 @@ package org.ezstack.denormalizer.core;
 import com.google.common.collect.*;
 import org.apache.commons.collections4.KeyValue;
 import org.apache.commons.collections4.keyvalue.DefaultKeyValue;
+import org.apache.samza.config.Config;
 import org.apache.samza.operators.functions.FlatMapFunction;
+import org.apache.samza.task.TaskContext;
+import org.ezstack.denormalizer.core.curator.CuratorRuleAcknowledger;
 import org.ezstack.denormalizer.model.*;
 import org.ezstack.ezapp.datastore.api.Document;
 import org.ezstack.ezapp.datastore.api.Query;
@@ -18,7 +21,21 @@ public class DocumentMessageMapper implements FlatMapFunction<DocumentChangePair
 
     private static final Logger log = LoggerFactory.getLogger(DocumentMessageMapper.class);
 
+    private CuratorRuleAcknowledger _ruleAcknowledger;
+
     private HashMultimap<String, QueryPair> _queryIndex;
+
+    @Override
+    public void init(Config config, TaskContext context) {
+        _ruleAcknowledger = new CuratorRuleAcknowledger("localhost:2181", "/rules",
+                context.getTaskName().getTaskName());
+        _ruleAcknowledger.startAsync().awaitRunning();
+    }
+
+    @Override
+    public void close() {
+        _ruleAcknowledger.stopAsync().awaitTerminated();
+    }
 
     public DocumentMessageMapper(Collection<Query> queries) {
         _queryIndex = getQueryIndex(queries);
