@@ -1,6 +1,11 @@
 package org.ezstack.ezapp.datastore.api;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 public class RuleExecutor {
+    private static final Logger LOG = LoggerFactory.getLogger(RuleExecutor.class);
+
     private RulesManager _ruleManager;
     private Query _originalQuery;
     private Query _execQuery;

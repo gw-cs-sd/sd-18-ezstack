@@ -92,6 +92,9 @@ public class DenormalizationDeityApp implements StreamApplication {
         Snapshot snap = histogram.getSnapshot();
 
         long mean = (long) snap.getMean();
+        if(mean == 0) {
+            mean = 1;
+        }
         long median = (long) snap.getMedian();
 
         long[] values = snap.getValues();
@@ -152,14 +155,13 @@ public class DenormalizationDeityApp implements StreamApplication {
 
             if (value.getPriority() >= threshold) {
                 Rule rule = ruleConverter.convertToRule(value.getQuery());
+                LOG.info(value.getQuery().toString());
                 if (rule != null) {
-                    LOG.info("We are adding the rule for " + key);
                     ruleConverter.addRule(rule);
                 }
             }
             else {
                 //if the rule exists, remove the rule --- THIS IS NOT IMPLEMENTED YET
-                LOG.info("We are removing the rule for " + key);
             }
         }
     }

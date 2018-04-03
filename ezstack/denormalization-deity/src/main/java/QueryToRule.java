@@ -18,7 +18,7 @@ public class QueryToRule {
         Rule rule = helper.getRule(query);
 
         if (rule != null) {
-            if (ruleExists(rule)) {
+            if (!ruleExists(rule)) {
                 return rule;
             }
         }

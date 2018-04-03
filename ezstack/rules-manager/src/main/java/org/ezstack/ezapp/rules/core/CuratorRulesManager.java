@@ -1,6 +1,7 @@
 package org.ezstack.ezapp.rules.core;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.common.base.MoreObjects;
 import com.google.common.base.Supplier;
 import com.google.common.base.Suppliers;
 import com.google.common.collect.*;
@@ -240,7 +241,7 @@ public class CuratorRulesManager extends AbstractService implements RulesManager
     @Override
     public Set<Rule> getRules(String outerTable, String innerTable, RuleStatus status) {
         if (status == RuleStatus.ACTIVE) {
-            return _activeRuleIndex.get().get(outerTable, innerTable);
+            return MoreObjects.firstNonNull(_activeRuleIndex.get().get(outerTable, innerTable), Collections.emptySet());
         }
 
         return _rules.values()
