@@ -10,6 +10,7 @@ import org.apache.samza.operators.MessageStream;
 import org.apache.samza.operators.StreamGraph;
 import org.apache.samza.serializers.KVSerde;
 import org.apache.samza.serializers.StringSerde;
+import org.ezstack.denormalizer.core.curator.CuratorRuleIndexer;
 import org.ezstack.denormalizer.model.*;
 import org.ezstack.denormalizer.serde.JsonSerdeV3;
 import org.ezstack.ezapp.datastore.api.Query;
@@ -27,6 +28,13 @@ public class DenormalizerApp implements StreamApplication {
 
     public void init(StreamGraph streamGraph, Config config) {
 
+//        RulesManager rulesManager = EZappClientFactory.newRulesManager("http://localhost:8080");
+//        queries = rulesManager
+//                .getRules(Rule.RuleStatus.ACTIVE)
+//                .stream()
+//                .map(Rule::getQuery)
+//                .collect(Collectors.toSet());
+
         // TODO: move input stream name into properties
         MessageStream<Update> updates = streamGraph.getInputStream("documents", new JsonSerdeV3<>(Update.class));
 
@@ -39,7 +47,7 @@ public class DenormalizerApp implements StreamApplication {
                 changePair.getNewDocument().getTable(), WritableResult.Action.INDEX))
             .sink(elasticsearchIndexer);
 
-        documents.flatMap(new DocumentMessageMapper(queries))
+        documents.flatMap(new DocumentMessageMapper("localhost:2181", "/rules"))
                 .partitionBy(DocumentMessage::getPartitionKey, v -> v, KVSerde.of(new StringSerde(), new JsonSerdeV3<>(DocumentMessage.class)), "partition")
                 .map(KV::getValue).flatMap(new DocumentJoiner("join-store")).sink(elasticsearchIndexer);
     }

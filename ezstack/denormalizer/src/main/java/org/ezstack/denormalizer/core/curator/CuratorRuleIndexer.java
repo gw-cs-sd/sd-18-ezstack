@@ -1,6 +1,8 @@
 package org.ezstack.denormalizer.core.curator;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.common.base.MoreObjects;
+import com.google.common.collect.HashMultimap;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.util.concurrent.AbstractService;
 import org.apache.curator.framework.CuratorFramework;
@@ -12,26 +14,31 @@ import org.apache.curator.retry.ExponentialBackoffRetry;
 import org.apache.curator.utils.ZKPaths;
 import org.apache.zookeeper.CreateMode;
 import org.apache.zookeeper.KeeperException;
+import org.ezstack.denormalizer.core.RuleIndexer;
+import org.ezstack.denormalizer.model.QueryLevel;
+import org.ezstack.denormalizer.model.RuleIndexPair;
 import org.ezstack.ezapp.datastore.api.Rule;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
-public class CuratorRuleAcknowledger extends AbstractService {
+public class CuratorRuleIndexer extends AbstractService implements RuleIndexer {
 
-    private static final Logger LOG = LoggerFactory.getLogger(CuratorRuleAcknowledger.class);
+    private static final Logger LOG = LoggerFactory.getLogger(CuratorRuleIndexer.class);
 
     private final static int BASE_RETRY_SLEEP_TYPE_IN_MS = 1000;
     private final static int MAX_CURATOR_RETRIES = 3;
 
     private static final ObjectMapper _mapper = new ObjectMapper();
 
-
+    private volatile HashMultimap<String, RuleIndexPair> _ruleIndex;
     private final String _rulesPath;
     private final String _partitionId;
 
@@ -41,7 +48,7 @@ public class CuratorRuleAcknowledger extends AbstractService {
     // <rule table name, rule itself>
     private volatile ConcurrentHashMap<String, Rule> _rules;
 
-    public CuratorRuleAcknowledger(String zookeeperHosts, String rulesPath, String partitionId) {
+    public CuratorRuleIndexer(String zookeeperHosts, String rulesPath, String partitionId) {
         _rulesPath = checkNotNull(rulesPath, "rulesPath");
         _partitionId = checkNotNull(partitionId, "partitionId");
 
@@ -51,6 +58,7 @@ public class CuratorRuleAcknowledger extends AbstractService {
         _ruleCache = new TreeCache(_client, _rulesPath);
 
         _rules = new ConcurrentHashMap<>();
+        _ruleIndex = HashMultimap.create();
 
     }
 
@@ -95,13 +103,28 @@ public class CuratorRuleAcknowledger extends AbstractService {
         } catch (Exception e) {
             if (e instanceof KeeperException.NodeExistsException) {
                 LOG.error("Already acknowled rule with table {} for partition id {}", rule.getTable(), _partitionId);
+                return;
             }
             LOG.error(e.toString());
             throw new RuntimeException("Failed to acknowledge rule", e);
         }
     }
 
-    private void handleAddOrUpdateEvent(TreeCacheEvent event) {
+    private HashMultimap<String, RuleIndexPair> updateRuleIndex(Collection<Rule> rules) {
+        HashMultimap<String, RuleIndexPair> index = HashMultimap.create();
+
+        for (Rule rule : rules) {
+            index.put(rule.getQuery().getTable(), new RuleIndexPair(rule, QueryLevel.OUTER));
+
+            if (rule.getQuery().getJoin() != null) {
+                index.put(rule.getQuery().getJoin().getTable(), new RuleIndexPair(rule, QueryLevel.INNER));
+            }
+        }
+
+        return index;
+    }
+
+    private synchronized void handleAddOrUpdateEvent(TreeCacheEvent event) {
         ChildData childData = event.getData();
         int pathLength = ZKPaths.split(childData.getPath()).size();
 
@@ -113,6 +136,7 @@ public class CuratorRuleAcknowledger extends AbstractService {
         try {
             Rule rule = _mapper.readValue(childData.getData(), Rule.class);
             _rules.put(rule.getTable(), rule);
+            _ruleIndex = updateRuleIndex(_rules.values());
             acknowledgeRuleIfPending(rule);
             LOG.info("Received update for rule with table {}. Current status is {}", rule.getTable(), rule.getStatus());
         } catch (IOException e) {
@@ -136,7 +160,13 @@ public class CuratorRuleAcknowledger extends AbstractService {
         }
     }
 
+    @Override
     public Set<Rule> getRules() {
         return ImmutableSet.copyOf(_rules.values());
+    }
+
+    @Override
+    public Set<RuleIndexPair> getApplicableRulesForTable(String table) {
+        return MoreObjects.firstNonNull(_ruleIndex.get(table), Collections.emptySet());
     }
 }
