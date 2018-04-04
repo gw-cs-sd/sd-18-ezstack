@@ -80,7 +80,8 @@ public class DocumentJoiner implements FlatMapFunction<DocumentMessage, Writable
     }
 
     private Collection<WritableResult> getActionsForRemove(JoinQueryIndex joinQueryIndex, DocumentMessage message) {
-        joinQueryIndex.deleteDocument(message.getDocument(), message.getDocumentLevel());
+        joinQueryIndex.deleteDocument(message.getDocument(), message.getDocumentLevel(),
+                message.getRuleStatus() != Rule.RuleStatus.ACTIVE);
 
         List<Document> outerDocs = joinQueryIndex.getEffectedDocumentsOuter();
         List<Document> innerDocs = joinQueryIndex.getEffectedDocumentsInner();
@@ -122,11 +123,18 @@ public class DocumentJoiner implements FlatMapFunction<DocumentMessage, Writable
         // i.e. We won't need it because it will always be in the DocumentMessage parameter
         if (message.getQuery().getJoin() == null) {
 
-            return ImmutableSet.of(new WritableResult(
-                    QueryHelper.filterAttributes(message.getQuery().getExcludeAttributes(),
-                            message.getQuery().getIncludeAttributes(), message.getDocument()),
-                    message.getQuery().getMurmur3HashAsString(),
-                    WritableResult.Action.INDEX));
+            if (message.getOpCode() == OpCode.UPDATE) {
+                return ImmutableSet.of(new WritableResult(
+                        QueryHelper.filterAttributes(message.getQuery().getExcludeAttributes(),
+                                message.getQuery().getIncludeAttributes(), message.getDocument()),
+                        message.getQuery().getMurmur3HashAsString(),
+                        WritableResult.Action.INDEX));
+            } else if (message.getOpCode() == OpCode.REMOVE_AND_DELETE) {
+                return ImmutableSet.of(new WritableResult(message.getDocument(),
+                        message.getQuery().getMurmur3HashAsString(), WritableResult.Action.DELETE));
+            }
+
+            return ImmutableSet.of();
         }
 
         JoinQueryIndex joinQueryIndex = MoreObjects.firstNonNull(_store.get(message.getPartitionKey()), new JoinQueryIndex());

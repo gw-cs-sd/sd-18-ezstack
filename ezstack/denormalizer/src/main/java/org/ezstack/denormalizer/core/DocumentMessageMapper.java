@@ -101,7 +101,8 @@ public class DocumentMessageMapper implements FlatMapFunction<DocumentChangePair
             messages.add(new DocumentMessage(changePair.getNewDocument(),
                     FanoutHashingUtils.getPartitionKey(changePair.getNewDocument(),
                             rulePair.getLevel(), rulePair.getRule().getQuery()),
-                    rulePair.getLevel(), OpCode.UPDATE, rulePair.getRule().getQuery()));
+                    rulePair.getLevel(), OpCode.UPDATE, rulePair.getRule().getQuery(),
+                    rulePair.getRule().getStatus()));
         }
 
         // add all the delete messages
@@ -110,12 +111,14 @@ public class DocumentMessageMapper implements FlatMapFunction<DocumentChangePair
                 messages.add(new DocumentMessage(changePair.getOldDocument(),
                         FanoutHashingUtils.getPartitionKey(changePair.getOldDocument(),
                                 rulePair.getLevel(), rulePair.getRule().getQuery()),
-                        rulePair.getLevel(), OpCode.REMOVE_AND_DELETE, rulePair.getRule().getQuery()));
+                        rulePair.getLevel(), OpCode.REMOVE_AND_DELETE, rulePair.getRule().getQuery(),
+                        rulePair.getRule().getStatus()));
             } else {
                 messages.add(new DocumentMessage(changePair.getOldDocument(),
                         FanoutHashingUtils.getPartitionKey(changePair.getOldDocument(),
                                 rulePair.getLevel(), rulePair.getRule().getQuery()),
-                        rulePair.getLevel(), OpCode.REMOVE, rulePair.getRule().getQuery()));
+                        rulePair.getLevel(), OpCode.REMOVE, rulePair.getRule().getQuery(),
+                        rulePair.getRule().getStatus()));
             }
         }
 
