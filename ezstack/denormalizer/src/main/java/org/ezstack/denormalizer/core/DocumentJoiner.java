@@ -36,7 +36,8 @@ public class DocumentJoiner implements FlatMapFunction<DocumentMessage, Writable
     }
 
     private Collection<WritableResult> getDenormalizationForDocuments(List<Document> outerDocs,
-                                                                      List<Document> innerDocs, Query query) {
+                                                                      List<Document> innerDocs, Query query,
+                                                                      String table) {
 
         checkNotNull(query, "query");
         checkNotNull(query.getJoin(), "query join");
@@ -74,14 +75,14 @@ public class DocumentJoiner implements FlatMapFunction<DocumentMessage, Writable
                     outerDoc.setDataField(query.getJoinAttributeName(), queryResult);
                     return outerDoc;
                 })
-                .map(denormDoc -> new WritableResult(denormDoc, query.getMurmur3HashAsString(),
+                .map(denormDoc -> new WritableResult(denormDoc, table,
                         WritableResult.Action.INDEX))
                 .collect(Collectors.toSet());
     }
 
     private Collection<WritableResult> getActionsForRemove(JoinQueryIndex joinQueryIndex, DocumentMessage message) {
         joinQueryIndex.deleteDocument(message.getDocument(), message.getDocumentLevel(),
-                message.getRuleStatus() != Rule.RuleStatus.ACTIVE);
+                message.shouldTombstone());
 
         List<Document> outerDocs = joinQueryIndex.getEffectedDocumentsOuter();
         List<Document> innerDocs = joinQueryIndex.getEffectedDocumentsInner();
@@ -94,11 +95,11 @@ public class DocumentJoiner implements FlatMapFunction<DocumentMessage, Writable
                 }
                 return outerDocs
                         .stream()
-                        .map(docToDelete -> new WritableResult(docToDelete, message.getQuery().getMurmur3HashAsString(),
+                        .map(docToDelete -> new WritableResult(docToDelete, message.getTable(),
                                 WritableResult.Action.DELETE))
                         .collect(Collectors.toSet());
             case INNER:
-                return getDenormalizationForDocuments(outerDocs, innerDocs, message.getQuery());
+                return getDenormalizationForDocuments(outerDocs, innerDocs, message.getQuery(), message.getTable());
         }
 
         return ImmutableSet.of();
@@ -111,7 +112,7 @@ public class DocumentJoiner implements FlatMapFunction<DocumentMessage, Writable
         List<Document> innerDocs = joinQueryIndex.getEffectedDocumentsInner();
         joinQueryIndex.refresh();
 
-        return getDenormalizationForDocuments(outerDocs, innerDocs, message.getQuery());
+        return getDenormalizationForDocuments(outerDocs, innerDocs, message.getQuery(), message.getTable());
     }
 
     @Override
@@ -127,11 +128,11 @@ public class DocumentJoiner implements FlatMapFunction<DocumentMessage, Writable
                 return ImmutableSet.of(new WritableResult(
                         QueryHelper.filterAttributes(message.getQuery().getExcludeAttributes(),
                                 message.getQuery().getIncludeAttributes(), message.getDocument()),
-                        message.getQuery().getMurmur3HashAsString(),
+                        message.getTable(),
                         WritableResult.Action.INDEX));
             } else if (message.getOpCode() == OpCode.REMOVE_AND_DELETE) {
                 return ImmutableSet.of(new WritableResult(message.getDocument(),
-                        message.getQuery().getMurmur3HashAsString(), WritableResult.Action.DELETE));
+                        message.getTable(), WritableResult.Action.DELETE));
             }
 
             return ImmutableSet.of();

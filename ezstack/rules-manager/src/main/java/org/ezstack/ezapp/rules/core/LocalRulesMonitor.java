@@ -1,5 +1,6 @@
 package org.ezstack.ezapp.rules.core;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.util.concurrent.AbstractService;
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import org.apache.curator.framework.CuratorFramework;
@@ -18,6 +19,8 @@ import java.util.concurrent.TimeUnit;
 public class LocalRulesMonitor extends AbstractService {
 
     private final static Logger LOG = LoggerFactory.getLogger(LocalRulesMonitor.class);
+
+    private final static ObjectMapper _mapper= new ObjectMapper();
 
     private final RulesManager _rulesManager;
     private final CuratorFactory _curatorFactory;
@@ -42,12 +45,17 @@ public class LocalRulesMonitor extends AbstractService {
 
         _service = Executors.newSingleThreadScheduledExecutor(new ThreadFactoryBuilder().setNameFormat("rules-monitor-%d").build());
 
-        _service.scheduleAtFixedRate(this::updateRuleStatuses, 30, 30, TimeUnit.SECONDS);
+        _service.scheduleAtFixedRate(this::processRules, 5, 5, TimeUnit.SECONDS);
 
         notifyStarted();
     }
 
-    private void updateRuleStatuses() {
+    private void processRules() {
+        acceptAcknowledgedRules();
+        bootstrapAcceptedRules();
+    }
+
+    private void acceptAcknowledgedRules() {
         _rulesManager.getRules(Rule.RuleStatus.PENDING).parallelStream()
                 .forEach(rule -> {
                     try {
@@ -57,7 +65,6 @@ public class LocalRulesMonitor extends AbstractService {
                                 forPath(ZKPaths.makePath("/rules", rule.getTable(), "denormalizer"))
                                 .size() == 6) {
                             _rulesManager.setRuleStatus(rule.getTable(), Rule.RuleStatus.ACCEPTED);
-                            // TODO: start boostrapper job here
                         }
                     } catch (KeeperException.NoNodeException e) {
                         LOG.info("Still waiting for rule {} to be acknowledged");
@@ -65,6 +72,30 @@ public class LocalRulesMonitor extends AbstractService {
                         notifyFailed(e);
                     }
                 });
+    }
+
+    private void bootstrapAcceptedRules() {
+        Set<Rule> acceptedRules = _rulesManager.getRules(Rule.RuleStatus.ACCEPTED);
+
+        if (acceptedRules.isEmpty()) {
+            return;
+        }
+
+        try {
+            _curator.create()
+                    .creatingParentsIfNeeded()
+                    .forPath(ZKPaths.makePath("/bootstrapper", "INSERT_JOB_ID_HERE"), _mapper.writeValueAsBytes(acceptedRules));
+        } catch (Exception e) {
+            notifyFailed(e);
+            throw new RuntimeException(e);
+        }
+
+        // TODO: schedule job with the job id used above
+
+        acceptedRules.parallelStream()
+                .forEach(rule -> _rulesManager.setRuleStatus(rule.getTable(), Rule.RuleStatus.BOOTSTRAPPING));
+
+
     }
 
     @Override
@@ -77,7 +108,6 @@ public class LocalRulesMonitor extends AbstractService {
         }
 
         notifyStopped();
-        notify();
     }
 
 

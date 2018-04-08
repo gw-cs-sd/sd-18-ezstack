@@ -58,8 +58,13 @@ public class JoinQueryIndex {
 
         checkArgument(!_isModified, "Query Index can only be modified once");
 
-        _modifiedDocument = document;
-        _modifiedLevel = queryLevel;
+        Map<String, Set<Integer>> tombstoneMap = queryLevel == QueryLevel.OUTER ? _outerTombstones : _innerTombstones;
+        Set<Integer> tombstonesForKey = MoreObjects.firstNonNull(tombstoneMap.get(document.getKey()), Collections.emptySet());
+        if (tombstonesForKey.contains(document.getVersion())) {
+            tombstonesForKey.remove(document.getVersion());
+            tombstoneMap.put(document.getKey(), tombstonesForKey);
+            return;
+        }
 
         Map<String, Document> mapForInsert = queryLevel == QueryLevel.OUTER ? _outerDocs : _innerDocs;
 
@@ -67,6 +72,8 @@ public class JoinQueryIndex {
 
         if (indexedDocument == null || document.getVersion() > indexedDocument.getVersion()) {
             mapForInsert.put(document.getKey(), document);
+            _modifiedDocument = document;
+            _modifiedLevel = queryLevel;
             _isModified = true;
         }
     }

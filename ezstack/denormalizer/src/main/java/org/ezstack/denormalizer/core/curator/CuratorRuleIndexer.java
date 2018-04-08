@@ -14,7 +14,7 @@ import org.apache.curator.retry.ExponentialBackoffRetry;
 import org.apache.curator.utils.ZKPaths;
 import org.apache.zookeeper.CreateMode;
 import org.apache.zookeeper.KeeperException;
-import org.ezstack.denormalizer.core.RuleIndexer;
+import org.ezstack.denormalizer.model.RuleIndexer;
 import org.ezstack.denormalizer.model.QueryLevel;
 import org.ezstack.denormalizer.model.RuleIndexPair;
 import org.ezstack.ezapp.datastore.api.Rule;
@@ -48,9 +48,9 @@ public class CuratorRuleIndexer extends AbstractService implements RuleIndexer {
     // <rule table name, rule itself>
     private volatile ConcurrentHashMap<String, Rule> _rules;
 
-    public CuratorRuleIndexer(String zookeeperHosts, String rulesPath, String partitionId) {
+    public CuratorRuleIndexer(String zookeeperHosts, String rulesPath, String instanceId) {
         _rulesPath = checkNotNull(rulesPath, "rulesPath");
-        _partitionId = checkNotNull(partitionId, "partitionId");
+        _partitionId = checkNotNull(instanceId, "partitionId");
 
         _client = CuratorFrameworkFactory.newClient(zookeeperHosts,
                 new ExponentialBackoffRetry(BASE_RETRY_SLEEP_TYPE_IN_MS, MAX_CURATOR_RETRIES));
@@ -110,20 +110,6 @@ public class CuratorRuleIndexer extends AbstractService implements RuleIndexer {
         }
     }
 
-    private HashMultimap<String, RuleIndexPair> updateRuleIndex(Collection<Rule> rules) {
-        HashMultimap<String, RuleIndexPair> index = HashMultimap.create();
-
-        for (Rule rule : rules) {
-            index.put(rule.getQuery().getTable(), new RuleIndexPair(rule, QueryLevel.OUTER));
-
-            if (rule.getQuery().getJoin() != null) {
-                index.put(rule.getQuery().getJoin().getTable(), new RuleIndexPair(rule, QueryLevel.INNER));
-            }
-        }
-
-        return index;
-    }
-
     private synchronized void handleAddOrUpdateEvent(TreeCacheEvent event) {
         ChildData childData = event.getData();
         int pathLength = ZKPaths.split(childData.getPath()).size();
@@ -136,7 +122,7 @@ public class CuratorRuleIndexer extends AbstractService implements RuleIndexer {
         try {
             Rule rule = _mapper.readValue(childData.getData(), Rule.class);
             _rules.put(rule.getTable(), rule);
-            _ruleIndex = updateRuleIndex(_rules.values());
+            _ruleIndex = getRuleIndex(_rules.values());
             acknowledgeRuleIfPending(rule);
             LOG.info("Received update for rule with table {}. Current status is {}", rule.getTable(), rule.getStatus());
         } catch (IOException e) {

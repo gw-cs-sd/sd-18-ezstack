@@ -3,7 +3,7 @@ dataWriter:
   bootstrapServers: "localhost:9092"
   producerName: "EZapp-dataWriter"
   writerTopicName: "documents"
-  writerTopicPartitionCount: 1
+  writerTopicPartitionCount: 6
   zookeeperHosts: "localhost:2181"
   writerTopicReplicationFactor: 1
 elasticsearch:

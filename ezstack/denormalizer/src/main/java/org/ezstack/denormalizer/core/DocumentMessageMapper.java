@@ -17,25 +17,39 @@ import org.slf4j.LoggerFactory;
 import java.util.*;
 import java.util.stream.Collectors;
 
+import static org.ezstack.denormalizer.model.TombstoningPolicy.shouldTombstone;
+
 import static com.google.common.base.Preconditions.checkNotNull;
 
 public class DocumentMessageMapper implements FlatMapFunction<DocumentChangePair, DocumentMessage> {
 
     private static final Logger log = LoggerFactory.getLogger(DocumentMessageMapper.class);
 
-    private RuleIndexer _ruleIndexer;
+    protected RuleIndexer _ruleIndexer;
 
     private final String _zookeeperHosts;
     private final String _rulesPath;
+    private final TombstoningPolicy _tombstoningPolicy;
 
-    public DocumentMessageMapper(String zookeeperHosts, String rulesPath) {
+    public DocumentMessageMapper(String zookeeperHosts, String rulesPath, TombstoningPolicy tombstoningPolicy) {
         _zookeeperHosts = checkNotNull(zookeeperHosts, "zookeeperHosts");
         _rulesPath = checkNotNull(rulesPath, "rulesPath");
+        _tombstoningPolicy = checkNotNull(tombstoningPolicy, "tombstoningPolicy");
+    }
+
+    public DocumentMessageMapper(RuleIndexer ruleIndexer, TombstoningPolicy tombstoningPolicy) {
+        _zookeeperHosts = null;
+        _rulesPath = null;
+        _tombstoningPolicy = checkNotNull(tombstoningPolicy, "tombstoningPolicy");
+        _ruleIndexer = checkNotNull(ruleIndexer, "ruleIndexer");
+
     }
 
     @Override
     public void init(Config config, TaskContext context) {
-        _ruleIndexer = new CuratorRuleIndexer(_zookeeperHosts, _rulesPath, context.getTaskName().getTaskName());
+        if (_ruleIndexer == null) {
+            _ruleIndexer = new CuratorRuleIndexer(_zookeeperHosts, _rulesPath, context.getTaskName().getTaskName());
+        }
         _ruleIndexer.startAsync().awaitRunning();
     }
 
@@ -102,7 +116,7 @@ public class DocumentMessageMapper implements FlatMapFunction<DocumentChangePair
                     FanoutHashingUtils.getPartitionKey(changePair.getNewDocument(),
                             rulePair.getLevel(), rulePair.getRule().getQuery()),
                     rulePair.getLevel(), OpCode.UPDATE, rulePair.getRule().getQuery(),
-                    rulePair.getRule().getStatus()));
+                    rulePair.getRule().getTable(), shouldTombstone(_tombstoningPolicy, rulePair.getRule())));
         }
 
         // add all the delete messages
@@ -112,13 +126,13 @@ public class DocumentMessageMapper implements FlatMapFunction<DocumentChangePair
                         FanoutHashingUtils.getPartitionKey(changePair.getOldDocument(),
                                 rulePair.getLevel(), rulePair.getRule().getQuery()),
                         rulePair.getLevel(), OpCode.REMOVE_AND_DELETE, rulePair.getRule().getQuery(),
-                        rulePair.getRule().getStatus()));
+                        rulePair.getRule().getTable(), shouldTombstone(_tombstoningPolicy, rulePair.getRule())));
             } else {
                 messages.add(new DocumentMessage(changePair.getOldDocument(),
                         FanoutHashingUtils.getPartitionKey(changePair.getOldDocument(),
                                 rulePair.getLevel(), rulePair.getRule().getQuery()),
                         rulePair.getLevel(), OpCode.REMOVE, rulePair.getRule().getQuery(),
-                        rulePair.getRule().getStatus()));
+                        rulePair.getRule().getTable(), shouldTombstone(_tombstoningPolicy, rulePair.getRule())));
             }
         }
 

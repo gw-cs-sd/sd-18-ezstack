@@ -16,6 +16,7 @@ public class Rule {
     public enum RuleStatus {
         PENDING,
         ACCEPTED,
+        BOOTSTRAPPING,
         ACTIVE,
         INACTIVE
     }

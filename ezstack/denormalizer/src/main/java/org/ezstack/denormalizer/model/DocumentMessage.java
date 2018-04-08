@@ -5,7 +5,6 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import org.ezstack.ezapp.datastore.api.Document;
 import org.ezstack.ezapp.datastore.api.Query;
 
-import static org.ezstack.ezapp.datastore.api.Rule.RuleStatus;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 public class DocumentMessage {
@@ -15,7 +14,8 @@ public class DocumentMessage {
     private final QueryLevel _level;
     private final OpCode _opCode;
     private final Query _query;
-    private final RuleStatus _ruleStatus;
+    private final String _table;
+    private final boolean _shouldTombstone;
 
 
     @JsonCreator
@@ -24,14 +24,15 @@ public class DocumentMessage {
                            @JsonProperty("documentLevel") QueryLevel level,
                            @JsonProperty("opCode") OpCode opCode,
                            @JsonProperty("query") Query query,
-                           @JsonProperty("ruleStatus") RuleStatus ruleStatus) {
+                           @JsonProperty("table") String table,
+                           @JsonProperty("shouldTombstone") Boolean shouldTombstone) {
         _document = checkNotNull(document);
         _partitionKey = checkNotNull(partitionKey);
         _level = checkNotNull(level);
         _opCode = checkNotNull(opCode);
         _query = checkNotNull(query);
-        _ruleStatus = checkNotNull(ruleStatus);
-
+        _table = checkNotNull(table);
+        _shouldTombstone = checkNotNull(shouldTombstone);
     }
 
     public Document getDocument() {
@@ -54,7 +55,12 @@ public class DocumentMessage {
         return _query;
     }
 
-    public RuleStatus getRuleStatus() {
-        return _ruleStatus;
+    public String getTable() {
+        return _table;
+    }
+
+    @JsonProperty("shouldTombstone")
+    public boolean shouldTombstone() {
+        return _shouldTombstone;
     }
 }
