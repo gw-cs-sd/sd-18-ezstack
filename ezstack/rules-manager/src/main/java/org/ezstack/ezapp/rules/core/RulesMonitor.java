@@ -18,7 +18,7 @@ public class RulesMonitor extends LeaderService {
     public RulesMonitor(CuratorFactory curatorFactory, LifeCycleRegistry lifecycle, RulesManager rulesManager,
                         @SelfHostAndPort HostAndPort hostAndPort) {
         super(curatorFactory, LEADER_DIR, hostAndPort.toString(), SERVICE_NAME,
-                1, TimeUnit.MINUTES, () -> new LocalRulesMonitor(rulesManager, curatorFactory));
+                1, TimeUnit.MINUTES, () -> new LocalRulesMonitor(rulesManager, curatorFactory, "localhost:9092"));
 
         lifecycle.manage(new GuavaManagedService(this));
     }
