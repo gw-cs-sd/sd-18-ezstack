@@ -42,14 +42,12 @@ public class BootstrapperApp implements StreamApplication {
         String zkHosts = "localhost:2181";
         String jobId = config.get("job.id");
 
+        OutputStream<KV<String, DocumentMessage>> documentMessages =
+                streamGraph.getOutputStream("bootstrapped-document-messages",
+                        KVSerde.of(new StringSerde(), new JsonSerdeV3<>(DocumentMessage.class)));
 
         changePairs.flatMap(new DocumentMessageMapper(new BootstrapperRuleIndexer(getRulesForJobID(zkHosts, jobId)),TombstoningPolicy.NO_TOMBSTONING))
-                .sink((msg, collector, coordinator) -> {
-                    collector.send(new OutgoingMessageEnvelope(
-                            new SystemStream("kafka", "bootstrapped-document-messages"),
-                            msg.getPartitionKey(), msg));
-                });
-//                .partitionBy(DocumentMessage::getPartitionKey, v -> v, KVSerde.of(new StringSerde(), new JsonSerdeV3<>(DocumentMessage.class)), "partition")
-//                .sendTo(streamGraph.getOutputStream("bootstrapped-document-messages", KV.of(new StringSerde(), new JsonSerdeV3<>(DocumentMessage.class))));
+                .map(msg -> KV.of(msg.getPartitionKey(), msg))
+                .sendTo(documentMessages);
     }
 }

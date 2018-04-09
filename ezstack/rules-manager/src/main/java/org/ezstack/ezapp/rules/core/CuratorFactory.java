@@ -36,11 +36,13 @@ public class CuratorFactory {
     private final static int MAX_CURATOR_RETRIES = 3;
 
     private final SharedCuratorFramework _sharedCuratorFramework;
+    private final String _zookeeperHosts;
 
     @Inject
     public CuratorFactory(@Named("zookeeperHosts") String zookeeperHosts) {
         checkNotNull(zookeeperHosts, "zookeeperHosts");
         _sharedCuratorFramework = new SharedCuratorFramework(zookeeperHosts);
+        _zookeeperHosts = zookeeperHosts;
 
     }
 
@@ -49,6 +51,9 @@ public class CuratorFactory {
         return _sharedCuratorFramework;
     }
 
+    public String getZkHosts() {
+        return _zookeeperHosts;
+    }
 
     private static class SharedCuratorFramework implements CuratorFramework {
 
