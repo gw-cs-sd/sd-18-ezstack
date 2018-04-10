@@ -208,7 +208,7 @@ public class CachingCuratorRulesManager extends AbstractService implements Rules
     @Override
     public Set<Rule> getRules(String outerTable, String innerTable, RuleStatus status) {
         if (status == RuleStatus.ACTIVE) {
-            return _activeRuleIndex.get().get(outerTable, innerTable);
+            return firstNonNull(_activeRuleIndex.get().get(outerTable, innerTable), Collections.emptySet());
         }
 
         return _rules.values()
