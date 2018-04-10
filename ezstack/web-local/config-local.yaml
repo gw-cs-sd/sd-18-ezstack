@@ -19,3 +19,10 @@ queryBus:
   queryBusTopicReplicationFactor: 1
 rulesManager:
   zookeeperHosts: "localhost:2181"
+  bootstrapTopicName: "bootstrapped-document-messages"
+  shutdownTopicName: "shutdown-messages"
+  partitionCount: 6
+  replicationFactor: 1
+  kafkaBootstrapServers: "localhost:9092"
+
+

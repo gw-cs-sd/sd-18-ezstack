@@ -6,7 +6,6 @@ import com.google.common.base.Throwables;
 import com.google.common.util.concurrent.AbstractService;
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
-import com.google.inject.name.Named;
 import kafka.admin.AdminUtils;
 import kafka.admin.RackAwareMode;
 import kafka.utils.ZKStringSerializer$;
@@ -35,6 +34,9 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
+import static com.google.common.base.Preconditions.checkArgument;
+import static com.google.common.base.Preconditions.checkNotNull;
+
 public class LocalRulesMonitor extends AbstractService {
 
     private final static Logger LOG = LoggerFactory.getLogger(LocalRulesMonitor.class);
@@ -54,24 +56,43 @@ public class LocalRulesMonitor extends AbstractService {
     private final CuratorFactory _curatorFactory;
 
     private final String _kafkaBootstrapServers;
+    private final int _partitionCount;
+    private final int _replicationFactor;
+    private final String _bootstrapTopicName;
+    private final String _shutdownTopicName;
+    private final String _rulesPath;
+    private final String _bootstrapperPath;
 
     private CuratorFramework _curator;
 
     private ScheduledExecutorService _service;
 
-    public LocalRulesMonitor(RulesManager rulesManager, CuratorFactory curatorFactory, String bootstrapServers) {
-        _rulesManager = rulesManager;
-        _curatorFactory = curatorFactory;
-        _kafkaBootstrapServers = bootstrapServers;
+    LocalRulesMonitor(RulesManager rulesManager, CuratorFactory curatorFactory, String bootstrapServers,
+                      int partitionCount, int replicationFactor, String bootstrapTopicName, String shutdownTopicName,
+                      String rulesPath, String bootstrapperPath) {
+        _rulesManager = checkNotNull(rulesManager, "rulesManager");
+        _curatorFactory = checkNotNull(curatorFactory, "curatorFactory");
+        _kafkaBootstrapServers = checkNotNull(bootstrapServers, "bootstrapServers");
+        _bootstrapTopicName = checkNotNull(bootstrapTopicName, "bootstrapTopicName");
+        _shutdownTopicName = checkNotNull(shutdownTopicName, "shutdownTopicName");
+        _rulesPath = checkNotNull(rulesPath, "rulesPath");
+        _bootstrapperPath = checkNotNull(bootstrapperPath, "bootstrapperPath");
+
+        checkArgument(partitionCount > 0);
+        checkArgument(replicationFactor > 0);
+
+
+        _partitionCount = partitionCount;
+        _replicationFactor = replicationFactor;
     }
 
     @Override
     protected void doStart() {
         try {
             _curator = _curatorFactory.getStartedCuratorFramework();
-            createKafkaTopic("bootstrapped-document-messages", 6, 1);
-            createKafkaTopic("shutdown-message", 1, 1);
-            writeShutdownMessageToTopic("shutdown-message");
+            createKafkaTopicIfNotExists(_bootstrapTopicName, _partitionCount, _replicationFactor);
+            createKafkaTopicIfNotExists(_shutdownTopicName, 1, _replicationFactor);
+            writeShutdownMessageToTopic(_shutdownTopicName);
         } catch (Exception e) {
             notifyFailed(e);
             throw e;
@@ -84,7 +105,7 @@ public class LocalRulesMonitor extends AbstractService {
         notifyStarted();
     }
 
-    private void createKafkaTopic(String topicName, int numPartitions, int replicationFactor) {
+    private void createKafkaTopicIfNotExists(String topicName, int numPartitions, int replicationFactor) {
         ZooKeeperClientWrapper zkClientWrapper = null;
         String zkHosts = _curatorFactory.getZkHosts();
         try {
@@ -149,8 +170,8 @@ public class LocalRulesMonitor extends AbstractService {
                         // TODO: replace six with an injected partition count
                         // TODO: replace rules path with an injected string
                         if (_curator.getChildren().
-                                forPath(ZKPaths.makePath("/rules", rule.getTable(), "denormalizer"))
-                                .size() == 6) {
+                                forPath(ZKPaths.makePath(_rulesPath, rule.getTable(), "denormalizer"))
+                                .size() == _partitionCount) {
                             _rulesManager.setRuleStatus(rule.getTable(), Rule.RuleStatus.ACCEPTED);
                         }
                     } catch (KeeperException.NoNodeException e) {
@@ -171,7 +192,7 @@ public class LocalRulesMonitor extends AbstractService {
         try {
             _curator.create()
                     .creatingParentsIfNeeded()
-                    .forPath(ZKPaths.makePath("/bootstrapper", "INSERT_JOB_ID_HERE"), _mapper.writeValueAsBytes(acceptedRules));
+                    .forPath(ZKPaths.makePath(_bootstrapperPath, "INSERT_JOB_ID_HERE"), _mapper.writeValueAsBytes(acceptedRules));
         } catch (Exception e) {
             notifyFailed(e);
             throw new RuntimeException(e);
@@ -187,9 +208,13 @@ public class LocalRulesMonitor extends AbstractService {
     protected void doStop() {
         try {
             _curator.close();
+            _service.shutdown();
+            if (!_service.awaitTermination(10, TimeUnit.SECONDS)) {
+                LOG.error("{} is this running after 10 seconds", this.getClass().getSimpleName());
+            }
         } catch (Exception e) {
             notifyFailed(e);
-            throw e;
+            throw new RuntimeException(e);
         }
 
         notifyStopped();

@@ -19,6 +19,8 @@ import org.ezstack.ezapp.datastore.api.ShutdownMessage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import static com.google.common.base.Preconditions.checkNotNull;
+
 import static org.ezstack.denormalizer.bootstrapper.CuratorRuleRetriever.getRulesForJobID;
 
 public class BootstrapperApp implements StreamApplication {
@@ -27,11 +29,13 @@ public class BootstrapperApp implements StreamApplication {
 
     public void init(StreamGraph streamGraph, Config config) {
 
-        // TODO: move input stream name into properties
+        String zkHosts = checkNotNull(config.get("bootstrapper.zkHosts"));
+        String jobId = checkNotNull(config.get("job.id"));
+
         MessageStream<Document> documents = streamGraph.getInputStream("documents",
                 new JsonSerdeV3<>(Document.class));
 
-        streamGraph.getInputStream("shutdown-message",
+        streamGraph.getInputStream("shutdown-messages",
                 new JsonSerdeV3<>(ShutdownMessage.class))
         .sink((a, b, taskCoordinator) -> {
             log.info("Reached a shutdown message. Time to shut down!");
@@ -40,9 +44,6 @@ public class BootstrapperApp implements StreamApplication {
 
         MessageStream<DocumentChangePair> changePairs = documents.map(
                 new BootstrappingDocumentResolver("bootstrapper-document-resolver"));
-
-        String zkHosts = "localhost:2181";
-        String jobId = config.get("job.id");
 
         OutputStream<KV<String, DocumentMessage>> documentMessages =
                 streamGraph.getOutputStream("bootstrapped-document-messages",
