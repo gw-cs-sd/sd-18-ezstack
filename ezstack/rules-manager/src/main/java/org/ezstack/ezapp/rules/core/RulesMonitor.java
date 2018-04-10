@@ -8,6 +8,7 @@ import org.ezstack.ezapp.common.lifecycle.GuavaManagedService;
 import org.ezstack.ezapp.common.lifecycle.LifeCycleRegistry;
 import org.ezstack.ezapp.datastore.api.RulesManager;
 import org.ezstack.ezapp.rules.api.BootstrapperPath;
+import org.ezstack.ezapp.rules.api.ConsistentRulesManager;
 import org.ezstack.ezapp.rules.api.RulesPath;
 
 import java.util.concurrent.TimeUnit;
@@ -19,7 +20,7 @@ public class RulesMonitor extends LeaderService {
 
     @Inject
     public RulesMonitor(CuratorFactory curatorFactory, LifeCycleRegistry lifecycle,
-                        RulesManager rulesManager, @SelfHostAndPort HostAndPort hostAndPort,
+                        @ConsistentRulesManager RulesManager rulesManager, @SelfHostAndPort HostAndPort hostAndPort,
                         @Named("partitionCount") int partitionCount, @Named("replicationFactor") int replicationFactor,
                         @Named("kafkaBootstrapServers") String bootstrapServers, @Named("bootstrapTopicName") String bootstrapTopicName,
                         @Named("shutdownTopicName") String shutdownTopicName, @RulesPath String rulesPath,

@@ -8,8 +8,10 @@ import org.ezstack.ezapp.common.lifecycle.GuavaManagedService;
 import org.ezstack.ezapp.common.lifecycle.LifeCycleRegistry;
 import org.ezstack.ezapp.datastore.api.RulesManager;
 import org.ezstack.ezapp.rules.api.BootstrapperPath;
+import org.ezstack.ezapp.rules.api.ConsistentRulesManager;
 import org.ezstack.ezapp.rules.api.RulesPath;
 import org.ezstack.ezapp.rules.core.CuratorFactory;
+import org.ezstack.ezapp.rules.core.CachingCuratorRulesManager;
 import org.ezstack.ezapp.rules.core.CuratorRulesManager;
 import org.ezstack.ezapp.rules.core.RulesMonitor;
 
@@ -43,6 +45,18 @@ public class RulesManagerModule extends PrivateModule {
     @Singleton
     @Provides
     RulesManager provideRulesManager(@RulesPath String rulesPath, CuratorFactory curatorFactory,
+                                     @ConsistentRulesManager RulesManager consistentRulesManager,
+                                     LifeCycleRegistry lifeCycleRegistry) {
+        CachingCuratorRulesManager rulesManager = new CachingCuratorRulesManager(rulesPath, curatorFactory,
+                consistentRulesManager);
+        lifeCycleRegistry.manage(new GuavaManagedService(rulesManager));
+        return rulesManager;
+    }
+
+    @Singleton
+    @ConsistentRulesManager
+    @Provides
+    RulesManager provideConsistentRulesManager(@RulesPath String rulesPath, CuratorFactory curatorFactory,
                                      LifeCycleRegistry lifeCycleRegistry) {
         CuratorRulesManager rulesManager = new CuratorRulesManager(rulesPath, curatorFactory);
         lifeCycleRegistry.manage(new GuavaManagedService(rulesManager));
