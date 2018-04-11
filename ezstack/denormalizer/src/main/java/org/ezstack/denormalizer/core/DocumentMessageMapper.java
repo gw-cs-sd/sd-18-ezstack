@@ -98,14 +98,14 @@ public class DocumentMessageMapper implements FlatMapFunction<DocumentChangePair
         Set<KeyValue<String, QueryLevel>> newPartitionLocations = newApplicableRules
                 .stream()
                 .map(pair -> new DefaultKeyValue<>(FanoutHashingUtils.getPartitionKey(changePair.getNewDocument(),
-                        pair.getLevel(), pair.getRule().getQuery()), pair.getLevel()))
+                        pair.getLevel(), pair.getRule()), pair.getLevel()))
                 .collect(Collectors.toSet());
 
-        Set<RuleIndexPair> rulesForDeletion = oldApplicableRules
+        Set<RuleIndexPair> deleteRulePairs = oldApplicableRules
                 .stream()
                 .filter(pair -> !newPartitionLocations.contains(new DefaultKeyValue<>(
                         FanoutHashingUtils.getPartitionKey(changePair.getOldDocument(),
-                                pair.getLevel(), pair.getRule().getQuery()), pair.getLevel())))
+                                pair.getLevel(), pair.getRule()), pair.getLevel())))
                 .collect(Collectors.toSet());
 
         Collection<DocumentMessage> messages = new LinkedList<>();
@@ -114,23 +114,23 @@ public class DocumentMessageMapper implements FlatMapFunction<DocumentChangePair
         for (RuleIndexPair rulePair : newApplicableRules) {
             messages.add(new DocumentMessage(changePair.getNewDocument(),
                     FanoutHashingUtils.getPartitionKey(changePair.getNewDocument(),
-                            rulePair.getLevel(), rulePair.getRule().getQuery()),
+                            rulePair.getLevel(), rulePair.getRule()),
                     rulePair.getLevel(), OpCode.UPDATE, rulePair.getRule().getQuery(),
                     rulePair.getRule().getTable(), shouldTombstone(_tombstoningPolicy, rulePair.getRule())));
         }
 
         // add all the delete messages
-        for (RuleIndexPair rulePair : rulesForDeletion) {
+        for (RuleIndexPair rulePair : deleteRulePairs) {
             if (!newApplicableRules.contains(rulePair) && rulePair.getLevel() == QueryLevel.OUTER) {
                 messages.add(new DocumentMessage(changePair.getOldDocument(),
                         FanoutHashingUtils.getPartitionKey(changePair.getOldDocument(),
-                                rulePair.getLevel(), rulePair.getRule().getQuery()),
+                                rulePair.getLevel(), rulePair.getRule()),
                         rulePair.getLevel(), OpCode.REMOVE_AND_DELETE, rulePair.getRule().getQuery(),
                         rulePair.getRule().getTable(), shouldTombstone(_tombstoningPolicy, rulePair.getRule())));
             } else {
                 messages.add(new DocumentMessage(changePair.getOldDocument(),
                         FanoutHashingUtils.getPartitionKey(changePair.getOldDocument(),
-                                rulePair.getLevel(), rulePair.getRule().getQuery()),
+                                rulePair.getLevel(), rulePair.getRule()),
                         rulePair.getLevel(), OpCode.REMOVE, rulePair.getRule().getQuery(),
                         rulePair.getRule().getTable(), shouldTombstone(_tombstoningPolicy, rulePair.getRule())));
             }

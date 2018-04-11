@@ -1,7 +1,9 @@
 package org.ezstack.ezapp.rules.core;
 
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.common.base.Charsets;
 import com.google.common.base.Throwables;
 import com.google.common.util.concurrent.AbstractService;
 import com.google.common.util.concurrent.Futures;
@@ -14,6 +16,7 @@ import kafka.utils.ZooKeeperClientWrapper;
 import org.I0Itec.zkclient.ZkClient;
 import org.I0Itec.zkclient.ZkConnection;
 import org.apache.curator.framework.CuratorFramework;
+import org.apache.curator.framework.api.transaction.CuratorOp;
 import org.apache.curator.utils.ZKPaths;
 import org.apache.kafka.clients.producer.KafkaProducer;
 import org.apache.kafka.clients.producer.ProducerConfig;
@@ -28,11 +31,11 @@ import org.ezstack.ezapp.datastore.api.ShutdownMessage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.Properties;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
@@ -90,12 +93,13 @@ public class LocalRulesMonitor extends AbstractService {
     protected void doStart() {
         try {
             _curator = _curatorFactory.getStartedCuratorFramework();
+            _curator.createContainers(_bootstrapperPath);
             createKafkaTopicIfNotExists(_bootstrapTopicName, _partitionCount, _replicationFactor);
             createKafkaTopicIfNotExists(_shutdownTopicName, 1, _replicationFactor);
             writeShutdownMessageToTopic(_shutdownTopicName);
         } catch (Exception e) {
             notifyFailed(e);
-            throw e;
+            throw new RuntimeException(e);
         }
 
         _service = Executors.newSingleThreadScheduledExecutor(new ThreadFactoryBuilder().setNameFormat("rules-monitor-%d").build());
@@ -159,49 +163,84 @@ public class LocalRulesMonitor extends AbstractService {
     }
 
     private void processRules() {
-        bootstrapAcceptedRules();
-        acceptAcknowledgedRules();
+        try {
+            acceptAcknowledgedRules();
+            scheduleAcceptedRules();
+            activateBootstrappedRules();
+
+        } catch (Exception e) {
+            notifyFailed(e);
+            throw new RuntimeException(e);
+        }
     }
 
-    private void acceptAcknowledgedRules() {
+    private void acceptAcknowledgedRules() throws Exception {
         _rulesManager.getRules(Rule.RuleStatus.PENDING).parallelStream()
                 .forEach(rule -> {
                     try {
-                        // TODO: replace six with an injected partition count
-                        // TODO: replace rules path with an injected string
                         if (_curator.getChildren().
                                 forPath(ZKPaths.makePath(_rulesPath, rule.getTable(), "denormalizer"))
                                 .size() == _partitionCount) {
                             _rulesManager.setRuleStatus(rule.getTable(), Rule.RuleStatus.ACCEPTED);
                         }
                     } catch (KeeperException.NoNodeException e) {
-                        LOG.info("Still waiting for rule {} to be acknowledged");
+                        LOG.info("Still waiting for rule {} to be acknowledged", rule.toString());
                     } catch (Exception e) {
                         notifyFailed(e);
+                        throw new RuntimeException(e);
                     }
                 });
     }
 
-    private void bootstrapAcceptedRules() {
+    private void scheduleAcceptedRules() throws Exception {
         Set<Rule> acceptedRules = _rulesManager.getRules(Rule.RuleStatus.ACCEPTED);
 
         if (acceptedRules.isEmpty()) {
             return;
         }
 
-        try {
-            _curator.create()
-                    .creatingParentsIfNeeded()
-                    .forPath(ZKPaths.makePath(_bootstrapperPath, "INSERT_JOB_ID_HERE"), _mapper.writeValueAsBytes(acceptedRules));
-        } catch (Exception e) {
-            notifyFailed(e);
-            throw new RuntimeException(e);
+        List<CuratorOp> ops = getCuratorOpsForStatusSetters(acceptedRules, Rule.RuleStatus.BOOTSTRAPPING);
+        String bootstrapperJobId = UUID.randomUUID().toString();
+        ops.add(_curator.transactionOp().create()
+                .forPath(ZKPaths.makePath(_bootstrapperPath, bootstrapperJobId), _mapper.writeValueAsBytes(acceptedRules)));
+
+        for (Rule rule : acceptedRules) {
+            ops.add(_curator.transactionOp().create()
+                .forPath(ZKPaths.makePath(_rulesPath, rule.getTable(), _bootstrapperPath), bootstrapperJobId.getBytes(Charsets.UTF_8)));
         }
 
-        // TODO: schedule job with the job id used above
+        _curator.transaction().forOperations(ops);
 
-        acceptedRules.parallelStream()
-                .forEach(rule -> _rulesManager.setRuleStatus(rule.getTable(), Rule.RuleStatus.BOOTSTRAPPING));
+        // TODO: start boostrapper job here
+        LOG.info("Please start job with ID: {}", bootstrapperJobId);
+    }
+
+    private List<CuratorOp> getCuratorOpsForStatusSetters(Set<Rule> rules, Rule.RuleStatus status) throws Exception {
+        List<CuratorOp> ops = new LinkedList<>();
+        for (Rule rule : rules) {
+            ops.add(_curator.transactionOp().setData()
+                    .forPath(ZKPaths.makePath(_rulesPath, rule.getTable()),
+                            _mapper.writeValueAsBytes(new Rule(rule.getQuery(), rule.getTable(), status))));
+
+        }
+
+        return ops;
+    }
+
+    private void activateBootstrappedRules() throws Exception {
+        for (String child : _curator.getChildren().forPath(_bootstrapperPath)) {
+            if (_curator.getChildren().forPath(ZKPaths.makePath(_bootstrapperPath, child)).size() == _partitionCount) {
+                Set<Rule> rules = _mapper.readValue(_curator.getData().forPath(ZKPaths.makePath(_bootstrapperPath, child)),
+                        new TypeReference<Set<Rule>>() {});
+                if (rules.isEmpty()) {
+                    _curator.delete().deletingChildrenIfNeeded().forPath(ZKPaths.makePath(_bootstrapperPath, child));
+                    break;
+                }
+                List<CuratorOp> ops = getCuratorOpsForStatusSetters(rules, Rule.RuleStatus.ACTIVE);
+                ops.add(_curator.transactionOp().setData().forPath(ZKPaths.makePath(_bootstrapperPath, child), "[]".getBytes(Charsets.UTF_8)));
+                _curator.transaction().forOperations(ops);
+            }
+        }
     }
 
     @Override

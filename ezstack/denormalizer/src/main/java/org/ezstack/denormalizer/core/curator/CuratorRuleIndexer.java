@@ -102,7 +102,7 @@ public class CuratorRuleIndexer extends AbstractService implements RuleIndexer {
 
         } catch (Exception e) {
             if (e instanceof KeeperException.NodeExistsException) {
-                LOG.error("Already acknowled rule with table {} for partition id {}", rule.getTable(), _partitionId);
+                LOG.error("Already acknowledged rule with table {} for partition id {}", rule.getTable(), _partitionId);
                 return;
             }
             LOG.error(e.toString());

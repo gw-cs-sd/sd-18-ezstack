@@ -14,6 +14,7 @@ import org.ezstack.ezapp.rules.api.RulesPath;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.Collections;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -127,14 +128,14 @@ public class CuratorRulesManager extends AbstractService implements RulesManager
                     .parallelStream()
                     .map(child -> {
                         try {
-                            return _mapper.readValue(_client.getData().forPath(child), Rule.class);
+                            return _mapper.readValue(_client.getData().forPath(ZKPaths.makePath(_rulesPath, child)), Rule.class);
                         } catch (Exception e) {
                             throw new RuntimeException(e);
                         }
                     })
                     .collect(Collectors.toSet());
         } catch (KeeperException.NoNodeException e) {
-            return null;
+            return Collections.emptySet();
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
