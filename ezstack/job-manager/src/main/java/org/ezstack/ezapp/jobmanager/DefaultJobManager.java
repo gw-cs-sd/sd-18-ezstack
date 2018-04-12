@@ -4,7 +4,6 @@ import org.ezstack.ezapp.jobmanager.api.JobManager;
 
 import java.io.File;
 import java.io.FileOutputStream;
-import java.io.IOException;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Properties;
@@ -24,7 +23,7 @@ public class DefaultJobManager implements JobManager {
 
     @Override
     public Properties create(Properties properties) throws Exception {
-        String id = getOrCreateId(properties);
+        String id = UUID.randomUUID().toString();
         File temp = File.createTempFile(id, ".properties");
         properties.store(new FileOutputStream(temp), null);
         List<String> args = new LinkedList<>();
@@ -61,7 +60,7 @@ public class DefaultJobManager implements JobManager {
         return PREFIX_CONFIG_PATH_CMD + "file://" + filePath;
     }
 
-    private void runApp(List<String> args) throws IOException {
+    private void runApp(List<String> args) throws Exception {
         List<String> cmd = new LinkedList<>(args);
         cmd.add(0, _runAppPath);
         Process run = new ProcessBuilder(cmd).start();
