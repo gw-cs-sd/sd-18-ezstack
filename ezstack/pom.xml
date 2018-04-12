@@ -22,6 +22,7 @@
         <module>client</module>
         <module>web-api</module>
         <module>common</module>
+        <module>job-manager</module>
     </modules>
     <name>EZstack</name>
 
