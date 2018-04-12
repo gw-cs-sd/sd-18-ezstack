@@ -11,16 +11,4 @@
     <modelVersion>4.0.0</modelVersion>
 
     <artifactId>ezapp-job-manager</artifactId>
-
-    <properties>
-        <samza.version>0.14.0</samza.version>
-    </properties>
-
-    <dependencies>
-        <dependency>
-            <groupId>org.apache.samza</groupId>
-            <artifactId>samza-core_2.11</artifactId>
-            <version>${samza.version}</version>
-        </dependency>
-    </dependencies>
 </project>
