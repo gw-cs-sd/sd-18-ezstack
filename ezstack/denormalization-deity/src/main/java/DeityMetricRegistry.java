@@ -91,7 +91,6 @@ public class DeityMetricRegistry extends MetricRegistry {
                 this.remove(entry.getKey());
                 iter.remove();
                 _histogramCounter.decrementAndGet();
-                LOG.info("reaping");
             }
 
             sortedList.add(entry.getValue());
@@ -104,8 +103,6 @@ public class DeityMetricRegistry extends MetricRegistry {
 
             this.remove(object.getQuery().getMurmur3HashAsString());
             _priorityObjects.remove(object);
-
-            LOG.info("get reaped");
 
             _histogramCounter.decrementAndGet();
         }

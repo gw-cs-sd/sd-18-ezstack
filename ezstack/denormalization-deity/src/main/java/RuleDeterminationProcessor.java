@@ -50,12 +50,10 @@ public class RuleDeterminationProcessor {
             if (value.getPriority() >= threshold) {
                 Rule rule = ruleConverter.convertToRule(value.getQuery());
                 if (rule != null) {
-                    LOG.info("greetings");
                     ruleConverter.addRule(rule);
                 }
             }
             else {
-                LOG.info("this shit still works");
                 //if the rule exists, remove the rule --- THIS IS NOT IMPLEMENTED YET
             }
         }
