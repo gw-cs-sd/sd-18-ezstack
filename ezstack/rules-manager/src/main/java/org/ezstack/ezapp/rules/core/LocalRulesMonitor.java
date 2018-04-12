@@ -44,6 +44,9 @@ public class LocalRulesMonitor extends AbstractService {
 
     private final static Logger LOG = LoggerFactory.getLogger(LocalRulesMonitor.class);
 
+    private final static int INITIAL_DELAY_SECONDS = 30;
+    private final static int SERVICE_INTERVAL_SECONDS = 30;
+
     private static final int MAX_BATCH_SIZE = 0;
     private static final int MAX_PUBLISH_RETRIES = 2;
     private static final int REQUEST_TIMEOUT_MS_CONFIG = 3000;
@@ -104,7 +107,7 @@ public class LocalRulesMonitor extends AbstractService {
 
         _service = Executors.newSingleThreadScheduledExecutor(new ThreadFactoryBuilder().setNameFormat("rules-monitor-%d").build());
 
-        _service.scheduleAtFixedRate(this::processRules, 30, 20, TimeUnit.SECONDS);
+        _service.scheduleAtFixedRate(this::processRules, INITIAL_DELAY_SECONDS, SERVICE_INTERVAL_SECONDS, TimeUnit.SECONDS);
 
         notifyStarted();
     }

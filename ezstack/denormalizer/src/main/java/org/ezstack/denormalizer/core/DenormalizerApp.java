@@ -14,6 +14,8 @@ import org.ezstack.ezapp.datastore.api.Update;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import static com.google.common.base.Preconditions.checkNotNull;
+
 public class DenormalizerApp implements StreamApplication {
 
     private static final Logger log = LoggerFactory.getLogger(DenormalizerApp.class);
@@ -34,7 +36,8 @@ public class DenormalizerApp implements StreamApplication {
                 changePair.getNewDocument().getTable(), WritableResult.Action.INDEX))
                 .sink(elasticsearchIndexer);
 
-        documents.flatMap(new DocumentMessageMapper("localhost:2181", "/rules", TombstoningPolicy.BASED_ON_RULE))
+        documents.flatMap(new DocumentMessageMapper(checkNotNull(config.get("denormalizer.zkHosts")),
+                "/rules", TombstoningPolicy.BASED_ON_RULE))
                 .partitionBy(DocumentMessage::getPartitionKey, v -> v, KVSerde.of(new StringSerde(), new JsonSerdeV3<>(DocumentMessage.class)), "partition")
                 .map(KV::getValue)
                 .merge(ImmutableSet.of(bootstrapperMessages))

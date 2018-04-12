@@ -15,14 +15,12 @@ import org.apache.curator.utils.ZKPaths;
 import org.apache.zookeeper.CreateMode;
 import org.apache.zookeeper.KeeperException;
 import org.ezstack.denormalizer.model.RuleIndexer;
-import org.ezstack.denormalizer.model.QueryLevel;
 import org.ezstack.denormalizer.model.RuleIndexPair;
 import org.ezstack.ezapp.datastore.api.Rule;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
