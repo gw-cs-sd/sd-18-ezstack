@@ -2,10 +2,11 @@ package org.ezstack.ezapp.jobmanager;
 
 import org.ezstack.ezapp.jobmanager.api.JobManager;
 
-import org.apache.samza.runtime.ApplicationRunnerMain;
-
 import java.io.File;
 import java.io.FileOutputStream;
+import java.io.IOException;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Properties;
 import java.util.UUID;
 
@@ -15,13 +16,21 @@ public class DefaultJobManager implements JobManager {
     private static final String SHUTDOWN_CMD = "--operation=kill";
     private static final String JOB_ID = "job.id";
 
+    private String _runAppPath;
+
+    public DefaultJobManager(String runAppPath) {
+        _runAppPath = runAppPath;
+    }
+
     @Override
     public Properties create(Properties properties) throws Exception {
         String id = getOrCreateId(properties);
         File temp = File.createTempFile(id, ".properties");
         properties.store(new FileOutputStream(temp), null);
-        String[] args = {CONFIG_FACTORY_CMD, getConfigPath(temp.getAbsolutePath())};
-        ApplicationRunnerMain.main(args);
+        List<String> args = new LinkedList<>();
+        args.add(CONFIG_FACTORY_CMD);
+        args.add(getConfigPath(temp.getAbsolutePath()));
+        runApp(args);
         return properties;
     }
 
@@ -29,8 +38,11 @@ public class DefaultJobManager implements JobManager {
     public void shutdown(Properties properties) throws Exception {
         File temp = File.createTempFile(properties.getProperty(JOB_ID), ".properties");
         properties.store(new FileOutputStream(temp), null);
-        String[] args = {CONFIG_FACTORY_CMD, getConfigPath(temp.getAbsolutePath()), SHUTDOWN_CMD};
-        ApplicationRunnerMain.main(args);
+        List<String> args = new LinkedList<>();
+        args.add(CONFIG_FACTORY_CMD);
+        args.add(getConfigPath(temp.getAbsolutePath()));
+        args.add(SHUTDOWN_CMD);
+        runApp(args);
     }
 
     @Override
@@ -47,5 +59,11 @@ public class DefaultJobManager implements JobManager {
 
     private String getConfigPath(String filePath) {
         return PREFIX_CONFIG_PATH_CMD + "file://" + filePath;
+    }
+
+    private void runApp(List<String> args) throws IOException {
+        List<String> cmd = new LinkedList<>(args);
+        cmd.add(0, _runAppPath);
+        Process run = new ProcessBuilder(cmd).start();
     }
 }
