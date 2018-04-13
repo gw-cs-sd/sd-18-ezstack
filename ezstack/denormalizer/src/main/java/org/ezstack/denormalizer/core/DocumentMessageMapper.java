@@ -3,7 +3,10 @@ package org.ezstack.denormalizer.core;
 import com.google.common.collect.*;
 import org.apache.commons.collections4.KeyValue;
 import org.apache.commons.collections4.keyvalue.DefaultKeyValue;
+import org.apache.samza.config.Config;
 import org.apache.samza.operators.functions.FlatMapFunction;
+import org.apache.samza.task.TaskContext;
+import org.ezstack.denormalizer.core.curator.CuratorRuleIndexer;
 import org.ezstack.denormalizer.model.*;
 import org.ezstack.ezapp.datastore.api.Document;
 import org.ezstack.ezapp.datastore.api.Query;
@@ -14,32 +17,49 @@ import org.slf4j.LoggerFactory;
 import java.util.*;
 import java.util.stream.Collectors;
 
+import static org.ezstack.denormalizer.model.TombstoningPolicy.shouldTombstone;
+
+import static com.google.common.base.Preconditions.checkNotNull;
+
 public class DocumentMessageMapper implements FlatMapFunction<DocumentChangePair, DocumentMessage> {
 
     private static final Logger log = LoggerFactory.getLogger(DocumentMessageMapper.class);
 
-    private HashMultimap<String, QueryPair> _queryIndex;
+    protected RuleIndexer _ruleIndexer;
 
-    public DocumentMessageMapper(Collection<Query> queries) {
-        _queryIndex = getQueryIndex(queries);
+    private final String _zookeeperHosts;
+    private final String _rulesPath;
+    private final TombstoningPolicy _tombstoningPolicy;
+
+    public DocumentMessageMapper(String zookeeperHosts, String rulesPath, TombstoningPolicy tombstoningPolicy) {
+        _zookeeperHosts = checkNotNull(zookeeperHosts, "zookeeperHosts");
+        _rulesPath = checkNotNull(rulesPath, "rulesPath");
+        _tombstoningPolicy = checkNotNull(tombstoningPolicy, "tombstoningPolicy");
     }
 
-    private HashMultimap<String, QueryPair> getQueryIndex(Collection<Query> queries) {
-        HashMultimap<String, QueryPair> index = HashMultimap.create();
+    public DocumentMessageMapper(RuleIndexer ruleIndexer, TombstoningPolicy tombstoningPolicy) {
+        _zookeeperHosts = null;
+        _rulesPath = null;
+        _tombstoningPolicy = checkNotNull(tombstoningPolicy, "tombstoningPolicy");
+        _ruleIndexer = checkNotNull(ruleIndexer, "ruleIndexer");
 
-        for (Query query : queries) {
-            index.put(query.getTable(), new QueryPair(query, QueryLevel.OUTER));
+    }
 
-            if (query.getJoin() != null) {
-                index.put(query.getJoin().getTable(), new QueryPair(query, QueryLevel.INNER));
-            }
+    @Override
+    public void init(Config config, TaskContext context) {
+        if (_ruleIndexer == null) {
+            _ruleIndexer = new CuratorRuleIndexer(_zookeeperHosts, _rulesPath, context.getTaskName().getTaskName());
         }
-
-        return index;
+        _ruleIndexer.startAsync().awaitRunning();
     }
 
-    private boolean doesMatchQuery(QueryPair queryPair, Document doc) {
-        Query q = queryPair.getLevel() == QueryLevel.OUTER ? queryPair.getQuery() : queryPair.getQuery().getJoin();
+    @Override
+    public void close() {
+        _ruleIndexer.stopAsync().awaitTerminated();
+    }
+
+    private boolean doesMatchRule(RuleIndexPair pair, Document doc) {
+        Query q = pair.getLevel() == QueryLevel.OUTER ? pair.getRule().getQuery() : pair.getRule().getQuery().getJoin();
 
         return QueryHelper.meetsFilters(q.getFilters(), doc);
     }
@@ -47,105 +67,75 @@ public class DocumentMessageMapper implements FlatMapFunction<DocumentChangePair
     // determines if a document has the requisite join attribute values to
     // perform the join and fulfill the query. If the query does not have join attributes values, then the
     // method should succeed because we know that the document has the requisite attributes (because they aren't any)
-    private boolean documentHasJoinAttributeValues(QueryPair queryPair, Document doc) {
-        if (queryPair.getQuery().getJoinAttributes() == null) {
+    private boolean documentHasJoinAttributeValues(RuleIndexPair pair, Document doc) {
+        if (pair.getRule().getQuery().getJoinAttributes() == null) {
             return true;
         }
-        return queryPair.getQuery().getJoinAttributes()
+        return pair.getRule().getQuery().getJoinAttributes()
                 .stream()
-                .map(att -> queryPair.getLevel() == QueryLevel.OUTER ? att.getOuterAttribute() : att.getInnerAttribute())
+                .map(att -> pair.getLevel() == QueryLevel.OUTER ? att.getOuterAttribute() : att.getInnerAttribute())
                 .allMatch(att ->  doc.getValue(att) != null);
     }
 
-    private Set<QueryPair> getApplicableQueries(Document document) {
+    private Set<RuleIndexPair> getApplicableQueries(Document document) {
 
         if (document == null) {
             return ImmutableSet.of();
         }
 
-        Set<QueryPair> queryPairs = _queryIndex.get(document.getTable());
-
-        if (queryPairs == null) {
-            return ImmutableSet.of();
-        }
-
-        return queryPairs
+        return _ruleIndexer.getApplicableRulesForTable(document.getTable())
                 .stream()
                 .filter(pair -> documentHasJoinAttributeValues(pair, document))
-                .filter(pair -> doesMatchQuery(pair, document))
+                .filter(pair -> doesMatchRule(pair, document))
                 .collect(Collectors.toSet());
     }
 
     @Override
     public Collection<DocumentMessage> apply(DocumentChangePair changePair) {
-        Set<QueryPair> oldApplicableQueries = getApplicableQueries(changePair.getOldDocument());
-        Set<QueryPair> newApplicableQueries = getApplicableQueries(changePair.getNewDocument());
+        Set<RuleIndexPair> oldApplicableRules = getApplicableQueries(changePair.getOldDocument());
+        Set<RuleIndexPair> newApplicableRules = getApplicableQueries(changePair.getNewDocument());
 
-        Set<KeyValue<String, QueryLevel>> newPartitionLocations = newApplicableQueries
+        Set<KeyValue<String, QueryLevel>> newPartitionLocations = newApplicableRules
                 .stream()
                 .map(pair -> new DefaultKeyValue<>(FanoutHashingUtils.getPartitionKey(changePair.getNewDocument(),
-                        pair.getLevel(), pair.getQuery()), pair.getLevel()))
+                        pair.getLevel(), pair.getRule()), pair.getLevel()))
                 .collect(Collectors.toSet());
 
-        Set<QueryPair> queriesForDeletion = oldApplicableQueries
+        Set<RuleIndexPair> deleteRulePairs = oldApplicableRules
                 .stream()
                 .filter(pair -> !newPartitionLocations.contains(new DefaultKeyValue<>(
                         FanoutHashingUtils.getPartitionKey(changePair.getOldDocument(),
-                                pair.getLevel(), pair.getQuery()), pair.getLevel())))
+                                pair.getLevel(), pair.getRule()), pair.getLevel())))
                 .collect(Collectors.toSet());
 
         Collection<DocumentMessage> messages = new LinkedList<>();
 
         // add all the update messages
-        for (QueryPair queryPair : newApplicableQueries) {
+        for (RuleIndexPair rulePair : newApplicableRules) {
             messages.add(new DocumentMessage(changePair.getNewDocument(),
                     FanoutHashingUtils.getPartitionKey(changePair.getNewDocument(),
-                            queryPair.getLevel(), queryPair.getQuery()),
-                    queryPair.getLevel(), OpCode.UPDATE, queryPair.getQuery()));
+                            rulePair.getLevel(), rulePair.getRule()),
+                    rulePair.getLevel(), OpCode.UPDATE, rulePair.getRule().getQuery(),
+                    rulePair.getRule().getTable(), shouldTombstone(_tombstoningPolicy, rulePair.getRule())));
         }
 
         // add all the delete messages
-        for (QueryPair queryPair : queriesForDeletion) {
-            if (!newApplicableQueries.contains(queryPair) && queryPair.getLevel() == QueryLevel.OUTER) {
+        for (RuleIndexPair rulePair : deleteRulePairs) {
+            if (!newApplicableRules.contains(rulePair) && rulePair.getLevel() == QueryLevel.OUTER) {
                 messages.add(new DocumentMessage(changePair.getOldDocument(),
                         FanoutHashingUtils.getPartitionKey(changePair.getOldDocument(),
-                                queryPair.getLevel(), queryPair.getQuery()),
-                        queryPair.getLevel(), OpCode.REMOVE_AND_DELETE, queryPair.getQuery()));
+                                rulePair.getLevel(), rulePair.getRule()),
+                        rulePair.getLevel(), OpCode.REMOVE_AND_DELETE, rulePair.getRule().getQuery(),
+                        rulePair.getRule().getTable(), shouldTombstone(_tombstoningPolicy, rulePair.getRule())));
             } else {
                 messages.add(new DocumentMessage(changePair.getOldDocument(),
                         FanoutHashingUtils.getPartitionKey(changePair.getOldDocument(),
-                                queryPair.getLevel(), queryPair.getQuery()),
-                        queryPair.getLevel(), OpCode.REMOVE, queryPair.getQuery()));
+                                rulePair.getLevel(), rulePair.getRule()),
+                        rulePair.getLevel(), OpCode.REMOVE, rulePair.getRule().getQuery(),
+                        rulePair.getRule().getTable(), shouldTombstone(_tombstoningPolicy, rulePair.getRule())));
             }
         }
 
         return messages;
-    }
-
-    private class QueryPair {
-        private final Query _query;
-        private final QueryLevel _queryLevel;
-
-        public QueryPair(Query query, QueryLevel queryLevel) {
-            this._query = query;
-            this._queryLevel = queryLevel;
-        }
-
-        public Query getQuery() {
-            return _query;
-        }
-
-        public QueryLevel getLevel() {
-            return _queryLevel;
-        }
-
-        @Override
-        public boolean equals(Object o) {
-            if (this == o) return true;
-            if (!(o instanceof QueryPair)) return false;
-            QueryPair queryPair = (QueryPair) o;
-            return _query.equals(queryPair.getQuery()) &&
-                    _queryLevel == queryPair.getLevel();
-        }
     }
 }
