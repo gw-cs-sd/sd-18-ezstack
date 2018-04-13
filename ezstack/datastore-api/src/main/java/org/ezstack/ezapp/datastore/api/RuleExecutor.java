@@ -1,7 +1,6 @@
 package org.ezstack.ezapp.datastore.api;
 
 public class RuleExecutor {
-
     private RulesManager _ruleManager;
     private Query _originalQuery;
     private Query _execQuery;
