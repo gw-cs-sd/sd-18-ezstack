@@ -1,8 +1,5 @@
 package org.ezstack.ezapp.datastore.api;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 public class RuleExecutor {
 
     private RulesManager _ruleManager;
