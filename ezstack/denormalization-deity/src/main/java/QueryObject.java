@@ -1,24 +1,25 @@
 import org.ezstack.ezapp.datastore.api.Query;
+import org.ezstack.ezapp.datastore.api.Rule;
 
 public class QueryObject {
 
-    private Query _query;
+    private Rule _rule;
     private long _priority;
     private long _recentTimestamp;
 
     /**
      * This is the object used for storing the incidental value required for creating and maintaining rules. The
      * timestamp is needed to guarantee that the list of rules is as up-to-date as possible, the priority is stored so
-     * that the scores do not need to be recalculated every time the RuleDeterminationProcessor executes, and the query
-     * needs to be stored so that there is a reference with which the rules need to be created.
+     * that the scores do not need to be recalculated every time the RuleDeterminationProcessor executes, and the rule
+     * needs to be stored so that there is a rule to be passed in to the ruledeterminationprocessor when it executes.
      * @param priority
      * @param recentTimestamp
-     * @param query
+     * @param rule
      */
-    public QueryObject(long priority, long recentTimestamp, Query query) {
+    public QueryObject(long priority, long recentTimestamp, Rule rule) {
         _priority = priority;
         _recentTimestamp = recentTimestamp;
-        _query = query;
+        _rule = rule;
     }
 
     public long getPriority() {
@@ -37,11 +38,11 @@ public class QueryObject {
         _recentTimestamp = timestamp;
     }
 
-    public void setQuery(Query query) {
-        _query = _query;
+    public void setRule(Rule rule) {
+        _rule = rule;
     }
 
-    public Query getQuery() {
-        return _query;
+    public Rule getRule() {
+        return _rule;
     }
 }

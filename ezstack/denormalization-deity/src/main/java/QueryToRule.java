@@ -1,4 +1,7 @@
 import org.ezstack.ezapp.datastore.api.*;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.util.Set;
 import java.util.function.Supplier;
 
@@ -6,6 +9,7 @@ public class QueryToRule {
 
     private final RulesManager _rulesManager;
     private final Supplier<Set<Rule>> _rules;
+    private static final Logger LOG = LoggerFactory.getLogger(RuleDeterminationProcessor.class);
 
     public QueryToRule(RulesManager rulesManager, Supplier<Set<Rule>> rules) {
         _rulesManager = rulesManager;
@@ -19,17 +23,22 @@ public class QueryToRule {
      * @param query
      * @return
      */
-    public Rule convertToRule(Query query) {
+    public Rule convertToRule(Query query, int maxRules) {
 
         RuleHelper helper = new RuleHelper();
         Rule rule = helper.getRule(query);
 
         if (rule != null) {
-            if (!ruleExists(rule)) {
-                return rule;
+            if (_rules.get().size() <= maxRules) {
+                if (!ruleExists(rule)) {
+                    return rule;
+                }
+            }
+            else {
+                LOG.info("Maximum Rules Hit");
+                return null;
             }
         }
-
         return null;
     }
 

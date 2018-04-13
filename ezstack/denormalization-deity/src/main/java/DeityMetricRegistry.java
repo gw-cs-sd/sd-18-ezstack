@@ -1,6 +1,7 @@
 import com.codahale.metrics.Histogram;
 import com.codahale.metrics.MetricRegistry;
 import com.codahale.metrics.Snapshot;
+import org.ezstack.ezapp.datastore.api.Rule;
 import org.ezstack.ezapp.querybus.api.QueryMetadata;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -31,11 +32,11 @@ public class DeityMetricRegistry extends MetricRegistry {
      * Priority is represented as the median, skewed by the mean absolute deviation from the median. The purpose of
      * the mean absolute deviation is to provide a score that weighs all parts of a query response time, so that some
      * queries that are skewed heavily towards a higher or lower percentage can be evaluated accurately.
-     * @param metadata
+     * @param rule
      * @param metricSupplier
      */
-    public void updateQueryObject(QueryMetadata metadata, MetricSupplier metricSupplier) {
-        String queryHash = metadata.getQuery().getMurmur3HashAsString();
+    public void updateQueryObject(Rule rule, MetricSupplier metricSupplier) {
+        String queryHash = rule.getQuery().getMurmur3HashAsString();
         Histogram histogram = this.histogram(queryHash, metricSupplier);
         Snapshot snap = histogram.getSnapshot();
 
@@ -70,10 +71,9 @@ public class DeityMetricRegistry extends MetricRegistry {
             queryObject = _priorityObjects.get(queryHash);
             queryObject.setRecentTimestamp(stamp);
             queryObject.setPriority(priority);
-            queryObject.setQuery(metadata.getQuery());
         }
         else {
-            queryObject = new QueryObject(priority, stamp, metadata.getQuery());
+            queryObject = new QueryObject(priority, stamp, rule);
             if (_histogramCounter.incrementAndGet() == _config.getMaxHistogramCount()) {
                 prune(metricSupplier);
             }
@@ -116,7 +116,7 @@ public class DeityMetricRegistry extends MetricRegistry {
         while (sortedList.size() > _config.getMaxHistogramCount() / 2) {
             QueryObject object = sortedList.remove(0);
 
-            this.remove(object.getQuery().getMurmur3HashAsString());
+            this.remove(object.getRule().getQuery().getMurmur3HashAsString());
             _priorityObjects.remove(object);
 
             _histogramCounter.decrementAndGet();

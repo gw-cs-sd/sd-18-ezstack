@@ -63,7 +63,7 @@ public class DenormalizationDeityApp implements StreamApplication {
                         KVSerde.of(new StringSerde(), new JsonSerdeV3<>(QueryMetadata.class)),
                         "partition-query-metadata");
 
-        queryStream.map(new QueryMetadataProcessor(_queryMetricRegistry, _histogramSupplier, _intManager, _metricRegistry))
+        queryStream.map(new QueryMetadataProcessor(_queryMetricRegistry, _histogramSupplier, _intManager, _rulesManager, _ruleSupplier, _config, _metricRegistry))
                 .sink(new RuleCreationServiceSamzaWrapper(_ruleCreationService));
 
         HttpTransport transport = new HttpTransport.Builder().withApiKey(_config.getDatadogKey()).build();

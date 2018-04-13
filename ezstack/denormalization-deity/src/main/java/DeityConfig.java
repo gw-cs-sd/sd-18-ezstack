@@ -9,11 +9,13 @@ public class DeityConfig extends JobConfig {
     public static final String CACHE_PERIOD_SECS = "deity.cache.interval.secs";
     public static final String UPDATE_QUERY_THRESHOLD = "deity.update.query.threshold";
     public static final String MAX_HISTOGRAM_COUNT = "deity.max.histogram.count";
+    public static final String MAX_RULE_CAPACITY = "deity.max.rule.capacity";
 
     private static final int DEFAULT_MAX_HISTOGRAM_COUNT = 50000;
     private static final long DEFAULT_ADJUSTMENT_PERIOD_SECS = 3600;
     private static final long DEFAULT_UPDATE_QUERY_THRESHOLD = 2000;
     private static final long DEFAULT_CACHE_PERIOD_SECS = 10;
+    private static final int DEFAULT_MAX_RULE_CAPACITY = 20;
 
     public DeityConfig (Config config) {
         super(config);
@@ -36,4 +38,6 @@ public class DeityConfig extends JobConfig {
     public long getUpdateQueryThreshold() { return getLong(UPDATE_QUERY_THRESHOLD, DEFAULT_UPDATE_QUERY_THRESHOLD); }
 
     public int getMaxHistogramCount() { return getInt(MAX_HISTOGRAM_COUNT, DEFAULT_MAX_HISTOGRAM_COUNT); }
+
+    public int getMaxRuleCapacity() { return getInt(MAX_RULE_CAPACITY, DEFAULT_MAX_RULE_CAPACITY); }
 }

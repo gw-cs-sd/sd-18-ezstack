@@ -55,14 +55,14 @@ public class RuleDeterminationProcessor {
     private void addRules(long threshold) {
         for (Map.Entry<String, QueryObject> entry : _queryMetricRegistry.getQueryObjects().entrySet()) {
             QueryObject value = entry.getValue();
-            QueryToRule ruleConverter = new QueryToRule(_rulesManager, _ruleSupplier);
+
+            QueryToRule ruleCreator = new QueryToRule(_rulesManager, _ruleSupplier);
 
             // we check to see which rules are necessary to be implemented
             if (value.getPriority() >= threshold) {
-                Rule rule = ruleConverter.convertToRule(value.getQuery());
-                if (rule != null) {
-                    LOG.info("The rule for Query \"" + value.getQuery().toString() +  "\" is being added.");
-                    ruleConverter.addRule(rule);
+                if (value.getRule() != null) {
+                    LOG.info("The rule for Query \"" + value.getRule().toString() +  "\" is being added.");
+                    ruleCreator.addRule(value.getRule());
                 }
             }
             else {
