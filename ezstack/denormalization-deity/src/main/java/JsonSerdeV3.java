@@ -78,7 +78,7 @@ public class JsonSerdeV3<T> implements Serde<T> {
                 if (clazz != null) {
                     return mapper.readValue(str, clazz);
                 } else {
-                    return mapper.readValue(str, new TypeReference<T>() { });
+                    return mapper.readValue(str, new TypeReference<T>() {});
                 }
             } catch (Exception e) {
                 LOG.debug("Error deserializing data: " + str, e);

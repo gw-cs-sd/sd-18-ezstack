@@ -6,21 +6,27 @@ public class QueryMetadataProcessor implements MapFunction<QueryMetadata, QueryM
 
     private final DeityMetricRegistry _metrics;
     private final DeityMetricRegistry.MetricSupplier<Histogram> _histogramSupplier;
-    private final AtomicIntManager _intManager;
+    private final QueryCounter _intManager;
 
 
-    public QueryMetadataProcessor(DeityMetricRegistry metrics, DeityMetricRegistry.MetricSupplier<Histogram> histogramSupplier, AtomicIntManager intManager) {
+    public QueryMetadataProcessor(DeityMetricRegistry metrics, DeityMetricRegistry.MetricSupplier<Histogram> histogramSupplier, QueryCounter intManager) {
         _metrics = metrics;
         _histogramSupplier = histogramSupplier;
         _intManager = intManager;
     }
 
+    /**
+     * This function generates the key for each query made to the system, and sends each query's data to be logged in
+     * their respective histograms.
+     * @param queryMetadata
+     * @return
+     */
     @Override
     public QueryMetadata apply(QueryMetadata queryMetadata) {
-        String strippedQuery = queryMetadata.getQuery().getMurmur3HashAsString();
+        String queryHash = queryMetadata.getQuery().getMurmur3HashAsString();
         _intManager.increment();
 
-        Histogram histogram = _metrics.histogram(strippedQuery, _histogramSupplier);
+        Histogram histogram = _metrics.histogram(queryHash, _histogramSupplier);
         histogram.update(queryMetadata.getResponseTimeInMs());
 
         _metrics.updateQueryObject(queryMetadata, _histogramSupplier);

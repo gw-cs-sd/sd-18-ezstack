@@ -12,6 +12,13 @@ public class QueryToRule {
         _rules = rules;
     }
 
+    /**
+     * This function is what is used to generate the rule that is sent to the denormalizer. The necessary components of
+     * the function are to make sure that the rule we get is not null, as well as making sure the rule does not already
+     * exist within the denormalizer.
+     * @param query
+     * @return
+     */
     public Rule convertToRule(Query query) {
 
         RuleHelper helper = new RuleHelper();
@@ -26,10 +33,20 @@ public class QueryToRule {
         return null;
     }
 
+    /**
+     * We need to try to make sure that the rules we try to create do not already exist, because if we attempt to call
+     * the add function on a rule that already exists, it will throw an exception that we would then have to catch.
+     * @param rule
+     * @return
+     */
     public boolean ruleExists(Rule rule) {
         return _rules.get().contains(rule);
     }
 
+    /**
+     * Here, we add the rule, and if the rule already exists, we need to catch the RuleAlreadyExistsException.
+     * @param rule
+     */
     public void addRule(Rule rule) {
         try {
             _rulesManager.createRule(rule);

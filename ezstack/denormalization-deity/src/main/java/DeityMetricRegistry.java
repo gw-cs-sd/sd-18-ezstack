@@ -13,41 +13,50 @@ public class DeityMetricRegistry extends MetricRegistry {
 
     private static final Logger LOG = LoggerFactory.getLogger(DeityMetricRegistry.class);
 
-    private final long MAX_HISTOGRAM_COUNT = 5;
+    private static final int MAX_QUERY_COUNT = 1024;
 
     private AtomicLong _histogramCounter;
     private Date _stamper = new Date();
     private Map<String, QueryObject> _priorityObjects;
+    private DeityConfig _config;
 
-    public DeityMetricRegistry() {
+    public DeityMetricRegistry(DeityConfig config) {
         super();
+        _config = config;
         _priorityObjects = new ConcurrentHashMap<>();
         _histogramCounter = new AtomicLong(0);
     }
 
-    // Priority is represented as the median, skewed by the mean absolute deviation from the median
-    public void updateQueryObject(QueryMetadata metadata, MetricSupplier _metricSupplier) {
-        String strippedQuery = metadata.getQuery().getMurmur3HashAsString();
-        Histogram histogram = this.histogram(strippedQuery, _metricSupplier);
+    /**
+     * Priority is represented as the median, skewed by the mean absolute deviation from the median. The purpose of
+     * the mean absolute deviation is to provide a score that weighs all parts of a query response time, so that some
+     * queries that are skewed heavily towards a higher or lower percentage can be evaluated accurately.
+     * @param metadata
+     * @param metricSupplier
+     */
+    public void updateQueryObject(QueryMetadata metadata, MetricSupplier metricSupplier) {
+        String queryHash = metadata.getQuery().getMurmur3HashAsString();
+        Histogram histogram = this.histogram(queryHash, metricSupplier);
         Snapshot snap = histogram.getSnapshot();
 
         long mean = (long) snap.getMean();
-        if(mean == 0) {
+
+        //This check and fix is to prevent an edge case where it was possible to have a dividebyzero exception.
+        if (mean == 0) {
             mean = 1;
         }
-        long median = (long) snap.getMedian();
 
+        long median = (long) snap.getMedian();
         long[] values = snap.getValues();
         long meanAbsoluteDeviation = 0;
-
-        long priority;
 
         for (int i = 0; i < values.length; i++) {
             meanAbsoluteDeviation += Math.abs(values[i]-median);
         }
         meanAbsoluteDeviation = meanAbsoluteDeviation/mean;
 
-        if(median <= mean) {
+        long priority;
+        if (median <= mean) {
             priority = median - meanAbsoluteDeviation;
         }
         else {
@@ -55,21 +64,20 @@ public class DeityMetricRegistry extends MetricRegistry {
         }
 
         long stamp = _stamper.getTime();
-
         QueryObject queryObject;
 
-        if (_priorityObjects.containsKey(strippedQuery)) {
-            queryObject = _priorityObjects.get(strippedQuery);
+        if (_priorityObjects.containsKey(queryHash)) {
+            queryObject = _priorityObjects.get(queryHash);
             queryObject.setRecentTimestamp(stamp);
             queryObject.setPriority(priority);
             queryObject.setQuery(metadata.getQuery());
         }
         else {
             queryObject = new QueryObject(priority, stamp, metadata.getQuery());
-            if(_histogramCounter.incrementAndGet() == MAX_HISTOGRAM_COUNT) {
-                prune(_metricSupplier);
+            if (_histogramCounter.incrementAndGet() == _config.getMaxHistogramCount()) {
+                prune(metricSupplier);
             }
-            _priorityObjects.put(strippedQuery, queryObject);
+            _priorityObjects.put(queryHash, queryObject);
         }
     }
 
@@ -77,17 +85,23 @@ public class DeityMetricRegistry extends MetricRegistry {
         return _priorityObjects;
     }
 
-    public void prune(MetricSupplier _metricSupplier) {
+    /**
+     * This function is used to prevent overflows of data, when too many unique queries are being in the system.
+     * The function first looks for empty (or near-empty) queries, and if it still needs to remove additional queries,
+     * it looks for the oldest queries to remove until it has opened up a sufficient space for new queries.
+     * @param metricSupplier
+     */
+    public void prune(MetricSupplier metricSupplier) {
         List<QueryObject> sortedList = new LinkedList();
 
         Iterator<Map.Entry<String, QueryObject>> iter = _priorityObjects.entrySet().iterator();
         while (iter.hasNext()) {
             Map.Entry<String, QueryObject> entry = iter.next();
 
-            Histogram histogram = this.histogram(entry.getKey(), _metricSupplier);
+            Histogram histogram = this.histogram(entry.getKey(), metricSupplier);
             Snapshot snap = histogram.getSnapshot();
 
-            if(snap.size() < 1024) {
+            if (snap.size() < MAX_QUERY_COUNT) {
                 this.remove(entry.getKey());
                 iter.remove();
                 _histogramCounter.decrementAndGet();
@@ -98,7 +112,8 @@ public class DeityMetricRegistry extends MetricRegistry {
 
         sortedList.sort((x, y) -> (int) (x.getRecentTimestamp() - y.getRecentTimestamp()));
 
-        while(sortedList.size() > MAX_HISTOGRAM_COUNT/2) {
+        // We need to make sure that when we prune, we're opening up at least half of histogram
+        while (sortedList.size() > _config.getMaxHistogramCount() / 2) {
             QueryObject object = sortedList.remove(0);
 
             this.remove(object.getQuery().getMurmur3HashAsString());

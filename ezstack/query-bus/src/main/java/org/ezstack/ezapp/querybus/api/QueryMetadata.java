@@ -32,10 +32,6 @@ public class QueryMetadata {
         return _query;
     }
 
-    public String hash() {
-        return _query.toString();
-    }
-
     @JsonProperty("responseTimeInMs")
     public long getResponseTimeInMs() {
         return _responseTimeInMs;

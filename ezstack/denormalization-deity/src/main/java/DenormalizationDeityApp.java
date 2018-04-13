@@ -19,30 +19,35 @@ import org.slf4j.LoggerFactory;
 
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Supplier;
 
 public class DenormalizationDeityApp implements StreamApplication {
     private static final Logger LOG = LoggerFactory.getLogger(DenormalizationDeityApp.class);
 
-    private final DeityMetricRegistry _metrics;
+    private static final int DATADOG_UPDATE_INTERVAL_SECS = 10;
+
+    private DeityMetricRegistry _metrics;
     private final DeityMetricRegistry.MetricSupplier<Histogram> _histogramSupplier;
     private DeityConfig _config;
     private RulesManager _rulesManager;
     private Supplier<Set<Rule>> _ruleSupplier;
-    private final AtomicIntManager _intManager;
+    private final QueryCounter _intManager;
     private RuleCreationService _ruleCreationService;
 
     public DenormalizationDeityApp() {
-        _metrics = new DeityMetricRegistry();
         _histogramSupplier = () -> new Histogram(new UniformReservoir());
-        AtomicInteger runningQueryCount = new AtomicInteger(0);
-        _intManager = new AtomicIntManager(runningQueryCount);
+        _intManager = new QueryCounter();
     }
 
+    /**
+     * This is the initialization function for the entire DenormalizationDeity. This is where the queries come in, and
+     * @param streamGraph
+     * @param config
+     */
     @Override
     public void init(StreamGraph streamGraph, Config config) {
         _config = new DeityConfig(config);
+        _metrics = new DeityMetricRegistry(_config);
         _rulesManager = EZappClientFactory.newRulesManager(_config.getUriAddress());
         _ruleSupplier = Suppliers.memoizeWithExpiration(_rulesManager::getRules, _config.getCachePeriod(), TimeUnit.SECONDS);
         _ruleCreationService = new RuleCreationService(_config, _metrics, _histogramSupplier, _rulesManager, _ruleSupplier, _intManager);
@@ -50,7 +55,7 @@ public class DenormalizationDeityApp implements StreamApplication {
         MessageStream<QueryMetadata> queryStream = streamGraph.getInputStream("queries", new JsonSerdeV3<>(QueryMetadata.class));
 
         MessageStream<KV<String, QueryMetadata>> partionedQueryMetadata =
-                queryStream.partitionBy(queryMetadata -> queryMetadata.hash(),
+                queryStream.partitionBy(queryMetadata -> queryMetadata.getQuery().getMurmur3HashAsString(),
                         queryMetadata -> queryMetadata,
                         KVSerde.of(new StringSerde(), new JsonSerdeV3<>(QueryMetadata.class)),
                         "partition-query-metadata");
@@ -61,6 +66,6 @@ public class DenormalizationDeityApp implements StreamApplication {
         HttpTransport transport = new HttpTransport.Builder().withApiKey(_config.getDatadogKey()).build();
         DatadogReporter reporter = DatadogReporter.forRegistry(_metrics).withTransport(transport).withExpansions(DatadogReporter.Expansion.ALL).build();
 
-        reporter.start(10, TimeUnit.SECONDS);
+        reporter.start(DATADOG_UPDATE_INTERVAL_SECS, TimeUnit.SECONDS);
     }
 }
