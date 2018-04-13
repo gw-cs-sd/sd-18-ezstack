@@ -41,7 +41,7 @@ public class DeityMetricRegistry extends MetricRegistry {
 
         long mean = (long) snap.getMean();
 
-        //This check and fix is to prevent an edge case where it was possible to have a dividebyzero exception.
+        // This check and fix is to prevent an edge case where it was possible to have a dividebyzero exception.
         if (mean == 0) {
             mean = 1;
         }

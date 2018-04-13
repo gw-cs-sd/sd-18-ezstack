@@ -57,7 +57,7 @@ public class RuleDeterminationProcessor {
             QueryObject value = entry.getValue();
             QueryToRule ruleConverter = new QueryToRule(_rulesManager, _ruleSupplier);
 
-            //we check to see which rules are necessary to be implemented
+            // we check to see which rules are necessary to be implemented
             if (value.getPriority() >= threshold) {
                 Rule rule = ruleConverter.convertToRule(value.getQuery());
                 if (rule != null) {
@@ -66,7 +66,7 @@ public class RuleDeterminationProcessor {
                 }
             }
             else {
-                //TODO: if the rule exists and is no longer necessary, remove the rule --- THIS IS NOT IMPLEMENTED YET
+                // TODO: if the rule exists and is no longer necessary, remove the rule --- THIS IS NOT IMPLEMENTED YET
             }
         }
     }
