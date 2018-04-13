@@ -4,7 +4,7 @@ import org.apache.samza.config.JobConfig;
 public class DeityConfig extends JobConfig {
 
     public static final String DATADOG_KEY = "deity.datadog.key";
-    public static final String ADJUSTMENT_PERIOD_SECS = "deity.update.interval.ms";
+    public static final String ADJUSTMENT_PERIOD_SECS = "deity.update.interval.secs";
     public static final String URI_ADDRESS = "deity.clientfactory.uri.address";
     public static final String CACHE_PERIOD_SECS = "deity.cache.interval.secs";
     public static final String UPDATE_QUERY_THRESHOLD = "deity.update.query.threshold";
