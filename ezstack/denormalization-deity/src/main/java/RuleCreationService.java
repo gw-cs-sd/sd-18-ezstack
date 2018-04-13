@@ -12,7 +12,7 @@ import java.util.function.Supplier;
 public class RuleCreationService extends AbstractScheduledService {
 
     private DeityConfig _config;
-    private final DeityMetricRegistry _metrics;
+    private final DeityMetricRegistry _queryMetricRegistry;
     private final DeityMetricRegistry.MetricSupplier<Histogram> _histogramSupplier;
     private RulesManager _rulesManager;
     private Supplier<Set<Rule>> _ruleSupplier;
@@ -22,12 +22,12 @@ public class RuleCreationService extends AbstractScheduledService {
 
     public RuleCreationService(DeityConfig config, DeityMetricRegistry metrics, DeityMetricRegistry.MetricSupplier<Histogram> histogramSupplier, RulesManager rulesManager, Supplier<Set<Rule>> ruleSupplier, QueryCounter intManager) {
         _config = config;
-        _metrics = metrics;
+        _queryMetricRegistry = metrics;
         _histogramSupplier = histogramSupplier;
         _rulesManager = rulesManager;
         _ruleSupplier = ruleSupplier;
         _intManager = intManager;
-        _ruleDeterminationProcessor = new RuleDeterminationProcessor(_metrics, _histogramSupplier, _rulesManager, _ruleSupplier);
+        _ruleDeterminationProcessor = new RuleDeterminationProcessor(_queryMetricRegistry, _histogramSupplier, _rulesManager, _ruleSupplier);
     }
 
     /**

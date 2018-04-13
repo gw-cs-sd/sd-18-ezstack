@@ -1,16 +1,17 @@
 import com.codahale.metrics.Histogram;
+import com.codahale.metrics.MetricRegistry;
 import org.apache.samza.operators.functions.MapFunction;
 import org.ezstack.ezapp.querybus.api.QueryMetadata;
 
 public class QueryMetadataProcessor implements MapFunction<QueryMetadata, QueryMetadata> {
 
-    private final DeityMetricRegistry _metrics;
+    private final DeityMetricRegistry _queryMetricRegistry;
     private final DeityMetricRegistry.MetricSupplier<Histogram> _histogramSupplier;
     private final QueryCounter _intManager;
 
 
-    public QueryMetadataProcessor(DeityMetricRegistry metrics, DeityMetricRegistry.MetricSupplier<Histogram> histogramSupplier, QueryCounter intManager) {
-        _metrics = metrics;
+    public QueryMetadataProcessor(DeityMetricRegistry queryMetricRegistry, DeityMetricRegistry.MetricSupplier<Histogram> histogramSupplier, QueryCounter intManager, MetricRegistry metricRegistry) {
+        _queryMetricRegistry = queryMetricRegistry;
         _histogramSupplier = histogramSupplier;
         _intManager = intManager;
     }
@@ -26,10 +27,10 @@ public class QueryMetadataProcessor implements MapFunction<QueryMetadata, QueryM
         String queryHash = queryMetadata.getQuery().getMurmur3HashAsString();
         _intManager.increment();
 
-        Histogram histogram = _metrics.histogram(queryHash, _histogramSupplier);
+        Histogram histogram = _queryMetricRegistry.histogram(queryHash, _histogramSupplier);
         histogram.update(queryMetadata.getResponseTimeInMs());
 
-        _metrics.updateQueryObject(queryMetadata, _histogramSupplier);
+        _queryMetricRegistry.updateQueryObject(queryMetadata, _histogramSupplier);
 
         return queryMetadata;
     }

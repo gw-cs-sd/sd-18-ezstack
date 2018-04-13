@@ -13,13 +13,13 @@ public class RuleDeterminationProcessor {
 
     private static final Logger LOG = LoggerFactory.getLogger(RuleDeterminationProcessor.class);
 
-    private final DeityMetricRegistry _metrics;
+    private final DeityMetricRegistry _queryMetricRegistry;
     private final DeityMetricRegistry.MetricSupplier<Histogram> _histogramSupplier;
     private RulesManager _rulesManager;
     private Supplier<Set<Rule>> _ruleSupplier;
 
     public RuleDeterminationProcessor(DeityMetricRegistry metrics, DeityMetricRegistry.MetricSupplier<Histogram> histogramSupplier, RulesManager rulesManager, Supplier<Set<Rule>> ruleSupplier) {
-        _metrics = metrics;
+        _queryMetricRegistry = metrics;
         _histogramSupplier = histogramSupplier;
         _rulesManager = rulesManager;
         _ruleSupplier = ruleSupplier;
@@ -36,10 +36,10 @@ public class RuleDeterminationProcessor {
      * @return
      */
     private long startRuleCreation() {
-        Histogram histogram = _metrics.histogram("baseline", _histogramSupplier);
+        Histogram histogram = _queryMetricRegistry.histogram("baseline", _histogramSupplier);
         Snapshot snap = histogram.getSnapshot();
 
-        for (Map.Entry<String, QueryObject> entry : _metrics.getQueryObjects().entrySet()) {
+        for (Map.Entry<String, QueryObject> entry : _queryMetricRegistry.getQueryObjects().entrySet()) {
             QueryObject value = entry.getValue();
             histogram.update(value.getPriority());
         }
@@ -53,7 +53,7 @@ public class RuleDeterminationProcessor {
      * @param threshold
      */
     private void addRules(long threshold) {
-        for (Map.Entry<String, QueryObject> entry : _metrics.getQueryObjects().entrySet()) {
+        for (Map.Entry<String, QueryObject> entry : _queryMetricRegistry.getQueryObjects().entrySet()) {
             QueryObject value = entry.getValue();
             QueryToRule ruleConverter = new QueryToRule(_rulesManager, _ruleSupplier);
 

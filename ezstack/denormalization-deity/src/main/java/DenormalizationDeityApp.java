@@ -1,4 +1,5 @@
 import com.codahale.metrics.Histogram;
+import com.codahale.metrics.MetricRegistry;
 import com.codahale.metrics.UniformReservoir;
 import com.google.common.base.Suppliers;
 import org.apache.samza.application.StreamApplication;
@@ -26,7 +27,8 @@ public class DenormalizationDeityApp implements StreamApplication {
 
     private static final int DATADOG_UPDATE_INTERVAL_SECS = 10;
 
-    private DeityMetricRegistry _metrics;
+    private DeityMetricRegistry _queryMetricRegistry;
+    private MetricRegistry _metricRegistry;
     private final DeityMetricRegistry.MetricSupplier<Histogram> _histogramSupplier;
     private DeityConfig _config;
     private RulesManager _rulesManager;
@@ -47,10 +49,11 @@ public class DenormalizationDeityApp implements StreamApplication {
     @Override
     public void init(StreamGraph streamGraph, Config config) {
         _config = new DeityConfig(config);
-        _metrics = new DeityMetricRegistry(_config);
+        _queryMetricRegistry = new DeityMetricRegistry(_config);
+        _metricRegistry = new MetricRegistry();
         _rulesManager = EZappClientFactory.newRulesManager(_config.getUriAddress());
         _ruleSupplier = Suppliers.memoizeWithExpiration(_rulesManager::getRules, _config.getCachePeriod(), TimeUnit.SECONDS);
-        _ruleCreationService = new RuleCreationService(_config, _metrics, _histogramSupplier, _rulesManager, _ruleSupplier, _intManager);
+        _ruleCreationService = new RuleCreationService(_config, _queryMetricRegistry, _histogramSupplier, _rulesManager, _ruleSupplier, _intManager);
 
         MessageStream<QueryMetadata> queryStream = streamGraph.getInputStream("queries", new JsonSerdeV3<>(QueryMetadata.class));
 
@@ -60,11 +63,11 @@ public class DenormalizationDeityApp implements StreamApplication {
                         KVSerde.of(new StringSerde(), new JsonSerdeV3<>(QueryMetadata.class)),
                         "partition-query-metadata");
 
-        queryStream.map(new QueryMetadataProcessor(_metrics, _histogramSupplier, _intManager))
+        queryStream.map(new QueryMetadataProcessor(_queryMetricRegistry, _histogramSupplier, _intManager, _metricRegistry))
                 .sink(new RuleCreationServiceSamzaWrapper(_ruleCreationService));
 
         HttpTransport transport = new HttpTransport.Builder().withApiKey(_config.getDatadogKey()).build();
-        DatadogReporter reporter = DatadogReporter.forRegistry(_metrics).withTransport(transport).withExpansions(DatadogReporter.Expansion.ALL).build();
+        DatadogReporter reporter = DatadogReporter.forRegistry(_metricRegistry).withTransport(transport).withExpansions(DatadogReporter.Expansion.ALL).build();
 
         reporter.start(DATADOG_UPDATE_INTERVAL_SECS, TimeUnit.SECONDS);
     }
