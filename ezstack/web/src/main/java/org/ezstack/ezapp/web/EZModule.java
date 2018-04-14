@@ -1,5 +1,6 @@
 package org.ezstack.ezapp.web;
 
+import com.codahale.metrics.MetricRegistry;
 import com.google.common.net.HostAndPort;
 import com.google.inject.AbstractModule;
 import com.google.inject.Provides;
@@ -32,6 +33,7 @@ public class EZModule extends AbstractModule {
         bind(ServerFactory.class).toInstance(_configuration.getServerFactory());
         bind(HostAndPort.class).annotatedWith(SelfHostAndPort.class)
                 .toInstance(SelfHostAndPortFactory.getSelfHostAndPort(_configuration.getServerFactory()));
+        bind(MetricRegistry.class).toInstance(_environment.metrics());
 
         install(new WriterModule(_configuration.getWriterConfiguration()));
         install(new ReaderModule(_configuration.getElasticSearchConfiguration()));
