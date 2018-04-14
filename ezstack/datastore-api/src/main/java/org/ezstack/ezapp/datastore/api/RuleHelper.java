@@ -23,9 +23,9 @@ public class RuleHelper {
         }
 
         return new Query(
-                null,
+                null, // searchTypes
                 original.getTable(),
-                original.getFilters(),
+                null, // filters
                 original.getJoin(),
                 original.getJoinAttributeName(),
                 original.getJoinAttributes(),
@@ -48,7 +48,7 @@ public class RuleHelper {
         }
 
         if (!original.getTable().equals(rule.getTable())) return false;
-        if (!original.getFilters().equals(rule.getFilters())) return false;
+        if (!original.getFilters().isEmpty() && !original.getFilters().equals(rule.getFilters())) return false;
         if (!original.getJoin().equals(rule.getJoin())) return false;
         if (!original.getJoinAttributes().equals(rule.getJoinAttributes())) return false;
         if (!original.getExcludeAttributes().equals(rule.getExcludeAttributes())) return false;
