@@ -1,3 +1,5 @@
+package org.ezstack.deity;
+
 import com.codahale.metrics.Histogram;
 import com.codahale.metrics.MetricRegistry;
 import com.codahale.metrics.UniformReservoir;
@@ -66,9 +68,11 @@ public class DenormalizationDeityApp implements StreamApplication {
         queryStream.map(new QueryMetadataProcessor(_queryMetricRegistry, _histogramSupplier, _intManager, _rulesManager, _ruleSupplier, _config, _metricRegistry))
                 .sink(new RuleCreationServiceSamzaWrapper(_ruleCreationService));
 
-        HttpTransport transport = new HttpTransport.Builder().withApiKey(_config.getDatadogKey()).build();
-        DatadogReporter reporter = DatadogReporter.forRegistry(_metricRegistry).withTransport(transport).withExpansions(DatadogReporter.Expansion.ALL).build();
+        if (_config.getDatadogKey() != null) {
+            HttpTransport transport = new HttpTransport.Builder().withApiKey(_config.getDatadogKey()).build();
+            DatadogReporter reporter = DatadogReporter.forRegistry(_metricRegistry).withTransport(transport).withExpansions(DatadogReporter.Expansion.ALL).build();
 
-        reporter.start(DATADOG_UPDATE_INTERVAL_SECS, TimeUnit.SECONDS);
+            reporter.start(DATADOG_UPDATE_INTERVAL_SECS, TimeUnit.SECONDS);
+        }
     }
 }

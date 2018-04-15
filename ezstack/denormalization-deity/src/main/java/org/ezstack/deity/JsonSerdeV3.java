@@ -1,3 +1,4 @@
+package org.ezstack.deity;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -11,17 +12,17 @@ import java.io.ObjectInputStream;
 import java.io.UnsupportedEncodingException;
 
 /**
- * A serializer for UTF-8 encoded JSON strings. JsonSerdeV3 differs from JsonSerde in that:
+ * A serializer for UTF-8 encoded JSON strings. org.ezstack.deity.JsonSerdeV3 differs from JsonSerde in that:
  * <ol>
  *   <li>
- *     It allows specifying the specific POJO type to deserialize to (using JsonSerdeV3(Class&lt;T&gt;)
- *     or JsonSerdeV3#of(Class&lt;T&gt;). JsonSerde always returns a LinkedHashMap&lt;String, Object&gt;
+ *     It allows specifying the specific POJO type to deserialize to (using org.ezstack.deity.JsonSerdeV3(Class&lt;T&gt;)
+ *     or org.ezstack.deity.JsonSerdeV3#of(Class&lt;T&gt;). JsonSerde always returns a LinkedHashMap&lt;String, Object&gt;
  *     upon deserialization.
  *   <li>
  *     It uses Jackson's default 'camelCase' property naming convention, which simplifies defining
  *     the POJO to bind to. JsonSerde enforces the 'dash-separated' property naming convention.
  * </ol>
- * This JsonSerdeV3 should be preferred over JsonSerde for High Level API applications, unless
+ * This org.ezstack.deity.JsonSerdeV3 should be preferred over JsonSerde for High Level API applications, unless
  * backwards compatibility with the older data format (with dasherized names) is required.
  *
  * @param <T> the type of the POJO being (de)serialized.
@@ -33,14 +34,14 @@ public class JsonSerdeV3<T> implements Serde<T> {
     private transient ObjectMapper mapper = new ObjectMapper();
 
     /**
-     * Constructs a JsonSerdeV3 that returns a LinkedHashMap&lt;String, Object&lt; upon deserialization.
+     * Constructs a org.ezstack.deity.JsonSerdeV3 that returns a LinkedHashMap&lt;String, Object&lt; upon deserialization.
      */
     public JsonSerdeV3() {
         this(null);
     }
 
     /**
-     * Constructs a JsonSerdeV3 that (de)serializes POJOs of class {@code clazz}.
+     * Constructs a org.ezstack.deity.JsonSerdeV3 that (de)serializes POJOs of class {@code clazz}.
      *
      * @param clazz the class of the POJO being (de)serialized.
      */

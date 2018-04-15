@@ -1,3 +1,5 @@
+package org.ezstack.deity;
+
 import org.apache.samza.config.Config;
 import org.apache.samza.config.JobConfig;
 

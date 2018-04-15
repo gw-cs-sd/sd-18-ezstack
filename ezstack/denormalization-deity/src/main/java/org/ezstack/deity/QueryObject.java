@@ -1,3 +1,5 @@
+package org.ezstack.deity;
+
 import org.ezstack.ezapp.datastore.api.Rule;
 
 public class QueryObject {
@@ -9,7 +11,7 @@ public class QueryObject {
     /**
      * This is the object used for storing the incidental value required for creating and maintaining rules. The
      * timestamp is needed to guarantee that the list of rules is as up-to-date as possible, the priority is stored so
-     * that the scores do not need to be recalculated every time the RuleDeterminationProcessor executes, and the rule
+     * that the scores do not need to be recalculated every time the org.ezstack.deity.RuleDeterminationProcessor executes, and the rule
      * needs to be stored so that there is a rule to be passed in to the ruledeterminationprocessor when it executes.
      * @param priority
      * @param recentTimestamp

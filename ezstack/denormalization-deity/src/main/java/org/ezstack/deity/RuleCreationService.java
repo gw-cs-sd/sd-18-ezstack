@@ -1,3 +1,5 @@
+package org.ezstack.deity;
+
 import com.codahale.metrics.Histogram;
 import com.google.common.util.concurrent.AbstractScheduledService;
 import org.ezstack.ezapp.datastore.api.Rule;
