@@ -17,12 +17,14 @@ public class RuleDeterminationProcessor {
     private final DeityMetricRegistry.MetricSupplier<Histogram> _histogramSupplier;
     private RulesManager _rulesManager;
     private Supplier<Set<Rule>> _ruleSupplier;
+    private final DeityConfig _config;
 
-    public RuleDeterminationProcessor(DeityMetricRegistry metrics, DeityMetricRegistry.MetricSupplier<Histogram> histogramSupplier, RulesManager rulesManager, Supplier<Set<Rule>> ruleSupplier) {
+    public RuleDeterminationProcessor(DeityMetricRegistry metrics, DeityMetricRegistry.MetricSupplier<Histogram> histogramSupplier, RulesManager rulesManager, Supplier<Set<Rule>> ruleSupplier, DeityConfig config) {
         _queryMetricRegistry = metrics;
         _histogramSupplier = histogramSupplier;
         _rulesManager = rulesManager;
         _ruleSupplier = ruleSupplier;
+        _config = config;
     }
 
     public void ruleCreationProcess() {
@@ -37,13 +39,13 @@ public class RuleDeterminationProcessor {
      */
     private long startRuleCreation() {
         Histogram histogram = _queryMetricRegistry.histogram("baseline", _histogramSupplier);
-        Snapshot snap = histogram.getSnapshot();
 
         for (Map.Entry<String, QueryObject> entry : _queryMetricRegistry.getQueryObjects().entrySet()) {
             QueryObject value = entry.getValue();
             histogram.update(value.getPriority());
         }
 
+        Snapshot snap = histogram.getSnapshot();
         return (long)snap.get75thPercentile();
     }
 
@@ -56,16 +58,17 @@ public class RuleDeterminationProcessor {
         for (Map.Entry<String, QueryObject> entry : _queryMetricRegistry.getQueryObjects().entrySet()) {
             QueryObject value = entry.getValue();
 
-            QueryToRule ruleCreator = new QueryToRule(_rulesManager, _ruleSupplier);
+            QueryToRule ruleCreator = new QueryToRule(_rulesManager, _ruleSupplier, _config.getMaxRuleCapacity());
 
             // we check to see which rules are necessary to be implemented
             if (value.getPriority() >= threshold) {
                 if (value.getRule() != null) {
-                    LOG.info("The rule for Query \"" + value.getRule().toString() +  "\" is being added.");
+                    LOG.info("The rule \"" + entry.getValue().getRule().toString() +  "\" is being added.");
                     ruleCreator.addRule(value.getRule());
                 }
             }
             else {
+                LOG.info("The rule \"" + entry.getValue().getRule().toString() +  "\" is not being added, because it does not pass the threshold");
                 // TODO: if the rule exists and is no longer necessary, remove the rule --- THIS IS NOT IMPLEMENTED YET
             }
         }

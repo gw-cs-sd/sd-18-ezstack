@@ -34,8 +34,8 @@ public class QueryMetadataProcessor implements MapFunction<QueryMetadata, QueryM
      */
     @Override
     public QueryMetadata apply(QueryMetadata queryMetadata) {
-        QueryToRule ruleConverter = new QueryToRule(_rulesManager, _ruleSupplier);
-        Rule rule = ruleConverter.convertToRule(queryMetadata.getQuery(), _config.getMaxRuleCapacity());
+        QueryToRule ruleConverter = new QueryToRule(_rulesManager, _ruleSupplier, _config.getMaxRuleCapacity());
+        Rule rule = ruleConverter.convertToRule(queryMetadata.getQuery());
 
         if (rule == null) {
             return queryMetadata;

@@ -27,7 +27,7 @@ public class RuleCreationService extends AbstractScheduledService {
         _rulesManager = rulesManager;
         _ruleSupplier = ruleSupplier;
         _intManager = intManager;
-        _ruleDeterminationProcessor = new RuleDeterminationProcessor(_queryMetricRegistry, _histogramSupplier, _rulesManager, _ruleSupplier);
+        _ruleDeterminationProcessor = new RuleDeterminationProcessor(_queryMetricRegistry, _histogramSupplier, _rulesManager, _ruleSupplier, _config);
     }
 
     /**
@@ -39,7 +39,11 @@ public class RuleCreationService extends AbstractScheduledService {
     @Override
     protected void runOneIteration() throws Exception {
         if (_intManager.getAndReset() >= _config.getUpdateQueryThreshold()) {
+            LOG.info("Executing the rule determination processor.");
             _ruleDeterminationProcessor.ruleCreationProcess();
+        }
+        else {
+            LOG.info("Not enough queries have come through the system in the last " + _config.getAdjustmentPeriod() + " seconds, so the rule determination processor will not execute.");
         }
     }
 

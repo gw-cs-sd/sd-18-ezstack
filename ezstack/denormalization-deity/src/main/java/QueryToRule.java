@@ -10,10 +10,12 @@ public class QueryToRule {
     private final RulesManager _rulesManager;
     private final Supplier<Set<Rule>> _rules;
     private static final Logger LOG = LoggerFactory.getLogger(RuleDeterminationProcessor.class);
+    private int _maxRules;
 
-    public QueryToRule(RulesManager rulesManager, Supplier<Set<Rule>> rules) {
+    public QueryToRule(RulesManager rulesManager, Supplier<Set<Rule>> rules, int maxRules) {
         _rulesManager = rulesManager;
         _rules = rules;
+        _maxRules = maxRules;
     }
 
     /**
@@ -23,13 +25,13 @@ public class QueryToRule {
      * @param query
      * @return
      */
-    public Rule convertToRule(Query query, int maxRules) {
+    public Rule convertToRule(Query query) {
 
         RuleHelper helper = new RuleHelper();
         Rule rule = helper.getRule(query);
 
         if (rule != null) {
-            if (_rules.get().size() <= maxRules) {
+            if (_rules.get().size() <= _maxRules) {
                 if (!ruleExists(rule)) {
                     return rule;
                 }
@@ -57,6 +59,18 @@ public class QueryToRule {
      * @param rule
      */
     public void addRule(Rule rule) {
+        //First we check to see if we already have too many rules
+        if (!(_rules.get().size() <= _maxRules)) {
+            return;
+        }
+
+        //Second, we check to see if the rule already exists within our cache.
+        if(ruleExists(rule)) {
+            return;
+        }
+
+        //Finally, we attempt to add the rule, and catch the RuleAlreadyExistsException in the case that the rule
+        //exists, but wasn't in our cache.
         try {
             _rulesManager.createRule(rule);
         } catch (RuleAlreadyExistsException exception) {
