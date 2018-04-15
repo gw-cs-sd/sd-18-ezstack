@@ -23,7 +23,7 @@
         <module>client</module>
         <module>web-api</module>
         <module>common</module>
-        <module>bootstrap-job-deployer</module>
+        <module>bootstrapper-job-deployer</module>
     </modules>
     <name>EZstack</name>
 

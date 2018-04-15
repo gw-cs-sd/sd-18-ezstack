@@ -4,6 +4,7 @@ import com.google.inject.PrivateModule;
 import com.google.inject.Provides;
 import com.google.inject.Singleton;
 import com.google.inject.name.Names;
+import org.ezstack.bootstrap.client.BootstrapClient;
 import org.ezstack.ezapp.common.lifecycle.GuavaManagedService;
 import org.ezstack.ezapp.common.lifecycle.LifeCycleRegistry;
 import org.ezstack.ezapp.datastore.api.RulesManager;
@@ -61,5 +62,11 @@ public class RulesManagerModule extends PrivateModule {
         CuratorRulesManager rulesManager = new CuratorRulesManager(rulesPath, curatorFactory);
         lifeCycleRegistry.manage(new GuavaManagedService(rulesManager));
         return rulesManager;
+    }
+
+    @Singleton
+    @Provides
+    BootstrapClient provideBootstrapClient() {
+        return new BootstrapClient(_configuration.getBootstapperJobDeployerUri());
     }
 }

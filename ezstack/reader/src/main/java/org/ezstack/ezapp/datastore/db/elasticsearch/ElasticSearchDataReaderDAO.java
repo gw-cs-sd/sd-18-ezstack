@@ -1,5 +1,6 @@
 package org.ezstack.ezapp.datastore.db.elasticsearch;
 
+import com.codahale.metrics.MetricRegistry;
 import com.google.common.util.concurrent.AbstractService;
 import com.google.inject.Inject;
 import com.google.inject.name.Named;

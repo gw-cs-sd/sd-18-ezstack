@@ -25,6 +25,7 @@ import org.apache.kafka.common.errors.TopicExistsException;
 import org.apache.kafka.common.serialization.StringSerializer;
 import org.apache.kafka.connect.json.JsonSerializer;
 import org.apache.zookeeper.KeeperException;
+import org.ezstack.bootstrap.client.BootstrapClient;
 import org.ezstack.ezapp.datastore.api.Rule;
 import org.ezstack.ezapp.datastore.api.RulesManager;
 import org.ezstack.ezapp.datastore.api.ShutdownMessage;
@@ -68,6 +69,7 @@ public class LocalRulesMonitor extends AbstractService {
     private final String _shutdownTopicName;
     private final String _rulesPath;
     private final String _bootstrapperPath;
+    private final BootstrapClient _bootstrapClient;
 
     private CuratorFramework _curator;
 
@@ -75,7 +77,7 @@ public class LocalRulesMonitor extends AbstractService {
 
     LocalRulesMonitor(RulesManager rulesManager, CuratorFactory curatorFactory, String bootstrapServers,
                       int partitionCount, int replicationFactor, String bootstrapTopicName, String shutdownTopicName,
-                      String rulesPath, String bootstrapperPath) {
+                      String rulesPath, String bootstrapperPath, BootstrapClient bootstrapClient) {
         _rulesManager = checkNotNull(rulesManager, "rulesManager");
         _curatorFactory = checkNotNull(curatorFactory, "curatorFactory");
         _kafkaBootstrapServers = checkNotNull(bootstrapServers, "bootstrapServers");
@@ -83,6 +85,7 @@ public class LocalRulesMonitor extends AbstractService {
         _shutdownTopicName = checkNotNull(shutdownTopicName, "shutdownTopicName");
         _rulesPath = checkNotNull(rulesPath, "rulesPath");
         _bootstrapperPath = checkNotNull(bootstrapperPath, "bootstrapperPath");
+        _bootstrapClient = checkNotNull(bootstrapClient, "bootstrapClient");
 
         checkArgument(partitionCount > 0);
         checkArgument(replicationFactor > 0);
@@ -214,8 +217,9 @@ public class LocalRulesMonitor extends AbstractService {
 
         _curator.transaction().forOperations(ops);
 
-        // TODO: start boostrapper job here
-        LOG.info("Please start job with ID: {}", bootstrapperJobId);
+        _bootstrapClient.startJob(bootstrapperJobId);
+
+        LOG.info("Starting job with ID: {}", bootstrapperJobId);
     }
 
     private List<CuratorOp> getCuratorOpsForStatusSetters(Set<Rule> rules, Rule.RuleStatus status) throws Exception {

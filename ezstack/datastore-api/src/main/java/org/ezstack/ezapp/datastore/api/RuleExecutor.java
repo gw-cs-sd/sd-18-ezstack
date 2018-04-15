@@ -1,17 +1,23 @@
 package org.ezstack.ezapp.datastore.api;
 
+import com.codahale.metrics.Meter;
+import com.codahale.metrics.MetricRegistry;
+
 import java.util.HashSet;
 import java.util.Set;
 
 public class RuleExecutor {
-    private RulesManager _ruleManager;
-    private Query _originalQuery;
+    private final RulesManager _ruleManager;
+    private final Query _originalQuery;
+    private final Meter _ruleMeter;
+
     private Query _execQuery;
     private Rule _closestRule;
 
-    public RuleExecutor(Query originalQuery, RulesManager ruleManager) {
+    public RuleExecutor(Query originalQuery, RulesManager ruleManager, Meter ruleMeter) {
         _originalQuery = originalQuery;
         _ruleManager = ruleManager;
+        _ruleMeter = ruleMeter;
 
         _execQuery = null;
         _closestRule = null;
@@ -49,6 +55,7 @@ public class RuleExecutor {
             filters = new HashSet<>();
         }
 
+        _ruleMeter.mark();
         _execQuery = new Query(_originalQuery.getSearchTypes(),
                 _closestRule.getTable(),
                 filters,

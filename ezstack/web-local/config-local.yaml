@@ -24,6 +24,7 @@ rulesManager:
   partitionCount: 6
   replicationFactor: 1
   kafkaBootstrapServers: "localhost:9092"
+  bootstrapperJobDeployerUri: "http://localhost:8000"
 
 #metrics:
 #  frequency: 1 second                       # Default is 1 second.

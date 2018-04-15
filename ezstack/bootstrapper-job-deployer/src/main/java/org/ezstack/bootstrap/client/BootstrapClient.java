@@ -1,7 +1,5 @@
 package org.ezstack.bootstrap.client;
 
-import com.fasterxml.jackson.jaxrs.json.JacksonJsonProvider;
-
 import javax.ws.rs.client.Client;
 import javax.ws.rs.client.ClientBuilder;
 import javax.ws.rs.core.MediaType;
@@ -15,7 +13,7 @@ public class BootstrapClient {
 
     public BootstrapClient(String uri) {
         _uri = URI.create(uri);
-        _client = ClientBuilder.newClient().register(JacksonJsonProvider.class);
+        _client = ClientBuilder.newClient();
     }
 
     public BootstrapClientResponse startJob(String jobId) throws RuntimeException {
