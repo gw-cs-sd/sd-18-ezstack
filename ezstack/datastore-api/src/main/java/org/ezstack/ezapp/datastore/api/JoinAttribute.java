@@ -9,6 +9,8 @@ import com.google.common.hash.Hashing;
 
 import javax.validation.constraints.NotNull;
 
+import static com.google.common.base.Preconditions.checkNotNull;
+
 /**
  * The following class is used to
  */
@@ -20,8 +22,8 @@ public class JoinAttribute {
     @JsonCreator
     public JoinAttribute(@NotNull @JsonProperty("outerAttribute") String outerAttribute,
                          @NotNull @JsonProperty("innerAttribute") String innerAttribute) {
-        _outerAttribute = outerAttribute;
-        _innerAttribute = innerAttribute;
+        _outerAttribute = checkNotNull(outerAttribute);
+        _innerAttribute = checkNotNull(innerAttribute);
     }
 
     public String getOuterAttribute() {

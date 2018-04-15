@@ -15,6 +15,7 @@
         <module>writer</module>
         <module>datastore-api</module>
         <module>denormalizer</module>
+        <module>denormalization-deity</module>
         <module>samza-elasticsearch</module>
         <module>reader</module>
         <module>query-bus</module>
