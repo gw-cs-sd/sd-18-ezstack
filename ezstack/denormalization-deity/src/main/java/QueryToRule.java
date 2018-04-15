@@ -61,11 +61,13 @@ public class QueryToRule {
     public void addRule(Rule rule) {
         // First we check to see if we already have too many rules
         if (!(_rules.get().size() <= _maxRules)) {
+            LOG.info("Process stopped. The maximum amount of rules have been created.");
             return;
         }
 
         // Second, we check to see if the rule already exists within our cache.
         if(ruleExists(rule)) {
+            LOG.info("Process stopped. The rule already exists.");
             return;
         }
 
@@ -74,6 +76,7 @@ public class QueryToRule {
         try {
             _rulesManager.createRule(rule);
         } catch (RuleAlreadyExistsException exception) {
+            LOG.info("Process stopped. The rule already exists.");
             return;
         }
     }
