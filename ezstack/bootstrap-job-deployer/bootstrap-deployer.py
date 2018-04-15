@@ -22,13 +22,13 @@ def deploy_job(job_id):
         f.write('{}={}\n'.format(key, properties[key]))
     f.close()
 
-    exec = [
+    cmd = [
         run_app_path,
         '--config-factory=org.apache.samza.config.factories.PropertiesConfigFactory',
         '--config-path=file://{}'.format(f.name)
     ]
 
-    proc = subprocess.Popen(exec, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    proc = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
     (stdout, stderr) = proc.communicate()
     status = proc.returncode
 
