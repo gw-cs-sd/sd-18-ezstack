@@ -1,3 +1,5 @@
+package org.ezstack.deity;
+
 import org.ezstack.ezapp.datastore.api.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

@@ -1,3 +1,5 @@
+package org.ezstack.deity;
+
 import com.codahale.metrics.Histogram;
 import com.codahale.metrics.MetricRegistry;
 import org.apache.samza.operators.functions.MapFunction;

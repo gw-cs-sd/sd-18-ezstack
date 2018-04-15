@@ -1,3 +1,5 @@
+package org.ezstack.deity;
+
 import java.util.concurrent.atomic.AtomicInteger;
 
 public class QueryCounter {
@@ -7,7 +9,7 @@ public class QueryCounter {
     /**
      * The purpose of this class is to allow a limited amount of access to a specific AtomicInteger, used for counting
      * the amount of queries that have been passed into the system since the previous execution of the
-     * RuleCreationService.
+     * org.ezstack.deity.RuleCreationService.
      */
     public QueryCounter() {
         _integer = new AtomicInteger(0);
