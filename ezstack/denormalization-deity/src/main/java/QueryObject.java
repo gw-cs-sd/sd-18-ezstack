@@ -1,7 +1,4 @@
-import org.ezstack.ezapp.datastore.api.Query;
 import org.ezstack.ezapp.datastore.api.Rule;
-
-import java.util.concurrent.atomic.AtomicInteger;
 
 public class QueryObject {
 

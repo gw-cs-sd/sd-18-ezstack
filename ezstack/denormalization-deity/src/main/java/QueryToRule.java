@@ -59,18 +59,18 @@ public class QueryToRule {
      * @param rule
      */
     public void addRule(Rule rule) {
-        //First we check to see if we already have too many rules
+        // First we check to see if we already have too many rules
         if (!(_rules.get().size() <= _maxRules)) {
             return;
         }
 
-        //Second, we check to see if the rule already exists within our cache.
+        // Second, we check to see if the rule already exists within our cache.
         if(ruleExists(rule)) {
             return;
         }
 
-        //Finally, we attempt to add the rule, and catch the RuleAlreadyExistsException in the case that the rule
-        //exists, but wasn't in our cache.
+        // Finally, we attempt to add the rule, and catch the RuleAlreadyExistsException in the case that the rule
+        // exists, but wasn't in our cache.
         try {
             _rulesManager.createRule(rule);
         } catch (RuleAlreadyExistsException exception) {

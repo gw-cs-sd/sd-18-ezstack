@@ -2,7 +2,6 @@ import com.codahale.metrics.Histogram;
 import com.codahale.metrics.MetricRegistry;
 import com.codahale.metrics.Snapshot;
 import org.ezstack.ezapp.datastore.api.Rule;
-import org.ezstack.ezapp.querybus.api.QueryMetadata;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
