@@ -14,12 +14,4 @@
     <properties>
         <cxf.version>3.0.15</cxf.version>
     </properties>
-
-    <dependencies>
-        <dependency>
-            <groupId>org.ezstack.ezapp</groupId>
-            <artifactId>ezapp-datastore-api</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-    </dependencies>
 </project>
