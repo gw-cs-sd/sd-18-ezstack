@@ -24,6 +24,9 @@ rulesManager:
   partitionCount: 6
   replicationFactor: 1
   kafkaBootstrapServers: "localhost:9092"
+  bootstrapperContainerCount: 2
+  bootstrapperPackagePath: "file:///Users/bdevore/code/senior-design/sd-18-ezstack/ezstack/denormalizer/target/ezstack-denormalizer-0.1-SNAPSHOT-dist.tar.gz"
+  samzaAppRunnerPath: "/Users/bdevore/code/senior-design/sd-18-ezstack/ezstack/web-local/deploy/bootstrapper/bin/run-app.sh"
 
 metrics:
   frequency: 1 second                       # Default is 1 second.

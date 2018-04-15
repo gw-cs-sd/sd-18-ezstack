@@ -57,7 +57,7 @@ public class DefaultJobManager implements JobManager {
     }
 
     private String getConfigPath(String filePath) {
-        return PREFIX_CONFIG_PATH_CMD + "file://" + filePath;
+        return PREFIX_CONFIG_PATH_CMD + filePath;
     }
 
     private void runApp(List<String> args) throws Exception {

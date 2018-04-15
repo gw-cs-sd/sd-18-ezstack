@@ -28,6 +28,8 @@ import org.apache.zookeeper.KeeperException;
 import org.ezstack.ezapp.datastore.api.Rule;
 import org.ezstack.ezapp.datastore.api.RulesManager;
 import org.ezstack.ezapp.datastore.api.ShutdownMessage;
+import org.ezstack.ezapp.jobmanager.api.JobManager;
+import org.ezstack.ezapp.rules.config.BootstrapperConfig;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -68,6 +70,8 @@ public class LocalRulesMonitor extends AbstractService {
     private final String _shutdownTopicName;
     private final String _rulesPath;
     private final String _bootstrapperPath;
+    private final BootstrapperConfig _bootstrapperConfig;
+    private final JobManager _jobManager;
 
     private CuratorFramework _curator;
 
@@ -75,7 +79,8 @@ public class LocalRulesMonitor extends AbstractService {
 
     LocalRulesMonitor(RulesManager rulesManager, CuratorFactory curatorFactory, String bootstrapServers,
                       int partitionCount, int replicationFactor, String bootstrapTopicName, String shutdownTopicName,
-                      String rulesPath, String bootstrapperPath) {
+                      String rulesPath, String bootstrapperPath, BootstrapperConfig bootstrapperConfig,
+                      JobManager jobManager) {
         _rulesManager = checkNotNull(rulesManager, "rulesManager");
         _curatorFactory = checkNotNull(curatorFactory, "curatorFactory");
         _kafkaBootstrapServers = checkNotNull(bootstrapServers, "bootstrapServers");
@@ -83,6 +88,8 @@ public class LocalRulesMonitor extends AbstractService {
         _shutdownTopicName = checkNotNull(shutdownTopicName, "shutdownTopicName");
         _rulesPath = checkNotNull(rulesPath, "rulesPath");
         _bootstrapperPath = checkNotNull(bootstrapperPath, "bootstrapperPath");
+        _bootstrapperConfig = checkNotNull(bootstrapperConfig, "bootstrapperConfig");
+        _jobManager = checkNotNull(jobManager, "jobManager");
 
         checkArgument(partitionCount > 0);
         checkArgument(replicationFactor > 0);
@@ -215,7 +222,8 @@ public class LocalRulesMonitor extends AbstractService {
         _curator.transaction().forOperations(ops);
 
         // TODO: start boostrapper job here
-        LOG.info("Please start job with ID: {}", bootstrapperJobId);
+        _jobManager.create(_bootstrapperConfig.forJobId(bootstrapperJobId));
+        LOG.info("Starting job with id: {}", bootstrapperJobId);
     }
 
     private List<CuratorOp> getCuratorOpsForStatusSetters(Set<Rule> rules, Rule.RuleStatus status) throws Exception {

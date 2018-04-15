@@ -59,4 +59,14 @@ public class BootstrapperConfig extends Properties {
         this.setProperty("metrics.reporter.snapshot.stream", "kafka.metrics");
         this.setProperty("metrics.reporter.jmx.class", "org.apache.samza.metrics.reporter.JmxReporterFactory");
     }
+
+    private BootstrapperConfig(Properties defaults) {
+        super(defaults);
+    }
+
+    public BootstrapperConfig forJobId(String jobId) {
+        BootstrapperConfig config = new BootstrapperConfig(this);
+        config.setProperty("job.id", jobId);
+        return config;
+    }
 }

@@ -7,9 +7,11 @@ import org.ezstack.ezapp.common.guice.SelfHostAndPort;
 import org.ezstack.ezapp.common.lifecycle.GuavaManagedService;
 import org.ezstack.ezapp.common.lifecycle.LifeCycleRegistry;
 import org.ezstack.ezapp.datastore.api.RulesManager;
+import org.ezstack.ezapp.jobmanager.api.JobManager;
 import org.ezstack.ezapp.rules.api.BootstrapperPath;
 import org.ezstack.ezapp.rules.api.ConsistentRulesManager;
 import org.ezstack.ezapp.rules.api.RulesPath;
+import org.ezstack.ezapp.rules.config.BootstrapperConfig;
 
 import java.util.concurrent.TimeUnit;
 
@@ -24,11 +26,13 @@ public class RulesMonitor extends LeaderService {
                         @Named("partitionCount") int partitionCount, @Named("replicationFactor") int replicationFactor,
                         @Named("kafkaBootstrapServers") String bootstrapServers, @Named("bootstrapTopicName") String bootstrapTopicName,
                         @Named("shutdownTopicName") String shutdownTopicName, @RulesPath String rulesPath,
-                        @BootstrapperPath String bootstrapperPath) {
+                        @BootstrapperPath String bootstrapperPath,
+                        BootstrapperConfig bootstrapperConfig,
+                        JobManager jobManager) {
         super(curatorFactory, LEADER_DIR, hostAndPort.toString(), SERVICE_NAME,
                 1, TimeUnit.MINUTES, () -> new LocalRulesMonitor(rulesManager, curatorFactory,
                         bootstrapServers, partitionCount, replicationFactor, bootstrapTopicName, shutdownTopicName,
-                        rulesPath, bootstrapperPath));
+                        rulesPath, bootstrapperPath, bootstrapperConfig, jobManager));
 
         lifecycle.manage(new GuavaManagedService(this));
     }

@@ -29,7 +29,19 @@ public class RulesManagerConfiguration {
 
     @NotEmpty
     @JsonProperty("kafkaBootstrapServers")
-    private String kafkaBootstrapServers;
+    private String _kafkaBootstrapServers;
+
+    @NotNull
+    @JsonProperty("bootstrapperContainerCount")
+    private Integer _bootstrapperContainerCount;
+
+    @NotEmpty
+    @JsonProperty("bootstrapperPackagePath")
+    private String _bootstrapperPackagePath;
+
+    @NotEmpty
+    @JsonProperty("samzaAppRunnerPath")
+    private String _samzaAppRunnerPath;
 
     public String getZookeeperHosts() {
         return _zookeeperHosts;
@@ -52,6 +64,18 @@ public class RulesManagerConfiguration {
     }
 
     public String getKafkaBootstrapServers() {
-        return kafkaBootstrapServers;
+        return _kafkaBootstrapServers;
+    }
+
+    public int getBootstrapperContainerCount() {
+        return _bootstrapperContainerCount;
+    }
+
+    public String getBootstrapperPackagePath() {
+        return _bootstrapperPackagePath;
+    }
+
+    public String getSamzaAppRunnerPath() {
+        return _samzaAppRunnerPath;
     }
 }

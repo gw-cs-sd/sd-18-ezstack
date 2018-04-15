@@ -7,9 +7,12 @@ import com.google.inject.name.Names;
 import org.ezstack.ezapp.common.lifecycle.GuavaManagedService;
 import org.ezstack.ezapp.common.lifecycle.LifeCycleRegistry;
 import org.ezstack.ezapp.datastore.api.RulesManager;
+import org.ezstack.ezapp.jobmanager.DefaultJobManager;
+import org.ezstack.ezapp.jobmanager.api.JobManager;
 import org.ezstack.ezapp.rules.api.BootstrapperPath;
 import org.ezstack.ezapp.rules.api.ConsistentRulesManager;
 import org.ezstack.ezapp.rules.api.RulesPath;
+import org.ezstack.ezapp.rules.config.BootstrapperConfig;
 import org.ezstack.ezapp.rules.core.CuratorFactory;
 import org.ezstack.ezapp.rules.core.CachingCuratorRulesManager;
 import org.ezstack.ezapp.rules.core.CuratorRulesManager;
@@ -36,6 +39,10 @@ public class RulesManagerModule extends PrivateModule {
         bind(String.class).annotatedWith(RulesPath.class).toInstance(RULES_PATH);
         bind(String.class).annotatedWith(BootstrapperPath.class).toInstance(BOOSTRAPPER_PATH);
         bind(String.class).annotatedWith(Names.named("zookeeperHosts")).toInstance(_configuration.getZookeeperHosts());
+        bind(Integer.class).annotatedWith(Names.named("bootstrapperContainerCount")).toInstance(_configuration.getBootstrapperContainerCount());
+        bind(String.class).annotatedWith(Names.named("bootstrapperPackagePath")).toInstance(_configuration.getBootstrapperPackagePath());
+
+        bind(BootstrapperConfig.class).asEagerSingleton();
         bind(CuratorFactory.class).asEagerSingleton();
         bind(RulesMonitor.class).asEagerSingleton();
 
@@ -61,5 +68,11 @@ public class RulesManagerModule extends PrivateModule {
         CuratorRulesManager rulesManager = new CuratorRulesManager(rulesPath, curatorFactory);
         lifeCycleRegistry.manage(new GuavaManagedService(rulesManager));
         return rulesManager;
+    }
+
+    @Singleton
+    @Provides
+    JobManager provideJobManager() {
+        return new DefaultJobManager(_configuration.getSamzaAppRunnerPath());
     }
 }
