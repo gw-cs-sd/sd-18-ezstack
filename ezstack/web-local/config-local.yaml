@@ -25,4 +25,30 @@ rulesManager:
   replicationFactor: 1
   kafkaBootstrapServers: "localhost:9092"
 
+metrics:
+  frequency: 1 second                       # Default is 1 second.
+  reporters:
+    - type: datadog
+      host: localhost:8080                       # Optional with UDP Transport
+      prefix: EZapp                          # Optional. Defaults to (none).
+      expansions:
+              - COUNT
+              - RATE_MEAN
+              - RATE_1_MINUTE
+              - RATE_5_MINUTE
+              - RATE_15_MINUTE
+              - MIN
+              - MEAN
+              - MAX
+              - STD_DEV
+              - MEDIAN
+              - P75
+              - P95
+              - P98
+              - P99
+              - P999
+      transport:
+        type: http
+        apiKey: <apiKey>
+
 

@@ -1,5 +1,8 @@
 package org.ezstack.ezapp.datastore.api;
 
+import java.util.HashSet;
+import java.util.Set;
+
 public class RuleExecutor {
     private RulesManager _ruleManager;
     private Query _originalQuery;
@@ -19,8 +22,7 @@ public class RuleExecutor {
     /**
      * method already gets called by constructor to get the closest rule,
      * however it has been made public in case a user wants to check if a
-     * closer Rule exists (which currently is not applicable) or if a rule
-     * for this query has been created since object creation.
+     * rule for this query has been created since object creation.
      */
     public void computeClosestRule() {
         if (_closestRule != null || !RuleHelper.isTwoLevelQuery(_originalQuery)) {
@@ -40,9 +42,16 @@ public class RuleExecutor {
     }
 
     private void computeExecQuery() {
+        Set<Filter> filters = _originalQuery.getFilters();
+        if (filters.equals(_closestRule.getQuery().getFilters())) {
+            // if the filters are the same then ES doesn't need to do anything
+            // because the filters have been computed by the denormalizer :)
+            filters = new HashSet<>();
+        }
+
         _execQuery = new Query(_originalQuery.getSearchTypes(),
                 _closestRule.getTable(),
-                null,
+                filters,
                 null,
                 null,
                 null,

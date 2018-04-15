@@ -10,7 +10,7 @@ import java.io.Closeable;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
- * Implementation of {@link org.ezstack.ezapp.web.api.lifecycle.LifeCycleRegistry} for Dropwizard {@code Environment} objects.
+ * Implementation of {@link org.ezstack.ezapp.common.lifecycle.LifeCycleRegistry} for Dropwizard {@code Environment} objects.
  */
 public class DropwizardLifeCycleRegistry implements LifeCycleRegistry {
     private final Environment _environment;
