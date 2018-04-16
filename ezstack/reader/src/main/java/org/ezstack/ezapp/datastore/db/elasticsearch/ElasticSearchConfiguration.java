@@ -1,7 +1,6 @@
 package org.ezstack.ezapp.datastore.db.elasticsearch;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import org.hibernate.validator.constraints.NotEmpty;
 
 import javax.annotation.Nullable;
 import javax.validation.Valid;

@@ -31,6 +31,10 @@ public class RulesManagerConfiguration {
     @JsonProperty("kafkaBootstrapServers")
     private String kafkaBootstrapServers;
 
+    @NotEmpty
+    @JsonProperty("bootstrapperJobDeployerUri")
+    private String _bootstapperJobDeployerUri;
+
     public String getZookeeperHosts() {
         return _zookeeperHosts;
     }
@@ -53,5 +57,9 @@ public class RulesManagerConfiguration {
 
     public String getKafkaBootstrapServers() {
         return kafkaBootstrapServers;
+    }
+
+    public String getBootstapperJobDeployerUri() {
+        return _bootstapperJobDeployerUri;
     }
 }

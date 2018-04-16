@@ -67,6 +67,11 @@
             <artifactId>ezapp-common</artifactId>
             <version>${project.version}</version>
         </dependency>
+        <dependency>
+            <groupId>org.ezstack</groupId>
+            <artifactId>ezstack-bootstrapper-job-deployer</artifactId>
+            <version>${project.version}</version>
+        </dependency>
     </dependencies>
 
 </project>

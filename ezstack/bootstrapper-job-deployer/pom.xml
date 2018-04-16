@@ -3,12 +3,19 @@
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <parent>
-        <artifactId>ezapp-parent</artifactId>
-        <groupId>org.ezstack.ezapp</groupId>
+        <artifactId>ezstack</artifactId>
+        <groupId>org.ezstack</groupId>
         <version>0.1-SNAPSHOT</version>
-        <relativePath>../ezapp-parent</relativePath>
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
-    <artifactId>ezapp-job-manager</artifactId>
+    <artifactId>ezstack-bootstrapper-job-deployer</artifactId>
+
+    <dependencies>
+        <dependency>
+            <groupId>javax.ws.rs</groupId>
+            <artifactId>javax.ws.rs-api</artifactId>
+            <version>${javax.version}</version>
+        </dependency>
+    </dependencies>
 </project>
