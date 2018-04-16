@@ -10,8 +10,4 @@
     <modelVersion>4.0.0</modelVersion>
 
     <artifactId>ezstack-bootstrapper-job-deployer</artifactId>
-
-    <properties>
-        <cxf.version>3.0.15</cxf.version>
-    </properties>
 </project>
