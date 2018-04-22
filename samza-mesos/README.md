@@ -21,8 +21,8 @@ The following is an example properties file for samza mesos.
 job.name=wikipedia-feed
 
 # Mesos
-mesos.package.path=http://ezstack12.parmer.seas.gwu.edu/hello-samza-dist.tar.gz
-mesos.master.connect=zk://ezstack04.parmer.seas.gwu.edu:2181/mesos
+mesos.package.path=http://www.mysite.com/hello-samza-dist.tar.gz
+mesos.master.connect=zk://www.myzknode.com:2181/mesos
 mesos.command=bin/run-app.sh --config-factory=org.apache.samza.config.factories.PropertiesConfigFactory --config-path=file://$PWD/config/wikipedia-feed.properties
 mesos.executor.count=4
 ```
@@ -33,8 +33,8 @@ job.factory.class=org.apache.samza.job.local.ProcessJobFactory
 
 ...
 
-systems.kafka.consumer.zookeeper.connect=my.zk.dns:2181/
-systems.kafka.producer.bootstrap.servers=my.kafka.dns:9092
+systems.kafka.consumer.zookeeper.connect=www.myzknode.com:2181/
+systems.kafka.producer.bootstrap.servers=www.mykafkanode.com:9092
 ```
 
 ## Running it locally
