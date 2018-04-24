@@ -20,6 +20,7 @@ The following table is EZapp RESTful endpoints:
 
 The following endpoints are leveraged internally by EZstack. However, they have also been exposed
 to external users for more advanced performance tuning by the end user/developer.
+
 | HTTP Method | URL | Description |
 | --- | --- | --- |
 | GET | /sor/1/_rule/ | Gets all rules. |
