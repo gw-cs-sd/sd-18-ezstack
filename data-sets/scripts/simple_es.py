@@ -9,7 +9,7 @@ import argparse
 import json
 
 debug = False
-es = Elasticsearch()
+es = None
 
 def debug_print(*argv):
     """
@@ -90,7 +90,7 @@ def delete_index(index='test_index'):
     :param index:
     :return:
     """
-    es.indices.delete(index=index, ignore=[400, 404])
+    debug_print(es.indices.delete(index=index, ignore=[400, 404]))
 
 def setup_argparse(parser=None):
     if parser == None:
@@ -104,6 +104,7 @@ def setup_argparse(parser=None):
                                                                                      'relating to index and type')
     parser.add_argument('-g', '--get', dest='get', action='store_true', default=False, help='gets the following documents from es')
     parser.add_argument('-i', '--index', dest='index', help='sets index name otherwise uses default')
+    parser.add_argument('--url', dest='url', default='localhost', help='sets elasticsearch url')
     parser.add_argument('-t', '--type', dest='type', help='sets type name otherwise uses default')
     parser.add_argument('-p', '--path', dest='path', help='specifies the location of the json file (required for '
                                                           'majority of options)')
@@ -118,6 +119,7 @@ if __name__=='__main__':
     index = 'test_index'
     type = 'test_type'
     debug = args.debug
+    es = Elasticsearch(args.url)
 
     if args.path is not None:
         f = open(args.path, 'r')
