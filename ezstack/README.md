@@ -31,6 +31,40 @@ to external users for more advanced performance tuning by the end user/developer
 | GET | /sor/1/_rule/{status}/{outerTable} | Gets all rules matching this status and table name. |
 | GET | /sor/1/_rule/{status}/{outerTable}/{innerTable} | Gets all rules matching this status and both inner and outer table of the rule. |
 
-### EZql
-EZql is EZstack query language. This is the primary way users can
-interact with EZapp. Users can leverage EZql to query the datastore.
+### EZQL
+EZQL is EZstack query language. This is the primary way users can
+interact with EZapp. Users can leverage EZQL to query the datastore.
+
+The `/sor/1/_search` endpoint expects a query object to be passed to it.
+
+#### Query Object Properties
+
+| Property | Type | Required | Default Value | Description |
+| --- | --- | --- | --- | --- |
+| searchTypes | <List> SearchType | | search | Allows you to define the aggregations or type of search. More on this can be found under the SearchType Object. |
+| table | <String> table name | Yes | | is the table name that you are attempting to query. |
+| filter | <List> Filter | | | Allows you to filter the query. Similar to `where` clause in SQL. More on this can be found under the Filter Object. |
+| join | <Query> Nested Queries | Yes* | | Enables you to nest queries. Similar to inner join in SQL. |
+| joinAttributeName | <String> attribute name | | _joinAttribute | Enables you to specify the attribute name that the `join` query result will be under. |
+| joinAttributes | <List> JoinAttribute | Yes* | | Specifies the attributes between the top query and the inner query should be joined on. More on this can be found under JoinAttribute. |
+| excludeAttributes | <List> exclude attributes | | | Set of string attributes that should be removed from document. |
+| includeAttributes | <List> include attributes | | | Set of string attributes that should be included from the document.  Similar to SQL SELECT specific column names. |
+
+\* Indicates that parameter is optional, however if `join` is supplied than `joinAttributes` must also be supplied.
+
+#### SearchType Object Properties
+
+| Property | Type | Required | Default Value | Description |
+| --- | --- | --- | --- | --- |
+
+
+#### Filter Object Properties
+
+| Property | Type | Required | Default Value | Description |
+| --- | --- | --- | --- | --- |
+
+
+#### JoinAttribute Object Properties
+
+| Property | Type | Required | Default Value | Description |
+| --- | --- | --- | --- | --- |
