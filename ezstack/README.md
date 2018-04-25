@@ -75,3 +75,30 @@ The `/sor/1/_search` endpoint expects a query object to be passed to it.
 | --- | --- | --- | --- |
 | outerAttribute | <String> attribute | Yes | The outer query table attribute that is being joined on. Such as primary key. |
 | innerAttribute | <String> attribute | Yes | The inner query table attribute that is being joined on. Such as foreign key. |
+
+#### EZQL Example Queries
+
+**Simples EZQL query**
+```json
+{
+    "table" "tableName"
+}
+```
+
+**SQL equivalent**
+```sql
+SELECT * FROM tableName;
+```
+
+
+**More advanced EZQL query**
+```json
+{
+
+}
+```
+
+**SQL equivalent**
+```sql
+
+```
