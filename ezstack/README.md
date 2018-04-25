@@ -90,15 +90,48 @@ The `/sor/1/_search` endpoint expects a query object to be passed to it.
 SELECT * FROM tableName;
 ```
 
-
+<br><br>
 **More advanced EZQL query**
 ```json
 {
-
+    "table" : "teacher",
+    "filter" : [
+        {
+            "attribute" : "firstName",
+            "op" : "eq",
+            "value" : "gabe"
+        },
+        {
+            "attribute" : "lastName",
+            "op" : "eq",
+            "value" "parmer"
+        }
+    ],
+    "join" : {
+        "searchTypes" : [
+                {
+                    "type" : "search"
+                },
+                {
+                    "type" : "min",
+                    "attributeOn" : "age"
+                }
+            ],
+        "table" : "student"
+    },
+    "joinAttributes" : [
+        {
+            "outerAttribute" : "id",
+            "innerAttribute" : "teacherId"
+        }
+    ]
 }
 ```
 
 **SQL equivalent**
 ```sql
-
+SELECT *, MIN(Student.age)
+FROM Teacher
+INNER JOIN Teacher.id == Student.teacherId
+WHERE Teacher.firstName == "gabe" AND Teacher.lastName == "parmer";
 ```
