@@ -54,17 +54,24 @@ The `/sor/1/_search` endpoint expects a query object to be passed to it.
 
 #### SearchType Object Properties
 
-| Property | Type | Required | Default Value | Description |
-| --- | --- | --- | --- | --- |
+| Property | Type | Required | Description |
+| --- | --- | --- | --- |
+| type | <Enum> search type | Yes | the type of search operation. The following operations are supported: {search, count, max, min, avg, sum} |
+| attributeOn | <String> attribute | Yes* | attribute to apply the search type on. The only one that doesn't need an attribute is **search** because it simply states that you want to retrieve the documents rather than do aggregations on them. |
 
 
 #### Filter Object Properties
 
-| Property | Type | Required | Default Value | Description |
-| --- | --- | --- | --- | --- |
+| Property | Type | Required | Description |
+| --- | --- | --- | --- |
+| attribute | <String> attribute | Yes | Attribute to filter on. |
+| op | <Enum> string operation | Yes | Operation to execute on filter. Supported operations both in long notation and mathematical form: {eq (==), not_eq (!=), gt (>), gte (>=), lt (<), lte (<=)} |
+| value | <Object> value | Yes | static value the filter is comparing the document attribute against. |
 
 
 #### JoinAttribute Object Properties
 
-| Property | Type | Required | Default Value | Description |
-| --- | --- | --- | --- | --- |
+| Property | Type | Required | Description |
+| --- | --- | --- | --- |
+| outerAttribute | <String> attribute | Yes | The outer query table attribute that is being joined on. Such as primary key. |
+| innerAttribute | <String> attribute | Yes | The inner query table attribute that is being joined on. Such as foreign key. |
