@@ -20,3 +20,5 @@ The histograms used to store response time information for unique queries store 
 | deity.update.query.threshold | This value is the threshold of queries made once every deity.update.interval.secs in order for the rule implementation system to execute. If this value is not met, it is zeroed before the start of the next interval. | 10000 |
  | deity.max.histogram.count | This is the maximum amount of unique histograms that can be stored. When this value is met, the deity will prune the histograms in order to remove unnecessary and unused histograms to make room for future histograms. | 50000 |
 | deity.max.rule.capacity | This is the maximum count of rules that can be made by the denormalizer at any given point in time. The deity will not attempt to send additional rules to the denormalizer if this maximum has been met. | 20 |
+| deity.datadog.key | This is the personalized key that will allow users to see query throughput data for queries going through the deity. Users will have to generate their own keys| No default value |
+
