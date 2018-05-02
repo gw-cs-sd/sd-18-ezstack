@@ -10,7 +10,7 @@ job.systemstreampartition.grouper.factory: org.apache.samza.container.grouper.st
 job.container.count: 1
 
 # YARN
-yarn.package.path: "file:///Users/bdevore/code/senior-design/sd-18-ezstack/ezstack/denormalizer/target/ezstack-denormalizer-0.1-SNAPSHOT-dist.tar.gz"
+yarn.package.path: "file:///opt/denormalizer/target/ezstack-denormalizer-0.1-SNAPSHOT-dist.tar.gz"
 
 # Broadcast inputs
 task.broadcast.inputs: kafka.shutdown-messages#0
