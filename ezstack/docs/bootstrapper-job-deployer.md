@@ -1,4 +1,25 @@
+# Bootstrap Job Deployer
 
+The bootstrap job deployer is a simple light weight Flask web server
+written in python that can be used to deploy new Samza jobs.
+
+The web server has the following parameters.
+
+| Parameter | Required | Description |
+| --- | --- | --- |
+| --port |  | specifies the port of the flask web server. Default is port `8000` |
+| -p, --path | Yes | specifies the boostrapper Samza job properties path. |
+| -rp, --rpath | Yes | specifies the bootstrapper Samza run-app.sh path. |
+
+### Example Samza Bootstrapper Properties
+
+The boostrapper properties that are passed to the
+`bootstrap-deployer.py` are expected to be in **`yaml`** format.
+
+A sample job depolyer properties can be found [here](../bootstrapper-job-deployer/example.yaml).
+Also for convenience the example is provided below.
+
+```yaml
 # Application / Job
 app.class: org.ezstack.denormalizer.bootstrapper.BootstrapperApp
 app.runner.class: org.apache.samza.runtime.RemoteApplicationRunner
@@ -10,7 +31,7 @@ job.systemstreampartition.grouper.factory: org.apache.samza.container.grouper.st
 job.container.count: 1
 
 # YARN
-yarn.package.path: "file:///opt/denormalizer/target/ezstack-denormalizer-0.1-SNAPSHOT-dist.tar.gz"
+yarn.package.path: "file:///opt/ezstack/denormalizer/target/ezstack-denormalizer-0.1-SNAPSHOT-dist.tar.gz"
 
 # Broadcast inputs
 task.broadcast.inputs: kafka.shutdown-messages#0
@@ -65,3 +86,13 @@ metrics.reporters: "snapshot,jmx"
 metrics.reporter.snapshot.class: org.apache.samza.metrics.reporter.MetricsSnapshotReporterFactory
 metrics.reporter.snapshot.stream: kafka.metrics
 metrics.reporter.jmx.class: org.apache.samza.metrics.reporter.JmxReporterFactory
+```
+
+### Running the Web Server
+
+Assuming you are inside the `bootstrapper-job-deployer` directory.
+
+```bash
+$ pip3 install -r requirements.txt
+$ python3 bootstrap-deployer.py -p /path/to/bootstrapper-props.yaml -rp /path/to/run-app.sh
+```
