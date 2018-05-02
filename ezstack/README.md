@@ -1,7 +1,7 @@
 # EZstack
 
 ### About EZstack
-EZstack is a restful data store platform for NoSQL databases that
+EZstack is a restful data store platform for JSON documents that
 maximizes query capability and efficency using a built-in data denormalization platform.
 
 ### EZapp
