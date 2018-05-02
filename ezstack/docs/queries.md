@@ -48,7 +48,7 @@ The `/sor/1/_search` endpoint expects a query object to be passed to it.
 **Simples EZQL query**
 ```json
 {
-    "table" "tableName"
+    "table" : "tableName"
 }
 ```
 
